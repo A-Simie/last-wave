@@ -1,12 +1,15 @@
 import type { Entity } from 'playcanvas';
 import { Script, Vec3 } from 'playcanvas';
 
+type InteractionAction =
+    { readonly type: 'message'; readonly message: string } | { readonly type: 'callback'; readonly run: () => void };
+
 export type Interactable = {
     readonly id: string;
     readonly label: string;
     readonly entity: Entity;
     readonly radius: number;
-    readonly message: string;
+    readonly action: InteractionAction;
 };
 
 export type InteractionState = {
@@ -24,6 +27,7 @@ export class InteractionSystem extends Script {
     private target: Interactable | null = null;
     private message: string | null = null;
     private messageTime = 0;
+    private suspended = false;
     private readonly distance = new Vec3();
     private readonly rayOptions = {
         filterCallback: (entity: Entity) => entity !== this.player && !!entity.rigidbody
@@ -41,7 +45,7 @@ export class InteractionSystem extends Script {
     }
 
     postUpdate(dt: number) {
-        if (dt === 0) return;
+        if (dt === 0 || this.suspended) return;
         const target = this.findTarget();
         let changed = target !== this.target;
         this.target = target;
@@ -58,13 +62,27 @@ export class InteractionSystem extends Script {
     }
 
     interact() {
-        if (!this.enabled || this.app.timeScale === 0) return;
+        if (!this.enabled || this.suspended || this.app.timeScale === 0) return;
         this.target = this.findTarget();
-        if (this.target) {
-            this.message = this.target.message;
+        const action = this.target?.action;
+        if (action?.type === 'message') {
+            this.message = action.message;
             this.messageTime = 4;
+        } else if (action?.type === 'callback') {
+            action.run();
         }
         this.onStateChange?.(this.state);
+    }
+
+    setSuspended(suspended: boolean) {
+        if (this.suspended === suspended) return;
+        this.suspended = suspended;
+        if (suspended) {
+            this.target = null;
+            this.message = null;
+            this.messageTime = 0;
+            this.onStateChange?.(this.state);
+        }
     }
 
     private findTarget(): Interactable | null {

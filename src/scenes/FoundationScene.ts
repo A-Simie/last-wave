@@ -1,8 +1,10 @@
 import { Color, Entity, StandardMaterial, Vec3 } from 'playcanvas';
 
+import { GUIDE_DIALOGUE } from '../data/dialogues';
 import {
     BLOCKS,
     GROUND,
+    GUIDE_INTERACTION,
     NPC_POSITION,
     PINE_LAYERS,
     PLAYER_SPAWN,
@@ -15,8 +17,15 @@ import type { BoxDefinition } from '../data/foundation';
 import { createCamera } from '../player/CameraController';
 import { addCharacterCollision, createCharacterModel } from '../player/CharacterModel';
 import { PlayerAnimation } from '../player/PlayerAnimation';
-import { addPlayerController } from '../player/PlayerController';
+import { addPlayerController, setPlayerControlsEnabled } from '../player/PlayerController';
+import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
+
+export type FoundationScene = {
+    interactions: InteractionSystem;
+    dialogue: DialogueSystem;
+    setControlsEnabled: (enabled: boolean) => void;
+};
 
 const material = (name: string, r: number, g: number, b: number) => {
     const result = new StandardMaterial();
@@ -45,7 +54,7 @@ const createStaticBox = (parent: Entity, definition: BoxDefinition, material: St
     return entity;
 };
 
-export const createFoundationScene = (root: Entity): InteractionSystem => {
+export const createFoundationScene = (root: Entity): FoundationScene => {
     const materials = {
         ground: material('ground', 0.2, 0.4, 0.18),
         block: material('obstacles', 0.34, 0.35, 0.3),
@@ -112,7 +121,7 @@ export const createFoundationScene = (root: Entity): InteractionSystem => {
     player.addChild(model);
 
     const camera = createCamera(root);
-    addPlayerController(player, camera, model);
+    const controller = addPlayerController(player, camera, model);
     model.addComponent('script')!.create(PlayerAnimation);
 
     const light = new Entity('sun');
@@ -128,7 +137,9 @@ export const createFoundationScene = (root: Entity): InteractionSystem => {
     light.setEulerAngles(45, 30, 0);
     root.addChild(light);
 
-    return root.addComponent('script')!.create(InteractionSystem, {
+    const dialogue = new DialogueSystem();
+    root.once('destroy', () => dialogue.destroy());
+    const interactions = root.addComponent('script')!.create(InteractionSystem, {
         properties: {
             player,
             targets: [
@@ -137,9 +148,23 @@ export const createFoundationScene = (root: Entity): InteractionSystem => {
                     label: SIGNAL_BOX.label,
                     entity: signalBox,
                     radius: SIGNAL_BOX.radius,
-                    message: SIGNAL_BOX.message
+                    action: { type: 'message', message: SIGNAL_BOX.message }
+                },
+                {
+                    id: npc.name,
+                    label: GUIDE_INTERACTION.label,
+                    entity: npc,
+                    radius: GUIDE_INTERACTION.radius,
+                    action: {
+                        type: 'callback',
+                        run: () => {
+                            dialogue.open(GUIDE_DIALOGUE);
+                        }
+                    }
                 }
             ]
         } satisfies Partial<InteractionSystem>
     })!;
+
+    return { interactions, dialogue, setControlsEnabled: (enabled) => setPlayerControlsEnabled(controller, enabled) };
 };

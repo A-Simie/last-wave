@@ -6,6 +6,14 @@ import { CAMERA_SETTINGS } from './CameraController';
 
 const FEET = [-0.38, 0, 0.38].flatMap((x) => [-0.38, 0, 0.38].map((z) => [x, z]));
 
+export const setPlayerControlsEnabled = (controller: ThirdPersonController, enabled: boolean) => {
+    controller.enabled = enabled;
+    const body = controller.entity.rigidbody;
+    if (!enabled && body) {
+        body.linearVelocity = new Vec3(0, body.linearVelocity.y, 0);
+    }
+};
+
 export const addPlayerController = (player: Entity, camera: Entity, model: Entity) => {
     const physics = player.rigidbody!.system as RigidBodyComponentSystem;
     const scripts = player.script ?? player.addComponent('script')!;

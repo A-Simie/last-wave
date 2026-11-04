@@ -22,7 +22,7 @@ export class GameHud {
                 <p class="desktop-controls"><kbd>WASD</kbd> move · <kbd>Shift</kbd> sprint · <kbd>Space</kbd> jump</p>
                 <p class="desktop-controls">Mouse to orbit · Scroll to zoom · <kbd>E</kbd> interact</p>
                 <p class="touch-controls">Drag left to move, right to look. Drag farther to sprint. Double-tap right to jump.</p>
-                <p class="objective">Find the amber signal box near the purple guide.</p>
+                <p class="objective">Check the amber signal box, or talk to the purple guide.</p>
                 <button type="button" data-reset>Reset test area</button>
             </section>
             <div class="interaction" data-prompt hidden>

@@ -1,6 +1,54 @@
 # Last Wave — Task tracker
 
-Last updated: **2026-11-04**. Current milestone: **gameplay foundation**.
+Last updated: **2026-11-04**. Current milestone: **core game systems**. Next implementation: **LW-C002 — quest tracking**.
+
+## Project checklist
+
+Checked items have working implementations and verification recorded below. Physical-device acceptance is tracked separately in LW-F002.
+
+### Project foundation
+
+- [x] Install Node.js and pnpm — installed; Node version alignment remains in LW-F002.
+- [x] Generate the PlayCanvas third-person starter.
+- [x] Verify build and browser preview.
+- [x] Set up Git and `AGENTS.md`.
+- [x] Create basic test environment.
+
+### Core game systems
+
+- [x] Player movement and camera.
+- [x] Interactions.
+- [x] NPC dialogue — reusable branching guide conversation, verified in LW-C001.
+- [ ] Quest tracking — next implementation task, LW-C002.
+- [ ] Inventory and clue journal.
+- [ ] Scene transition and save system.
+
+### Episode 1 — Story
+
+- [ ] Coffee shop and TV broadcast.
+- [ ] Beach exploration.
+- [ ] Wave and evacuation.
+- [ ] Hospital awakening and investigation.
+- [ ] Hospital escape puzzle.
+- [ ] Kiroween City quests.
+- [ ] Episode-ending transmission.
+
+### Social game foundation
+
+- [ ] Two-player Colyseus prototype.
+- [ ] Matchmaking and reconnect.
+- [ ] Shared cooperative mission.
+- [ ] Chat, report and block controls.
+- [ ] Preference-driven event proof.
+
+### Persistent backend
+
+- [ ] NestJS API.
+- [ ] PostgreSQL database.
+- [ ] Player accounts and saved characters.
+- [ ] Inventory and quest persistence.
+- [ ] Approved preference storage.
+- [ ] Deployment and monitoring.
 
 ## LW-F001 — Establish the gameplay foundation
 
@@ -77,14 +125,14 @@ Workspace-local evidence is in `C:\Users\HP\AppData\Local\Temp\opencode\`: `last
 - Gameplay and presentation: `src/scenes/FoundationScene.ts`, `src/data/foundation.ts`, `src/systems/InteractionSystem.ts`, `src/ui/GameHud.ts`, and `src/ui/game.css` (replaces `src/starter.css`).
 - Structure and handoff: six `public/assets/` category placeholders and asset notes; scope READMEs under `src/systems/`, `src/networking/`, and `src/episodes/episode-01/`; `README.md` and the five Markdown documents under `docs/`. The previously empty `docs/TASKS.MD` became this task tracker.
 - Key decisions: retain the shipped controller and ledge shim, configure its camera through a player adapter, keep physical roots unscaled, own scene resources under one resettable root, and publish typed interaction state to a DOM HUD. `app.start()` precedes scene construction because it installs the Ammo world. Full rationale and extension points are in [ARCHITECTURE.md](ARCHITECTURE.md).
-- Existing worktree items on entry included the project-specific `AGENTS.md`, React additions in `package.json`/`pnpm-lock.yaml`, and both original design DOCX files. This task added no dependencies. Foundation changes are uncommitted.
+- Existing worktree items on entry included the project-specific `AGENTS.md`, React additions in `package.json`/`pnpm-lock.yaml`, and both original design DOCX files. This task added no dependencies.
 
 ### Limitations
 
 - Physical mobile devices, physical gamepads, and Firefox/Safari have not been tested. Touch automation covered movement and interaction; right-drag look, farther-drag sprint, and double-tap jump still need hardware acceptance. Hardware performance budgets are unmeasured.
 - Application teardown was invoked directly; the Vite HMR trigger and startup-error display were code-reviewed rather than fault-injected.
 - Commands ran with Node **22.20.0** and pnpm **10.32.1**. pnpm warns because the project declares Node **≥22.23.2**; build/lint/type-check nevertheless passed. Use the declared Node version for the next verification run.
-- Repository-wide formatting/whitespace checks retain the pre-existing `AGENTS.md` and lockfile findings recorded above.
+- Foundation verification recorded pre-existing `AGENTS.md` and lockfile formatting findings; LW-C001 resolves the `AGENTS.md` findings.
 
 ### Manual acceptance route
 
@@ -105,9 +153,9 @@ Workspace-local evidence is in `C:\Users\HP\AppData\Local\Temp\opencode\`: `last
 - Scene positions and interaction copy/radius: `src/data/foundation.ts`.
 - Scene geometry/materials: `src/scenes/FoundationScene.ts`.
 - Movement and ledge fix: `src/player/PlayerController.ts`; camera tuning: `src/player/CameraController.ts`.
-- Interaction rules: `src/systems/InteractionSystem.ts`; DOM presentation: `src/ui/GameHud.ts` and `src/ui/game.css`.
+- Interaction rules: `src/systems/InteractionSystem.ts`; conversations: `src/systems/DialogueSystem.ts` and `src/data/dialogues.ts`; DOM presentation: `src/ui/`.
 - A scene reset is the reference teardown path. Recheck it whenever adding scripts, callbacks, materials, or assets.
-- Next concrete action: run the acceptance route on a physical touch device and record its OS/browser, gesture results, and frame-time observations under LW-F002.
+- Next implementation: LW-C002, a data-driven quest using the guide and signal box. Physical touch-device acceptance can proceed under LW-F002; record OS/browser, gesture results, and frame-time observations there.
 
 ## LW-F002 — Hardware acceptance
 
@@ -118,9 +166,87 @@ Status: **Ready**. Owner: **Next contributor**. Dependency: **LW-F001**.
 - [ ] Check the preserved gamepad mappings and representative-device performance.
 - [ ] Record device/browser versions, outcomes, and any concrete follow-up fixes here.
 
+## LW-C001 — Reusable NPC dialogue
+
+Owner: **Lead game engineering**. Priority: **P1**. Dependency: **LW-F001**. Status: **Complete; automated browser acceptance passed**.
+
+### Completed implementation
+
+- [x] Reconciled the supplied project checklist with the existing implementation and foundation evidence.
+- [x] Added typed, authored dialogue nodes and choices, with stable IDs, branching, return paths, and explicit endings.
+- [x] Added an engine-independent `DialogueSystem` with one active conversation, stale-choice rejection, graph validation, and cleanup.
+- [x] Made the existing purple guide an interaction target using the same distance, nearest-target, and solid-sightline rules as the signal box.
+- [x] Extended interaction outcomes to support a timed message or a callback; scene composition connects the guide callback to dialogue.
+- [x] Added a native modal dialogue panel with speaker text, response buttons, keyboard focus, Escape/end controls, and touch layout.
+- [x] Suspended movement/camera and additional interactions during dialogue, stopped horizontal momentum, and released pointer lock. Closing returns focus to the canvas; clicking the scene resumes desktop input.
+- [x] Added scene-reset and application-teardown handling for active conversations.
+- [x] Added seven dependency-free Node tests and the `pnpm test` command.
+
+### Files and decisions
+
+- State and authored content: `src/systems/DialogueSystem.ts`, `src/data/dialogues.ts`, and `src/data/foundation.ts`.
+- Integration: `src/systems/InteractionSystem.ts`, `src/scenes/FoundationScene.ts`, `src/player/PlayerController.ts`, and `src/core/Game.ts`.
+- Presentation: `src/ui/DialoguePanel.ts`, `src/ui/GameHud.ts`, and `src/ui/game.css`.
+- Tests/tooling: `tests/dialogue.test.mjs` and the `test` script in `package.json`.
+- Documentation: this checklist/task record, `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`, `docs/AGENT_CONTEXT.md`, `docs/GAME_DESIGN.md`, and `src/systems/README.md`.
+- The installed Engine has no authored dialogue runner. The new state model is plain TypeScript because it needs neither entities nor frame updates; the scene owns it, and the application coordinates input and UI. The shipped controller uses its public `enabled` property for modal suspension. Detailed contracts are in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+### Verification record
+
+- `pnpm test` — **7/7 passed**: branching/return paths, exclusive opening, stale/unknown choices, endings/cancellation/reopening, missing start nodes, broken links/duplicate choice IDs, and teardown.
+- `pnpm build`, `pnpm lint`, and `pnpm typecheck` — passed.
+- `pnpm exec prettier --check src tests docs README.md AGENTS.md index.html package.json public/assets` — passed for the implementation and updated documentation.
+- Production foundation regression — **34/34 browser checks passed** against the new build, including movement/sprint, collision, ledge jumping, camera, signal-box interaction, reset, teardown, and emulated touch.
+- Dialogue acceptance — **14/14 browser checks passed** in headless Chrome **156.0.8078.79**: nearest-target selection and E-to-talk, keyboard/mouse branches, return/end paths, Escape and explicit close, focus and pointer-lock handoff, suspended controls/repeated E, and movement resumption.
+- Three reset-callback invocations during open conversations retained one scene, 19 bodies, one HUD, and one closed dialogue panel. Application teardown while dialogue was open also passed.
+- Emulated touch at 390×844 verified tap-to-talk, choices, ≥44 px targets, closing, and resumed movement. The 844×390 landscape panel stayed within the viewport and scrolled. Desktop, branch, mobile, and landscape screenshots were visually inspected.
+- Desktop and mobile console/network results were captured separately: **no warnings, exceptions, shader failures, missing assets, or HTTP errors**.
+- `git -c core.safecrlf=false diff --check` — passed. Reviewed the changed code, documentation, and worktree diff.
+- `pnpm fmt` — the remaining finding is pre-existing formatting in `pnpm-lock.yaml`. `AGENTS.md` was formatted while updating its milestone/handoff instructions.
+
+Local browser commands (production preview on port 4178; isolated Chrome CDP on port 9223):
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4178/'
+$env:VERIFY_PREFIX = 'last-wave-dialogue-regression'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-verify.mjs"
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-dialogue-verify.mjs"
+```
+
+Local evidence is under `C:\Users\HP\AppData\Local\Temp\opencode\`: `last-wave-dialogue-regression-verification.json`, `last-wave-dialogue-verification.json`, and `last-wave-dialogue-{desktop,branch,mobile,landscape}.png`. For a fresh clone, run `pnpm test` and the manual route below.
+
+### Manual dialogue acceptance
+
+1. Start `pnpm dev`. Walk beside the purple guide until the target label reads **Guide**, then press E.
+2. Confirm the mouse is released, the conversation has focus, and movement/camera and the world-interaction prompt are suspended.
+3. Use Tab/Enter or click **How do I move around?**. Read the response, go back, and choose **What should I investigate?**.
+4. End via a goodbye response, **End conversation**, and Escape on separate attempts. Each new conversation begins at the greeting. Click the scene afterward and check movement/sprint/stop and the signal-box interaction.
+5. Release movement keys while the conversation is open; confirm closing it does not leave movement stuck. Reset the test area and repeat.
+6. On touch devices, tap to talk, choose a response, and end the conversation. Check portrait and short landscape layouts and resume left-drag movement.
+7. Check the console and repeat in the production preview (`pnpm build`, then `pnpm start`).
+
+### Remaining follow-up
+
+- Physical devices, gamepads, other browser engines, and hardware performance remain under LW-F002.
+- Guide content is a foundation tutorial. Stable dialogue/choice IDs are ready for the quest integration in LW-C002; the source story documents still own Episode 1 narrative.
+- The local Node version remains below the declared minimum; see LW-F002. Dependency versions and the existing lockfile have not been changed.
+
+## LW-C002 — Data-driven quest tracking
+
+Status: **Next**. Owner: **Next contributor**. Priority: **P1**. Dependency: **LW-C001**.
+
+Next concrete action: implement one scene-owned quest in the existing test area: **speak to the guide → check the signal box → report back**.
+
+- [ ] Define typed quest data and explicit inactive/active/completed progress.
+- [ ] Connect validated dialogue choices and world interactions to quest progress using stable IDs.
+- [ ] Display the active objective and completion feedback through the UI boundary.
+- [ ] Make repeated/out-of-order actions safe and reset progress with the scene.
+- [ ] Test acceptance, progression, duplicate events, completion, and reset; run build/lint/type-check and browser acceptance.
+- [ ] Update this checklist, the task evidence, and architecture after completion.
+
 ## Deferred backlog
 
-Episode scenes, dialogue, quests, inventory, cutscenes, save/load, Colyseus, and persistence are future tasks. Their folders/expected filenames are recorded in [ARCHITECTURE.md](ARCHITECTURE.md); they have no runtime implementation yet.
+The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). Quest tracking is the next core-system task; the current playable scene remains the foundation test area.
 
 ## Completion protocol
 

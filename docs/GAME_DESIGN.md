@@ -10,6 +10,6 @@ The selected implementation stack is PlayCanvas Engine, TypeScript, Vite, and pn
 
 ## Active milestone
 
-One test environment validating movement, sprint, jump, camera follow, obstacle collisions, a stationary NPC, and one proximity interaction. All visuals are placeholders. See [TASKS.md](TASKS.md) for acceptance evidence and [ARCHITECTURE.md](ARCHITECTURE.md) for code ownership.
+Core game systems in one test environment: movement, sprint, jump, camera follow, obstacle collisions, signal-box interaction, and branching dialogue with the stationary guide. All visuals are placeholders. The guide conversation is a foundation tutorial; Episode 1 dialogue remains owned by the story source. Quest tracking is the next implementation task. See [TASKS.md](TASKS.md) for the checked roadmap and acceptance evidence, and [ARCHITECTURE.md](ARCHITECTURE.md) for code ownership.
 
 Future story scope is indexed in [EPISODE_01.md](EPISODE_01.md). Validate this foundation before implementing those scenes.

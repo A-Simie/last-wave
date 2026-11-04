@@ -151,6 +151,55 @@ button:focus-visible {
     display: none;
 }
 
+.dialogue-panel {
+    width: min(560px, calc(100% - 24px));
+    max-height: calc(100dvh - 24px);
+    padding: 22px;
+    border: 1px solid #edbc6966;
+    border-radius: 16px;
+    background: #111925;
+    color: #f8fafc;
+    box-shadow: 0 20px 70px #0009;
+    overflow-y: auto;
+}
+
+.dialogue-panel::backdrop {
+    background: #040812a8;
+}
+
+.dialogue-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.dialogue-panel h2 {
+    margin: 18px 0 10px;
+    font-size: 24px;
+}
+
+#dialogue-text {
+    color: #e3e9f1;
+    font-size: 15px;
+    white-space: pre-line;
+}
+
+.dialogue-choices {
+    display: grid;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.dialogue-choices button {
+    text-align: left;
+}
+
+.dialogue-hint {
+    margin-top: 16px;
+    font-size: 12px;
+}
+
 @media (pointer: coarse) {
     .desktop-controls {
         display: none;

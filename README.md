@@ -4,7 +4,7 @@ A browser-based, stylized third-person social-discovery game built with **PlayCa
 
 ## Current playable milestone
 
-A resettable test environment with an animated humanoid, a follow camera, solid walls/obstacles, a stationary purple NPC, and an amber signal box. [Task status and verification](docs/TASKS.md) · [Architecture and project structure](docs/ARCHITECTURE.md) · [Contributor handoff](docs/AGENT_CONTEXT.md).
+A resettable test environment with an animated humanoid, a follow camera, solid walls/obstacles, a purple guide with branching dialogue, and an amber signal box. [Project checklist and verification](docs/TASKS.md) · [Architecture and project structure](docs/ARCHITECTURE.md) · [Contributor handoff](docs/AGENT_CONTEXT.md).
 
 ### Controls
 
@@ -18,9 +18,13 @@ Click the scene to capture the mouse. Press **Esc** to release it.
 | Mouse             | Orbit camera                                       |
 | Mouse wheel       | Zoom                                               |
 | E                 | Interact while the prompt is visible               |
+| Tab / Enter       | Select a dialogue response                         |
+| Esc               | Close dialogue or release the mouse                |
 | Reset test area   | Rebuild the test scene and reset interaction state |
 
 Find the amber signal box near the purple guide. Approach until **Press E to Interact** appears, then press E for a confirmation message. On touch devices, the starter uses left drag to move, right drag to look, a farther left drag to sprint, and a right-side double-tap to jump; tap the interaction button when it appears.
+
+Walk beside the purple guide until the target label reads **Guide**, then interact to talk. Choose a response with Tab/Enter, click, or touch. Conversations pause player controls and release the mouse. Use a goodbye response, **End conversation**, or Esc to close; click the scene to resume desktop play.
 
 ## Prerequisites
 
@@ -51,6 +55,7 @@ Run these with `pnpm run <script>`:
 | `lint`      | Run ESLint                                         |
 | `fmt`       | Check formatting                                   |
 | `typecheck` | Run TypeScript checks                              |
+| `test`      | Run dialogue state and authoring-validation tests  |
 
 Run `pnpm run build` to generate a deployable static site in `dist/`. Its paths are relative, so it runs from any folder, such as a GitHub Pages project site or an itch.io upload.
 

@@ -18,7 +18,8 @@ import {
 } from 'playcanvas';
 
 import { createFoundationScene } from '../scenes/FoundationScene';
-import type { InteractionSystem } from '../systems/InteractionSystem';
+import type { FoundationScene } from '../scenes/FoundationScene';
+import { DialoguePanel } from '../ui/DialoguePanel';
 import { GameHud } from '../ui/GameHud';
 
 import { loadPhysics } from './AssetManager';
@@ -48,20 +49,36 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
     app.systems.rigidbody!.gravity.set(0, -18, 0);
 
     const scenes = new SceneManager(app);
-    let interactions: InteractionSystem | undefined;
+    let scene: FoundationScene | undefined;
     const resetScene = () => {
-        interactions = scenes.load('foundation-scene', createFoundationScene);
-        interactions.onStateChange = (state) => hud.render(state);
-        hud.render(interactions.state);
+        scene?.dialogue.close();
+        scene = undefined;
+        scene = scenes.load('foundation-scene', createFoundationScene);
+        scene.interactions.onStateChange = (state) => hud.render(state);
+        scene.dialogue.onStateChange = (state) => {
+            const active = state !== null;
+            scene?.setControlsEnabled(!active);
+            scene?.interactions.setSuspended(active);
+            if (active && document.pointerLockElement === canvas) document.exitPointerLock();
+            dialoguePanel.render(state);
+            if (!active) canvas.focus({ preventScroll: true });
+        };
+        hud.render(scene.interactions.state);
         canvas.focus({ preventScroll: true });
     };
-    const hud = new GameHud(() => interactions?.interact(), resetScene);
+    const hud = new GameHud(() => scene?.interactions.interact(), resetScene);
+    const dialoguePanel = new DialoguePanel(
+        (nodeId, choiceId) => {
+            scene?.dialogue.choose(nodeId, choiceId);
+        },
+        () => scene?.dialogue.close()
+    );
 
     const onKeyDown = ({ key, event }: KeyboardEvent) => {
         if (key !== KEY_E || !event || event.repeat || event.ctrlKey || event.altKey || event.metaKey) return;
         if (document.pointerLockElement !== canvas) return;
         event.preventDefault();
-        interactions?.interact();
+        scene?.interactions.interact();
     };
     const resize = () => app.resizeCanvas();
     app.keyboard!.on(EVENT_KEYDOWN, onKeyDown);
@@ -70,7 +87,10 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         window.removeEventListener('resize', resize);
         app.keyboard?.off(EVENT_KEYDOWN, onKeyDown);
         if (document.pointerLockElement === canvas) document.exitPointerLock();
+        if (scene) scene.dialogue.onStateChange = null;
         scenes.destroy();
+        scene = undefined;
+        dialoguePanel.destroy();
         hud.destroy();
     });
 

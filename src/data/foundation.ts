@@ -9,6 +9,7 @@ export type BoxDefinition = {
 
 export const PLAYER_SPAWN: Vector3Tuple = [0, 1.1, 0];
 export const NPC_POSITION: Vector3Tuple = [1.8, 1, -5.5];
+export const GUIDE_INTERACTION = { label: 'Guide', radius: 2.3 };
 
 export const GROUND: BoxDefinition = {
     name: 'ground',
