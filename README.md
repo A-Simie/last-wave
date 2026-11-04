@@ -1,14 +1,26 @@
-# PlayCanvas Engine + TypeScript Starter
+# Last Wave
 
-A Vite-powered PlayCanvas Engine project with TypeScript, hot module replacement, ESLint and Prettier.
+A browser-based, stylized third-person social-discovery game built with **PlayCanvas Engine, TypeScript, Vite, and pnpm**, starting from the official PlayCanvas Third-Person Controller starter.
 
-## Third-Person Controller
+## Current playable milestone
 
-A physics-backed third-person controller, follow camera and animated robot.
+A resettable test environment with an animated humanoid, a follow camera, solid walls/obstacles, a stationary purple NPC, and an amber signal box. [Task status and verification](docs/TASKS.md) · [Architecture and project structure](docs/ARCHITECTURE.md) · [Contributor handoff](docs/AGENT_CONTEXT.md).
 
 ### Controls
 
-Click the scene, use WASD to move, move the mouse to orbit and press Space to jump.
+Click the scene to capture the mouse. Press **Esc** to release it.
+
+| Input             | Action                                             |
+| ----------------- | -------------------------------------------------- |
+| WASD / arrow keys | Move relative to camera direction                  |
+| Shift             | Sprint                                             |
+| Space             | Jump                                               |
+| Mouse             | Orbit camera                                       |
+| Mouse wheel       | Zoom                                               |
+| E                 | Interact while the prompt is visible               |
+| Reset test area   | Rebuild the test scene and reset interaction state |
+
+Find the amber signal box near the purple guide. Approach until **Press E to Interact** appears, then press E for a confirmation message. On touch devices, the starter uses left drag to move, right drag to look, a farther left drag to sprint, and a right-side double-tap to jump; tap the interaction button when it appears.
 
 ## Prerequisites
 
@@ -44,7 +56,13 @@ Run `pnpm run build` to generate a deployable static site in `dist/`. Its paths 
 
 ## Coding agents
 
-`AGENTS.md` gives coding agents such as Claude Code, Codex and Cursor this project's commands, layout, conventions and checks. `CLAUDE.md` imports it for Claude Code.
+`AGENTS.md` gives coding agents this project's rules and milestone. `CLAUDE.md` imports it for Claude Code. Every completed task must update `docs/TASKS.md` with changes, verification, limitations, and the next action so another contributor can continue immediately.
+
+## Design and assets
+
+- [Game design](docs/GAME_DESIGN.md) and [Episode 01 reference](docs/EPISODE_01.md) index the original design documents.
+- `public/assets/` holds the requested character, animation, environment, prop, audio, and texture categories. See its [asset notes](public/assets/README.md).
+- The foundation uses procedural geometry and the starter's licensed Ammo runtime. Episode scenes and backend/multiplayer systems are reserved for future milestones.
 
 ## Agent skills
 

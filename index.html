@@ -4,10 +4,16 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/png" href="/src/assets/playcanvas.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PlayCanvas Starter</title>
+        <meta name="description" content="Last Wave — third-person gameplay foundation." />
+        <title>Last Wave | Gameplay Foundation</title>
     </head>
     <body>
-        <canvas id="application-canvas"></canvas>
+        <canvas
+            id="application-canvas"
+            tabindex="0"
+            aria-label="Last Wave game. Controls are listed on screen."
+        ></canvas>
+        <div id="startup-status" role="status">Starting Last Wave…</div>
         <script type="module" src="/src/main.ts"></script>
     </body>
 </html>
