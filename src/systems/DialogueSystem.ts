@@ -24,6 +24,12 @@ export type DialogueState = {
     readonly choices: readonly DialogueChoice[];
 };
 
+export type DialogueSelection = {
+    readonly dialogueId: string;
+    readonly nodeId: string;
+    readonly choiceId: string;
+};
+
 const validateDialogue = ({ id, start, nodes }: DialogueDefinition) => {
     if (!Object.hasOwn(nodes, start)) throw new Error(`Dialogue ${id}: missing start node ${start}.`);
 
@@ -41,6 +47,7 @@ const validateDialogue = ({ id, start, nodes }: DialogueDefinition) => {
 
 export class DialogueSystem {
     onStateChange: ((state: DialogueState | null) => void) | null = null;
+    onChoice: ((selection: DialogueSelection) => void) | null = null;
 
     private dialogue: DialogueDefinition | null = null;
     private nodeId = '';
@@ -70,12 +77,14 @@ export class DialogueSystem {
         if (!this.dialogue || nodeId !== this.nodeId) return false;
         const choice = this.dialogue.nodes[this.nodeId].choices.find((entry) => entry.id === choiceId);
         if (!choice) return false;
+        const dialogueId = this.dialogue.id;
         if (choice.next === null) {
             this.close();
         } else {
             this.nodeId = choice.next;
             this.onStateChange?.(this.state);
         }
+        this.onChoice?.({ dialogueId, nodeId, choiceId });
         return true;
     }
 
@@ -89,5 +98,6 @@ export class DialogueSystem {
     destroy() {
         this.close();
         this.onStateChange = null;
+        this.onChoice = null;
     }
 }

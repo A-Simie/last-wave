@@ -55,6 +55,7 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         scene = undefined;
         scene = scenes.load('foundation-scene', createFoundationScene);
         scene.interactions.onStateChange = (state) => hud.render(state);
+        scene.quest.onStateChange = (state) => hud.renderQuest(state);
         scene.dialogue.onStateChange = (state) => {
             const active = state !== null;
             scene?.setControlsEnabled(!active);
@@ -64,6 +65,7 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             if (!active) canvas.focus({ preventScroll: true });
         };
         hud.render(scene.interactions.state);
+        hud.renderQuest(scene.quest.state);
         canvas.focus({ preventScroll: true });
     };
     const hud = new GameHud(() => scene?.interactions.interact(), resetScene);

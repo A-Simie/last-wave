@@ -27,7 +27,8 @@ last-wave/
 │   │   └── CharacterModel.ts         # Shared placeholder humanoid and collider
 │   ├── systems/
 │   │   ├── InteractionSystem.ts      # Proximity, sightline, action, timed message state
-│   │   └── DialogueSystem.ts         # Authored conversation state and validated choices
+│   │   ├── DialogueSystem.ts         # Authored conversation state and validated choices
+│   │   └── QuestSystem.ts            # Ordered, event-driven quest progress
 │   ├── scenes/
 │   │   └── FoundationScene.ts        # The current test environment
 │   ├── episodes/episode-01/          # Reserved, with a scope README
@@ -37,7 +38,8 @@ last-wave/
 │   │   └── game.css
 │   ├── data/
 │   │   ├── foundation.ts             # Layout and interaction definitions
-│   │   └── dialogues.ts              # Authored guide conversation
+│   │   ├── dialogues.ts              # Progress-aware guide conversations
+│   │   └── quests.ts                 # Authored objectives and completion events
 │   ├── networking/                  # Reserved, with a scope README
 │   ├── assets/playcanvas.png         # Starter favicon
 │   ├── inspector.ts / inspector.css # Development-only inspector integration
@@ -52,7 +54,9 @@ last-wave/
 │   ├── AGENT_CONTEXT.md
 │   └── *.docx                       # Original design sources
 ├── AGENTS.md / CLAUDE.md
-├── tests/dialogue.test.mjs            # Node tests for dialogue state and graph validation
+├── tests/
+│   ├── dialogue.test.mjs              # Dialogue transitions, events, and graph validation
+│   └── quest.test.mjs                 # Quest rules and authored dialogue integration
 ├── package.json / pnpm-lock.yaml
 ├── tsconfig.json
 └── vite.config.ts
@@ -64,9 +68,9 @@ last-wave/
 
 - `createGame` returns the actual `AppBase`; there is no second game loop or wrapper application lifecycle.
 - The original minimal render/camera/light/script/collision/rigid-body component systems are registered. `Keyboard` is opt-in for E; the shipped controller owns its own keyboard/mouse, touch, and gamepad sources.
-- `SceneManager.load(name, build)` destroys the previous root, attaches one unscaled root, and invokes a synchronous scene builder. It also cleans up a partially built scene if construction fails. The foundation builder returns its interaction system, dialogue state model, and a control-enabling action. Reset closes any conversation before using the same builder as startup.
+- `SceneManager.load(name, build)` destroys the previous root, attaches one unscaled root, and invokes a synchronous scene builder. It also cleans up a partially built scene if construction fails. The foundation builder returns its interaction system, dialogue and quest models, and a control-enabling action. Reset closes any conversation before using the same builder as startup and creates fresh quest progress.
 - Scene roots own all entities. The foundation root releases its shared procedural materials on destruction. Engine Script destruction releases the stock controller's input sources.
-- The application owns HUD/dialogue actions, E-key handling, and the resize listener. `app.destroy()` disconnects dialogue callbacks, destroys scene-owned state, and removes both UI surfaces and external listeners; `main.ts` invokes that path on Vite module disposal.
+- The application owns HUD/dialogue actions, E-key handling, and the resize listener. It connects quest state to the HUD on load. `app.destroy()` disconnects dialogue callbacks, destroys scene-owned state, and removes both UI surfaces and external listeners; `main.ts` invokes that path on Vite module disposal.
 - Physics uses the starter's local Ammo runtime and loads before app/rigid-body creation. In this AppBase setup, `app.start()` installs the Ammo physics world, so it must run before building scene colliders/bodies. Loading failures reach the startup error display. URLs respect Vite's relative base path.
 
 ## Player, animation, and camera
@@ -103,9 +107,11 @@ The upstream script integrates camera-relative movement and camera positioning i
 
 `setSuspended(true)` clears the prompt/message and blocks selection/actions during dialogue. Both targets use a 2.3 m radius; the nearest unobstructed one wins. World actions remain owned by scene composition rather than DOM event handlers.
 
+After an eligible action, `onInteract(targetId)` publishes its stable target ID. The target is captured before running the action because a callback may suspend interactions and clear selection. Range, occlusion, disabled-target, pause, and suspension checks all precede this event. Destruction clears both interaction subscribers and target references.
+
 `Game.ts` forwards a fresh E press while pointer lock belongs to the game canvas. Repeated keydown events and modified shortcuts are ignored. The HUD button calls the same action for pointer/touch input. Range and visibility rules are enforced for both paths.
 
-`GameHud` renders state with `textContent`; the DOM is not the game-state store. Input/actions, scene rendering, and interaction rules have distinct owners. The current lightweight DOM overlay is sufficient; the existing React dependencies can support later UI work without moving state into components.
+`GameHud.render` renders interaction state with `textContent`; `renderQuest` renders the quest title, status, current objective or completion message, and completed/total counts. Quest feedback uses a polite live region and persists independently of the four-second interaction message. Controls and the quest tracker sit side by side on desktop/landscape and stack on narrow screens. The DOM is not the game-state store. The current lightweight DOM overlay is sufficient; the existing React dependencies can support later UI work without moving state into components.
 
 ## NPC dialogue
 
@@ -114,14 +120,36 @@ The upstream script integrates camera-relative movement and camera positioning i
 - A `DialogueDefinition` has a stable ID, speaker, start-node ID, and keyed nodes. Nodes contain readable text and choices; each choice has an ID, label, and `next` node ID. `next: null` ends the conversation. Return links and cycles are supported.
 - `open(definition)` validates the start node, destinations, and per-node choice-ID uniqueness before publishing state. It refuses to replace an active conversation.
 - `choose(nodeId, choiceId)` accepts only a choice from the displayed node. Unknown/stale choices are ignored, preventing delayed clicks from advancing a different response.
+- `onChoice({ dialogueId, nodeId, choiceId })` publishes the validated source IDs after a transition, including choices that end a conversation. Opening, cancellation, invalid/stale choices, and destruction emit no choice event. Destruction releases this subscriber too.
 - `close()` is idempotent. Scene destruction closes the conversation and drops the UI subscriber; scene reset creates fresh dialogue state.
-- `src/data/dialogues.ts` contains the guide's foundation tutorial: movement help, a signal-box hint, return choices, and goodbye responses. Author new conversations here and bind an eligible NPC's callback in scene composition.
+- `src/data/dialogues.ts` contains the guide's movement help and signal-check conversations. `selectGuideDialogue(quest.state)` selects an offer, inspection reminder, report opportunity, or completed response when the guide interaction opens a conversation. The report choice is available only after inspection. Accept/report choices lead to acknowledgement nodes; help, return, and goodbye choices remain reusable.
 
 `DialoguePanel` is a native modal `<dialog>` with text-only content rendering, response buttons, native focus containment, keyboard Tab/Enter navigation, Escape cancellation, and touch controls. It sends node/choice IDs back to the model. Every response change focuses the first choice; closing restores focus to the canvas. Desktop players click the scene to regain pointer lock. The panel scrolls inside short viewports.
 
-`Game.ts` coordinates dialogue state with player controls, pointer-lock release, and interaction suspension. It disconnects callbacks before destroying the app, so an open conversation cannot access a destroyed controller. The seven Node tests in `tests/dialogue.test.mjs` cover state transitions and authoring errors; browser acceptance covers input handoff, UI, reset, and teardown. See LW-C001 in [TASKS.md](TASKS.md).
+`Game.ts` coordinates dialogue state with player controls, pointer-lock release, and interaction suspension. It disconnects callbacks before destroying the app, so an open conversation cannot access a destroyed controller. Node tests cover state transitions, authoring errors, and validated choice events; browser acceptance covers input handoff, UI, reset, and teardown. See LW-C001 and LW-C002 in [TASKS.md](TASKS.md).
 
-The next quest task will connect validated dialogue/interaction IDs to objective progress. Quest flags and story progression belong to that system rather than the dialogue panel.
+## Quest tracking
+
+`QuestSystem` is an engine-independent TypeScript model. Each instance owns progress for one `QuestDefinition`: stable quest ID, title, ordered objectives, and completion copy. An objective has an ID, text, and a typed `QuestEvent` requirement. Definitions are authored in `src/data/quests.ts`; progress is private to the instance.
+
+- `state` exposes `questId`, title, status, a text/ID projection of the current objective, completed/total counts, and completion copy. The initial status is `inactive`; the first objective's event accepts the quest and activates the next objective. Finishing the last objective produces `completed` with no current objective.
+- `handle(event)` matches only the current requirement and advances at most one objective. Dialogue events match dialogue/node/choice IDs; interactions match target IDs. Unrelated, duplicate, early, and post-completion events return `false` without publishing changes. Early events are not buffered.
+- Construction rejects empty objective lists, duplicate objective IDs, and duplicate event requirements. This tracker represents sequential, one-shot objectives; repeated-count objectives require a separate contract when introduced.
+- `reset()` returns progress to inactive and publishes only if progress changed. `destroy()` clears progress/subscribers and disables further handling or resets, including callbacks retained from an old scene.
+
+The authored foundation quest is **Signal check**:
+
+| Progress      | Required event                                            | Next state/objective                    |
+| ------------- | --------------------------------------------------------- | --------------------------------------- |
+| Inactive, 0/3 | `dialogue-choice`: `foundation-guide / signal / accept`   | Active, 1/3: check the amber signal box |
+| Active, 1/3   | `interaction`: `signal-box`                               | Active, 2/3: report back to the guide   |
+| Active, 2/3   | `dialogue-choice`: `foundation-guide / greeting / report` | Completed, 3/3                          |
+
+`FoundationScene.ts` owns the models and routes `DialogueSystem.onChoice` and `InteractionSystem.onInteract` into typed quest events. It selects guide content from current quest progress and destroys both models with the scene root. Neither the dialogue runner nor the interaction selector imports the quest system. `Game.ts` connects quest snapshots to `GameHud.renderQuest`; presentation never advances objectives.
+
+Checking the box before accepting does not count. Reading or declining the offer, cancelling a conversation, and opening the guide after inspection do not complete objectives. A completed quest remains completed until scene reset or reload. Progress is session-local; save/load belongs to its later roadmap task.
+
+`pnpm test` runs eight dialogue tests and eleven quest/integration tests, including alternative authored data, exact event matching, ordering, duplicates, reset, stale callbacks, and the actual guide/box IDs.
 
 ## Asset and content boundaries
 
@@ -133,14 +161,13 @@ All foundation content is procedural placeholder geometry. Episode content is do
 
 These are reserved responsibilities, not implemented systems:
 
-| Location                                                          | First feature that should introduce it                     |
-| ----------------------------------------------------------------- | ---------------------------------------------------------- |
-| `systems/QuestSystem.ts`                                          | A data-driven objective with prerequisite/completion tests |
-| `systems/InventorySystem.ts`                                      | A usable item and protected quest-item behavior            |
-| `systems/CutsceneSystem.ts`                                       | An authored sequence with input handoff/skip behavior      |
-| `systems/SaveSystem.ts`                                           | Versioned state and a verified checkpoint/load path        |
-| `episodes/episode-01/{CoffeeShop,Beach,Hospital,KiroweenCity}.ts` | The corresponding approved scene milestone                 |
-| `networking/`                                                     | A Colyseus shared-session proof                            |
+| Location                                                          | First feature that should introduce it                |
+| ----------------------------------------------------------------- | ----------------------------------------------------- |
+| `systems/InventorySystem.ts`                                      | A usable item and protected quest-item behavior       |
+| `systems/CutsceneSystem.ts`                                       | An authored sequence with input handoff/skip behavior |
+| `systems/SaveSystem.ts`                                           | Versioned state and a verified checkpoint/load path   |
+| `episodes/episode-01/{CoffeeShop,Beach,Hospital,KiroweenCity}.ts` | The corresponding approved scene milestone            |
+| `networking/`                                                     | A Colyseus shared-session proof                       |
 
 Future persistence uses NestJS/PostgreSQL outside browser rendering. No backend, multiplayer connection, complete coffee shop, or Episode 1 progression exists in this foundation. See [TASKS.md](TASKS.md) for its verification status before advancing scope.
 

@@ -112,3 +112,26 @@ test('destroy closes an active conversation and releases its subscriber', () => 
     dialogue.destroy();
     assert.equal(states.length, 2);
 });
+
+test('only validated choices publish source IDs after transitioning, including endings', () => {
+    const dialogue = new DialogueSystem();
+    const selections = [];
+    dialogue.onChoice = (selection) => selections.push({ ...selection, next: dialogue.state?.nodeId ?? null });
+
+    dialogue.open(GUIDE_DIALOGUE);
+    assert.equal(dialogue.choose('greeting', 'missing'), false);
+    assert.equal(dialogue.choose('greeting', 'movement'), true);
+    assert.equal(dialogue.choose('greeting', 'goodbye'), false);
+    assert.equal(dialogue.choose('movement', 'goodbye'), true);
+    assert.deepEqual(selections, [
+        { dialogueId: 'foundation-guide', nodeId: 'greeting', choiceId: 'movement', next: 'movement' },
+        { dialogueId: 'foundation-guide', nodeId: 'movement', choiceId: 'goodbye', next: null }
+    ]);
+
+    dialogue.open(GUIDE_DIALOGUE);
+    dialogue.close();
+    dialogue.open(GUIDE_DIALOGUE);
+    dialogue.destroy();
+    assert.equal(selections.length, 2);
+    assert.equal(dialogue.onChoice, null);
+});

@@ -1,6 +1,6 @@
 import { Color, Entity, StandardMaterial, Vec3 } from 'playcanvas';
 
-import { GUIDE_DIALOGUE } from '../data/dialogues';
+import { selectGuideDialogue } from '../data/dialogues';
 import {
     BLOCKS,
     GROUND,
@@ -14,16 +14,19 @@ import {
     WOOD_PROPS
 } from '../data/foundation';
 import type { BoxDefinition } from '../data/foundation';
+import { SIGNAL_CHECK_QUEST } from '../data/quests';
 import { createCamera } from '../player/CameraController';
 import { addCharacterCollision, createCharacterModel } from '../player/CharacterModel';
 import { PlayerAnimation } from '../player/PlayerAnimation';
 import { addPlayerController, setPlayerControlsEnabled } from '../player/PlayerController';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
+import { QuestSystem } from '../systems/QuestSystem';
 
 export type FoundationScene = {
     interactions: InteractionSystem;
     dialogue: DialogueSystem;
+    quest: QuestSystem;
     setControlsEnabled: (enabled: boolean) => void;
 };
 
@@ -138,10 +141,16 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
     root.addChild(light);
 
     const dialogue = new DialogueSystem();
-    root.once('destroy', () => dialogue.destroy());
+    const quest = new QuestSystem(SIGNAL_CHECK_QUEST);
+    dialogue.onChoice = (selection) => quest.handle({ type: 'dialogue-choice', ...selection });
+    root.once('destroy', () => {
+        dialogue.destroy();
+        quest.destroy();
+    });
     const interactions = root.addComponent('script')!.create(InteractionSystem, {
         properties: {
             player,
+            onInteract: (targetId) => quest.handle({ type: 'interaction', targetId }),
             targets: [
                 {
                     id: SIGNAL_BOX.name,
@@ -158,7 +167,7 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
                     action: {
                         type: 'callback',
                         run: () => {
-                            dialogue.open(GUIDE_DIALOGUE);
+                            dialogue.open(selectGuideDialogue(quest.state));
                         }
                     }
                 }
@@ -166,5 +175,10 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
         } satisfies Partial<InteractionSystem>
     })!;
 
-    return { interactions, dialogue, setControlsEnabled: (enabled) => setPlayerControlsEnabled(controller, enabled) };
+    return {
+        interactions,
+        dialogue,
+        quest,
+        setControlsEnabled: (enabled) => setPlayerControlsEnabled(controller, enabled)
+    };
 };

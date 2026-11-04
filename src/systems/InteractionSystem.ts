@@ -23,6 +23,7 @@ export class InteractionSystem extends Script {
     player!: Entity;
     targets: readonly Interactable[] = [];
     onStateChange: ((state: InteractionState) => void) | null = null;
+    onInteract: ((targetId: string) => void) | null = null;
 
     private target: Interactable | null = null;
     private message: string | null = null;
@@ -40,6 +41,7 @@ export class InteractionSystem extends Script {
     initialize() {
         this.on('destroy', () => {
             this.onStateChange = null;
+            this.onInteract = null;
             this.targets = [];
         });
     }
@@ -64,13 +66,15 @@ export class InteractionSystem extends Script {
     interact() {
         if (!this.enabled || this.suspended || this.app.timeScale === 0) return;
         this.target = this.findTarget();
-        const action = this.target?.action;
+        const target = this.target;
+        const action = target?.action;
         if (action?.type === 'message') {
             this.message = action.message;
             this.messageTime = 4;
         } else if (action?.type === 'callback') {
             action.run();
         }
+        if (target) this.onInteract?.(target.id);
         this.onStateChange?.(this.state);
     }
 

@@ -49,6 +49,34 @@ body {
     width: min(370px, 100%);
 }
 
+.hud-summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.quest-tracker {
+    width: min(300px, 100%);
+}
+
+.quest-tracker h2 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.quest-progress {
+    font-size: 12px;
+}
+
+.quest-tracker[data-status='completed'] {
+    border-color: #79d9af99;
+}
+
+.quest-tracker[data-status='completed'] .eyebrow {
+    color: #79d9af;
+}
+
 h1 {
     margin: 4px 0 10px;
     font-size: 22px;
@@ -223,7 +251,8 @@ button:focus-visible {
         padding: 12px;
     }
 
-    .instructions {
+    .instructions,
+    .quest-tracker {
         padding: 12px;
         max-width: 300px;
     }
@@ -239,5 +268,18 @@ button:focus-visible {
 
     .interaction-message {
         bottom: 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .hud-summary {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media (max-height: 500px) {
+    .interaction {
+        bottom: 80px;
     }
 }

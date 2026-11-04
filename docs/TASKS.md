@@ -1,6 +1,6 @@
 # Last Wave — Task tracker
 
-Last updated: **2026-11-04**. Current milestone: **core game systems**. Next implementation: **LW-C002 — quest tracking**.
+Last updated: **2026-11-04**. Latest completed milestone: **LW-C002 — quest tracking**. Next implementation: **LW-C003 — inventory and clue journal**.
 
 ## Project checklist
 
@@ -19,8 +19,8 @@ Checked items have working implementations and verification recorded below. Phys
 - [x] Player movement and camera.
 - [x] Interactions.
 - [x] NPC dialogue — reusable branching guide conversation, verified in LW-C001.
-- [ ] Quest tracking — next implementation task, LW-C002.
-- [ ] Inventory and clue journal.
+- [x] Quest tracking — data-driven guide/signal-box quest, verified in LW-C002.
+- [ ] Inventory and clue journal — follows quest tracking, LW-C003.
 - [ ] Scene transition and save system.
 
 ### Episode 1 — Story
@@ -153,9 +153,9 @@ Workspace-local evidence is in `C:\Users\HP\AppData\Local\Temp\opencode\`: `last
 - Scene positions and interaction copy/radius: `src/data/foundation.ts`.
 - Scene geometry/materials: `src/scenes/FoundationScene.ts`.
 - Movement and ledge fix: `src/player/PlayerController.ts`; camera tuning: `src/player/CameraController.ts`.
-- Interaction rules: `src/systems/InteractionSystem.ts`; conversations: `src/systems/DialogueSystem.ts` and `src/data/dialogues.ts`; DOM presentation: `src/ui/`.
+- Interaction rules: `src/systems/InteractionSystem.ts`; conversations: `src/systems/DialogueSystem.ts` and `src/data/dialogues.ts`; quest rules/data: `src/systems/QuestSystem.ts` and `src/data/quests.ts`; DOM presentation: `src/ui/`.
 - A scene reset is the reference teardown path. Recheck it whenever adding scripts, callbacks, materials, or assets.
-- Next implementation: LW-C002, a data-driven quest using the guide and signal box. Physical touch-device acceptance can proceed under LW-F002; record OS/browser, gesture results, and frame-time observations there.
+- LW-C002 is complete: a data-driven quest using the guide and signal box. Next implementation: LW-C003, inventory and clue journal. Physical touch-device acceptance can proceed under LW-F002; record OS/browser, gesture results, and frame-time observations there.
 
 ## LW-F002 — Hardware acceptance
 
@@ -228,25 +228,106 @@ Local evidence is under `C:\Users\HP\AppData\Local\Temp\opencode\`: `last-wave-d
 ### Remaining follow-up
 
 - Physical devices, gamepads, other browser engines, and hardware performance remain under LW-F002.
-- Guide content is a foundation tutorial. Stable dialogue/choice IDs are ready for the quest integration in LW-C002; the source story documents still own Episode 1 narrative.
+- Guide content is a foundation tutorial. LW-C002 connects the stable dialogue/choice IDs to quest progress; the source story documents still own Episode 1 narrative.
 - The local Node version remains below the declared minimum; see LW-F002. Dependency versions and the existing lockfile have not been changed.
 
 ## LW-C002 — Data-driven quest tracking
 
-Status: **Next**. Owner: **Next contributor**. Priority: **P1**. Dependency: **LW-C001**.
+Owner: **Lead game engineering**. Priority: **P1**. Dependency: **LW-C001**. Status: **Complete; automated browser acceptance passed**.
 
-Next concrete action: implement one scene-owned quest in the existing test area: **speak to the guide → check the signal box → report back**.
+### Completed implementation
 
-- [ ] Define typed quest data and explicit inactive/active/completed progress.
-- [ ] Connect validated dialogue choices and world interactions to quest progress using stable IDs.
-- [ ] Display the active objective and completion feedback through the UI boundary.
-- [ ] Make repeated/out-of-order actions safe and reset progress with the scene.
-- [ ] Test acceptance, progression, duplicate events, completion, and reset; run build/lint/type-check and browser acceptance.
-- [ ] Update this checklist, the task evidence, and architecture after completion.
+- [x] Added typed quest definitions and an engine-independent `QuestSystem` for ordered, one-shot objectives with inactive/active/completed progress.
+- [x] Authored **Signal check**: accept the guide's request → inspect the signal box → explicitly report back.
+- [x] Added validated dialogue-choice and interaction-ID notifications; scene composition routes them into the quest model.
+- [x] Added guide offer, inspection reminder, report opportunity, and completed responses selected from quest progress. Movement help and conversation cancellation remain available.
+- [x] Added a responsive quest tracker with title, status, current objective, progress counts, persistent completion feedback, and polite live announcements.
+- [x] Ignored duplicate, early, unrelated, and post-completion events without buffering progress or publishing extra changes.
+- [x] Added definition validation for empty objectives, duplicate IDs, and duplicate required events.
+- [x] Reset quest progress with scene replacement and released event/UI subscribers on destruction. Destroyed models reject retained callbacks.
+- [x] Added eleven quest/integration tests and one dialogue-event test; the full suite now has nineteen tests.
+- [x] Completed quest acceptance and foundation/dialogue regression, reviewed screenshots, and recorded the LW-C003 handoff.
+
+### Files and decisions
+
+- Quest rules and authored data: `src/systems/QuestSystem.ts`, `src/data/quests.ts`.
+- Event boundaries: `src/systems/DialogueSystem.ts` (`onChoice`) and `src/systems/InteractionSystem.ts` (`onInteract`). These systems publish validated IDs and do not import quest rules.
+- Composition and lifetime: `src/scenes/FoundationScene.ts` owns dialogue/quest models, selects guide content, and binds events; `src/core/Game.ts` binds state to the HUD.
+- Presentation/content: `src/ui/GameHud.ts`, `src/ui/game.css`, and `src/data/dialogues.ts`.
+- Verification: `tests/quest.test.mjs` and `tests/dialogue.test.mjs`; existing `pnpm test` covers both without new dependencies.
+- Documentation/handoff: `docs/TASKS.md`, `docs/ARCHITECTURE.md`, `docs/AGENT_CONTEXT.md`, `docs/GAME_DESIGN.md`, `README.md`, `AGENTS.md`, and `src/systems/README.md`.
+- Definitions contain an ordered objective list. The first objective's event activates the quest; only the current objective can advance. The current feature needs one quest per instance and unique event requirements. [ARCHITECTURE.md](ARCHITECTURE.md) records the state/event contract and exact IDs.
+
+### Verification record
+
+Finalized on **2026-11-04**. The previous session completed the production browser suites below; this continuation reviewed their saved results and screenshots and reran the repository checks.
+
+- `pnpm test` — **19/19 passed**: eight dialogue tests and eleven quest/integration tests. Coverage includes matching all event IDs, activation, ordering, duplicates, completion, reset, instance isolation, different authored data, invalid definitions, destroyed callbacks, declining/cancelling, and the authored guide/box flow.
+- `pnpm build`, `pnpm lint`, and `pnpm typecheck` — passed.
+- Production foundation regression — **34/34 browser checks passed**, including movement, camera, collision, interactions, reset, teardown, and emulated touch.
+- Quest acceptance — **18/18 browser checks passed** in headless Chrome **156.0.8078.79**. Verified available → accepted → inspected → explicitly reported progress, reminders, persistent completion feedback, early/duplicate actions, cancellation/declining, and range/occlusion/disabled/paused interaction gates.
+- Dialogue regression — **14/14 browser checks passed**, including keyboard/mouse branching, focus and pointer-lock handoff, suspended controls, resumed movement, reset, teardown, and emulated touch.
+- Quest resets after acceptance, inspection, and completion returned to 0/3. Reset during dialogue restored controls and one usable scene; retained old interaction callbacks could not affect the new quest. Application teardown released the UI/subscribers, and reload started fresh progress.
+- Emulated **390×844 portrait** and **844×390 landscape** touch flows completed the quest with readable, non-overlapping HUD panels and ≥44 px dialogue controls. Available, accepted, return-objective, completed, portrait, and landscape screenshots were visually inspected.
+- Desktop and mobile runs recorded **no console, shader, asset, or network errors**.
+- `pnpm exec prettier --check src tests docs README.md AGENTS.md index.html package.json public/assets` — passed after completing the README/architecture table formatting.
+- `pnpm fmt` — the remaining finding is pre-existing formatting in `pnpm-lock.yaml`.
+- `git -c core.safecrlf=false diff --check` — passed. Reviewed the implementation, new quest files/tests, and documentation diff.
+
+Local browser commands (production preview on port 4178; isolated Chrome CDP on port 9223):
+
+```powershell
+pnpm exec vite preview --host 127.0.0.1 --port 4178 --strictPort
+```
+
+In another terminal:
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4178/'
+$env:VERIFY_PREFIX = 'last-wave-quest-foundation'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-verify.mjs"
+$env:VERIFY_PREFIX = 'last-wave-quest'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-quest-verify.mjs"
+$env:VERIFY_PREFIX = 'last-wave-quest-dialogue'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-dialogue-verify.mjs"
+```
+
+Retained evidence is under `C:\Users\HP\AppData\Local\Temp\opencode\`: `last-wave-quest-foundation-verification.json`, `last-wave-quest-verification.json`, `last-wave-quest-dialogue-verification.json`, and their corresponding PNG screenshots. These are workspace-local artifacts; the manual route below is the portable acceptance procedure for a fresh clone.
+
+### Manual quest acceptance
+
+1. Start the game and confirm **Signal check**, **Quest available**, and **0 / 3 objectives complete**.
+2. Check the signal box before accepting. The normal interaction message appears, but the quest remains 0/3.
+3. Talk to the guide, choose **What should I investigate?**, then cancel or choose **Maybe later**. Progress remains 0/3.
+4. Reopen the offer and choose **I will check the signal box.** Confirm active progress at 1/3 and **Check the amber signal box**. Close with **On my way.**
+5. Revisit the guide before inspection. Confirm a reminder and no report choice. Move out of range and verify E cannot advance progress.
+6. Inspect the signal box. Confirm 2/3 and **Return to the guide and report what you found**. Repeat the interaction and wait for its timed message to expire; progress stays 2/3.
+7. Talk to the guide. Opening/cancelling alone must not finish the quest. Choose **I checked the signal box.** Confirm **Quest complete**, 3/3, acknowledgement dialogue, and persistent completion feedback.
+8. Revisit both targets; completion must not restart or advance. Use **Reset test area** and confirm fresh 0/3 progress and working controls. Repeat after accepting and after inspecting.
+9. Repeat using touch input in portrait and landscape. Confirm readable, non-overlapping HUD panels and resumed movement after each conversation.
+10. Reload and confirm fresh progress. Check the console and repeat against `pnpm build` + `pnpm start`.
+
+### Limitations and continuation
+
+- Progress is scene-local and resets on reset/reload. Persistent saves remain the scene-transition/save roadmap task.
+- Physical devices, gamepads, Firefox/Safari, and hardware performance acceptance remain in LW-F002. Commands still use Node 22.20.0 against the declared ≥22.23.2 minimum; version alignment remains open.
+- Next implementation: LW-C003, inventory and clue journal in the existing test area.
+
+## LW-C003 — Inventory and clue journal
+
+Status: **Ready — next implementation**. Owner: **Next contributor**. Priority: **P1**. Dependency: **LW-C002 (complete)**.
+
+Next concrete action: add one collectible clue associated with the existing signal box, with a journal view and duplicate-pickup protection.
+
+- [ ] Define typed item/clue data and scene-owned inventory/journal state.
+- [ ] Connect a validated interaction to one unique clue acquisition.
+- [ ] Present acquired clues and their readable details through the UI boundary.
+- [ ] Preserve movement/dialogue input handoff and clear inventory/journal state on scene reset.
+- [ ] Verify pickup, duplicate events, journal opening/closing, reset, and desktop/touch behavior; update task evidence and architecture.
 
 ## Deferred backlog
 
-The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). Quest tracking is the next core-system task; the current playable scene remains the foundation test area.
+The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). Inventory and clue journal follow quest tracking; the current playable scene remains the foundation test area.
 
 ## Completion protocol
 
