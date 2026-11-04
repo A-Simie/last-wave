@@ -133,8 +133,18 @@ button:focus-visible {
     outline-offset: 3px;
 }
 
-[data-reset] {
+.hud-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 12px;
+}
+
+.clue-notice {
+    margin-top: 4px;
+    color: #79d9af;
+    font-size: 12px;
+    line-height: 1.25;
 }
 
 .interaction,
@@ -179,7 +189,8 @@ button:focus-visible {
     display: none;
 }
 
-.dialogue-panel {
+.dialogue-panel,
+.journal-panel {
     width: min(560px, calc(100% - 24px));
     max-height: calc(100dvh - 24px);
     padding: 22px;
@@ -191,18 +202,21 @@ button:focus-visible {
     overflow-y: auto;
 }
 
-.dialogue-panel::backdrop {
+.dialogue-panel::backdrop,
+.journal-panel::backdrop {
     background: #040812a8;
 }
 
-.dialogue-heading {
+.dialogue-heading,
+.journal-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
 }
 
-.dialogue-panel h2 {
+.dialogue-panel h2,
+.journal-panel h2 {
     margin: 18px 0 10px;
     font-size: 24px;
 }
@@ -223,9 +237,35 @@ button:focus-visible {
     text-align: left;
 }
 
-.dialogue-hint {
+.dialogue-hint,
+.journal-hint {
     margin-top: 16px;
     font-size: 12px;
+}
+
+.journal-entries {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.journal-entry {
+    padding: 16px;
+    border: 1px solid #ffffff24;
+    border-radius: 10px;
+    background: #1c273a;
+}
+
+.journal-entry h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.journal-description {
+    margin-top: 12px;
+    color: #e3e9f1;
+    font-size: 15px;
+    white-space: pre-line;
 }
 
 @media (pointer: coarse) {
@@ -279,7 +319,16 @@ button:focus-visible {
 }
 
 @media (max-height: 500px) {
+    .instructions > .eyebrow {
+        display: none;
+    }
+
     .interaction {
         bottom: 80px;
+        padding: 8px 12px;
+    }
+
+    .interaction p {
+        margin-bottom: 4px;
     }
 }

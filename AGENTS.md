@@ -41,8 +41,8 @@ After changes:
 ## Current Milestone
 
 Core game systems in the existing foundation test area.
-Movement, camera, collision, interactions, reusable NPC dialogue, and data-driven quest tracking are implemented and browser-verified.
-The next implementation task is inventory and clue journal using one collectible clue associated with the existing signal box.
+Movement, camera, collision, interactions, reusable NPC dialogue, quest tracking, inventory, and clue journal are implemented and browser-verified.
+The next implementation task is scene transition and save/load for the existing foundation area, starting with a versioned save-state contract.
 Use `docs/TASKS.md` for the checked roadmap, acceptance evidence, and next concrete task.
 
 Do not implement future scenes yet.

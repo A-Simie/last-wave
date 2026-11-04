@@ -1,6 +1,6 @@
 # Last Wave — Task tracker
 
-Last updated: **2026-11-04**. Latest completed milestone: **LW-C002 — quest tracking**. Next implementation: **LW-C003 — inventory and clue journal**.
+Last updated: **2026-11-04**. Latest completed milestone: **LW-C003 — inventory and clue journal**. Next implementation: **LW-C004 — scene transition and save system**.
 
 ## Project checklist
 
@@ -20,8 +20,8 @@ Checked items have working implementations and verification recorded below. Phys
 - [x] Interactions.
 - [x] NPC dialogue — reusable branching guide conversation, verified in LW-C001.
 - [x] Quest tracking — data-driven guide/signal-box quest, verified in LW-C002.
-- [ ] Inventory and clue journal — follows quest tracking, LW-C003.
-- [ ] Scene transition and save system.
+- [x] Inventory and clue journal — unique signal-box note and readable journal, verified in LW-C003.
+- [ ] Scene transition and save system — next implementation, LW-C004.
 
 ### Episode 1 — Story
 
@@ -153,9 +153,9 @@ Workspace-local evidence is in `C:\Users\HP\AppData\Local\Temp\opencode\`: `last
 - Scene positions and interaction copy/radius: `src/data/foundation.ts`.
 - Scene geometry/materials: `src/scenes/FoundationScene.ts`.
 - Movement and ledge fix: `src/player/PlayerController.ts`; camera tuning: `src/player/CameraController.ts`.
-- Interaction rules: `src/systems/InteractionSystem.ts`; conversations: `src/systems/DialogueSystem.ts` and `src/data/dialogues.ts`; quest rules/data: `src/systems/QuestSystem.ts` and `src/data/quests.ts`; DOM presentation: `src/ui/`.
+- Interaction rules: `src/systems/InteractionSystem.ts`; conversations: `src/systems/DialogueSystem.ts` and `src/data/dialogues.ts`; quest rules/data: `src/systems/QuestSystem.ts` and `src/data/quests.ts`; inventory rules/data: `src/systems/InventorySystem.ts` and `src/data/items.ts`; DOM presentation: `src/ui/`.
 - A scene reset is the reference teardown path. Recheck it whenever adding scripts, callbacks, materials, or assets.
-- LW-C002 is complete: a data-driven quest using the guide and signal box. Next implementation: LW-C003, inventory and clue journal. Physical touch-device acceptance can proceed under LW-F002; record OS/browser, gesture results, and frame-time observations there.
+- LW-C003 is complete: a unique signal-box note and clue journal. Next implementation: LW-C004, scene transition and save/load in the existing foundation area. Physical touch-device acceptance can proceed under LW-F002; record OS/browser, gesture results, and frame-time observations there.
 
 ## LW-F002 — Hardware acceptance
 
@@ -311,23 +311,103 @@ Retained evidence is under `C:\Users\HP\AppData\Local\Temp\opencode\`: `last-wav
 
 - Progress is scene-local and resets on reset/reload. Persistent saves remain the scene-transition/save roadmap task.
 - Physical devices, gamepads, Firefox/Safari, and hardware performance acceptance remain in LW-F002. Commands still use Node 22.20.0 against the declared ≥22.23.2 minimum; version alignment remains open.
-- Next implementation: LW-C003, inventory and clue journal in the existing test area.
+- Follow-up LW-C003, inventory and clue journal in the existing test area, is complete below.
 
 ## LW-C003 — Inventory and clue journal
 
-Status: **Ready — next implementation**. Owner: **Next contributor**. Priority: **P1**. Dependency: **LW-C002 (complete)**.
+Owner: **Lead game engineering**. Priority: **P1**. Dependency: **LW-C002**. Status: **Complete; automated browser acceptance passed**.
 
-Next concrete action: add one collectible clue associated with the existing signal box, with a journal view and duplicate-pickup protection.
+### Completed implementation
 
-- [ ] Define typed item/clue data and scene-owned inventory/journal state.
-- [ ] Connect a validated interaction to one unique clue acquisition.
-- [ ] Present acquired clues and their readable details through the UI boundary.
-- [ ] Preserve movement/dialogue input handoff and clear inventory/journal state on scene reset.
-- [ ] Verify pickup, duplicate events, journal opening/closing, reset, and desktop/touch behavior; update task evidence and architecture.
+- [x] Added typed item definitions and a scene-owned, engine-independent inventory with unique IDs and copied snapshots.
+- [x] Connected eligible signal-box interactions to one `signal-box-note`; acquisition works before or after quest acceptance and reporting retains the clue.
+- [x] Rejected unknown/duplicate pickups without publishing changes; validated catalog IDs and isolated definitions/state from external mutation.
+- [x] Added a HUD clue count and acquisition notice plus an empty/populated journal with readable titles, sources, and full note text.
+- [x] Added J/HUD opening, J/Escape/button closing, native modal focus, and shared dialogue/journal control suspension with pointer-lock handoff.
+- [x] Cleared inventory and journal state on reset/reload; released subscribers and rejected retained acquisition callbacks on destruction.
+- [x] Added seven inventory tests and adjusted short-viewport prompt spacing to prevent a 640×360 HUD overlap while retaining ≥44 px buttons.
+- [x] Verified pickup, duplicate events, journal opening/closing, reset, desktop/touch behavior, and existing gameplay; updated architecture and handoff.
+
+### Files and decisions
+
+- Item rules/content: `src/systems/InventorySystem.ts`, `src/data/items.ts`.
+- Scene acquisition/lifetime: `src/scenes/FoundationScene.ts`; the scene routes the already-validated interaction ID to both quest progress and inventory acquisition.
+- Application coordination: `src/core/Game.ts`; journal visibility is UI state, and `syncControls()` coordinates both modal surfaces.
+- Presentation: `src/ui/JournalPanel.ts`, `src/ui/GameHud.ts`, `src/ui/game.css`.
+- Tests: `tests/inventory.test.mjs`, using the existing dependency-free `pnpm test` command.
+- Documentation: `AGENTS.md`, `README.md`, `docs/{TASKS,ARCHITECTURE,AGENT_CONTEXT,GAME_DESIGN}.md`, and `src/systems/README.md`.
+- Inventory acquisition is independent of quest ordering: early inspection collects the note but still requires inspection after acceptance to advance the quest. Closing the journal preserves items; reporting does not consume them. The maintenance note is foundation tutorial content. Detailed contracts are in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+### Verification record
+
+Completed on **2026-11-04** against the production preview at `http://127.0.0.1:4178/`, using headless Chrome **156.0.8078.79** on Windows through CDP.
+
+- `pnpm test` — **26/26 passed**: eight dialogue, eleven quest/integration, and seven inventory tests. Inventory coverage includes unknown IDs, duplicate pickups, acquisition order, same-title/different-ID items, snapshot/catalog isolation, reset/reacquisition, catalog validation, and teardown.
+- `pnpm build`, `pnpm lint`, and `pnpm typecheck` — passed, including a fresh run after the compact-layout correction.
+- Feature regressions — foundation **34/34**, quest **18/18**, and dialogue **14/14 browser checks passed**. Movement, camera, collision, interactions, quest ordering, branching dialogue, reset, teardown, and emulated touch remained usable.
+- Inventory/journal acceptance — **23/23 browser checks passed** after rebuilding the compact-layout correction; **89 browser checks** passed across the four suites.
+- Verified empty/populated journal state, J/HUD opening, J/Escape/Enter/button closing, native focus, pointer-lock release/resumption, stopped momentum, and suspended movement/sprint/camera/zoom/interactions. Dialogue and journal could not overlap or release each other's controls.
+- Verified range, occlusion, disabled-target, pause, and suspension gates; one eligible pickup; repeated/held input; persistent clue feedback; complete authored text; acquisition before/after quest acceptance; and retention after reporting. A DOM mutation observer confirmed duplicates did not repeat the acquisition announcement.
+- Three reset-callback invocations with a populated journal open retained one scene, 19 bodies, one HUD, and one journal/dialogue panel. Old interaction callbacks were released and could not acquire into the new scene; each reset allowed one fresh pickup. The open-modal reset check invokes the existing HUD callback programmatically because native modal UI makes the background inert. Normal click/tap reset was also verified.
+- Reload returned fresh inventory/quest state. Direct application teardown with the populated journal open removed UI, scene state, input, and retained callbacks without errors.
+- Emulated touch passed at **390×844**, **844×390**, **360×640**, **320×568**, and **640×360**. Checked ≥44 px controls, readable non-overlapping HUD panels, contained journal text, touch scrolling in short viewports, tap acquisition, and resumed/stopped movement. Desktop empty/populated journals and portrait/landscape HUD/journal screenshots were visually inspected.
+- Desktop and mobile inventory runs independently recorded **no console, shader, asset, or network warnings/errors**. The regression suites also passed their browser-error checks.
+- `pnpm exec prettier --check src tests docs README.md AGENTS.md index.html package.json public/assets` — passed.
+- `pnpm fmt` — the remaining finding is pre-existing formatting in `pnpm-lock.yaml`.
+- `git -c core.safecrlf=false diff --check` — passed. Reviewed the implementation, new item/model/panel/tests, and documentation diff.
+
+Local commands (production preview on port 4178; isolated Chrome CDP on port 9223). Run browser scripts sequentially because they share a page:
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4178/'
+$env:VERIFY_PREFIX = 'last-wave-inventory-foundation'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-verify.mjs"
+$env:VERIFY_PREFIX = 'last-wave-inventory-quest'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-quest-verify.mjs"
+$env:VERIFY_PREFIX = 'last-wave-inventory-dialogue'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-dialogue-verify.mjs"
+$env:VERIFY_PREFIX = 'last-wave-inventory'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-inventory-verify.mjs"
+```
+
+Workspace-local evidence is under `C:\Users\HP\AppData\Local\Temp\opencode\`: `last-wave-inventory-verification.json`, `last-wave-inventory-{foundation,quest,dialogue}-verification.json`, and the screenshots listed in each report. The helper and scripts are local artifacts; use the manual route below on a fresh clone.
+
+### Manual inventory/journal acceptance
+
+1. Start `pnpm dev`. Open **Clue journal** or press J; confirm **0 clues collected** and the empty-state hint.
+2. Close using J, Escape, and **Close journal** on separate attempts. Confirm canvas focus returns and clicking the scene resumes movement/camera input.
+3. Approach the amber signal box and press E or tap the interaction button. Confirm **Clue collected: Signal box note** and **Clue journal (1)**.
+4. Open the journal and read the title, **Found at: Amber signal box**, and complete maintenance note. Reopen it and confirm the same single entry.
+5. Repeat the box interaction and hold E. The clue count remains one; the timed interaction message can expire while the collected clue remains available.
+6. Collect before accepting the guide's quest, then accept. Quest progress starts at 1/3; inspect again to reach 2/3 and report to reach 3/3. The journal retains one clue throughout.
+7. Open the journal while moving and release movement keys. Confirm movement/camera/world actions are suspended and resume cleanly after closing. While talking to the guide, J must not open a second modal.
+8. Close the journal and use **Reset test area**. Confirm zero clues and a fresh quest, then reacquire the note once. Reload and confirm fresh state again.
+9. Repeat with touch in portrait and short landscape layouts. Check readable text, scrolling when needed, ≥44 px controls, and no HUD/prompt overlap.
+10. Check the console and repeat against `pnpm build` + `pnpm start`.
+
+### Limitations and continuation
+
+- Inventory and quest progress are scene-local; reset/reload clears both. Save/load follows in LW-C004.
+- Physical devices, gamepads, Firefox/Safari, and hardware performance remain under LW-F002. Touch acceptance used browser emulation.
+- Commands used Node **22.20.0** and pnpm **10.32.1**; the declared Node **≥22.23.2** requirement still needs alignment under LW-F002.
+- Next implementation: **LW-C004 — scene transition and save system**, using the existing foundation test area.
+
+## LW-C004 — Scene transition and save system
+
+Status: **Ready — next implementation**. Owner: **Next contributor**. Priority: **P1**. Dependency: **LW-C003 (complete)**.
+
+Next concrete action: define a versioned save-state contract for the foundation scene, player position, quest progress, and acquired clue IDs, then connect validated restoration to the existing `SceneManager` lifecycle.
+
+- [ ] Define versioned save/load data and validation for the current foundation state.
+- [ ] Add model restoration boundaries and connect scene replacement to checkpoint save/load.
+- [ ] Expose save/load feedback and verify fresh, restored, missing, and incompatible state.
+- [ ] Verify reset/reload, input handoff, and resource/callback cleanup; record exact checks and the next handoff.
+
+Keep this milestone in the foundation test area; Episode 1 scenes remain deferred.
 
 ## Deferred backlog
 
-The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). Inventory and clue journal follow quest tracking; the current playable scene remains the foundation test area.
+The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). Scene transition and save/load follow inventory and clue journal; the current playable scene remains the foundation test area.
 
 ## Completion protocol
 

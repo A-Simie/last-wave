@@ -28,18 +28,21 @@ last-wave/
 │   ├── systems/
 │   │   ├── InteractionSystem.ts      # Proximity, sightline, action, timed message state
 │   │   ├── DialogueSystem.ts         # Authored conversation state and validated choices
-│   │   └── QuestSystem.ts            # Ordered, event-driven quest progress
+│   │   ├── QuestSystem.ts            # Ordered, event-driven quest progress
+│   │   └── InventorySystem.ts        # Unique collected items and copied snapshots
 │   ├── scenes/
 │   │   └── FoundationScene.ts        # The current test environment
 │   ├── episodes/episode-01/          # Reserved, with a scope README
 │   ├── ui/
 │   │   ├── GameHud.ts
 │   │   ├── DialoguePanel.ts
+│   │   ├── JournalPanel.ts
 │   │   └── game.css
 │   ├── data/
 │   │   ├── foundation.ts             # Layout and interaction definitions
 │   │   ├── dialogues.ts              # Progress-aware guide conversations
-│   │   └── quests.ts                 # Authored objectives and completion events
+│   │   ├── quests.ts                 # Authored objectives and completion events
+│   │   └── items.ts                  # Authored clue IDs, titles, sources, and text
 │   ├── networking/                  # Reserved, with a scope README
 │   ├── assets/playcanvas.png         # Starter favicon
 │   ├── inspector.ts / inspector.css # Development-only inspector integration
@@ -56,7 +59,8 @@ last-wave/
 ├── AGENTS.md / CLAUDE.md
 ├── tests/
 │   ├── dialogue.test.mjs              # Dialogue transitions, events, and graph validation
-│   └── quest.test.mjs                 # Quest rules and authored dialogue integration
+│   ├── quest.test.mjs                 # Quest rules and authored dialogue integration
+│   └── inventory.test.mjs             # Unique acquisition, snapshots, reset, and teardown
 ├── package.json / pnpm-lock.yaml
 ├── tsconfig.json
 └── vite.config.ts
@@ -67,10 +71,10 @@ last-wave/
 `index.html → main.ts → createGame(canvas) → loadPhysics() → AppBase.init() → app.start() → SceneManager.load()`.
 
 - `createGame` returns the actual `AppBase`; there is no second game loop or wrapper application lifecycle.
-- The original minimal render/camera/light/script/collision/rigid-body component systems are registered. `Keyboard` is opt-in for E; the shipped controller owns its own keyboard/mouse, touch, and gamepad sources.
-- `SceneManager.load(name, build)` destroys the previous root, attaches one unscaled root, and invokes a synchronous scene builder. It also cleans up a partially built scene if construction fails. The foundation builder returns its interaction system, dialogue and quest models, and a control-enabling action. Reset closes any conversation before using the same builder as startup and creates fresh quest progress.
+- The original minimal render/camera/light/script/collision/rigid-body component systems are registered. `Keyboard` is opt-in for E and J; the shipped controller owns its own keyboard/mouse, touch, and gamepad sources.
+- `SceneManager.load(name, build)` destroys the previous root, attaches one unscaled root, and invokes a synchronous scene builder. It also cleans up a partially built scene if construction fails. The foundation builder returns its interaction system, dialogue, quest, and inventory models, and a control-enabling action. Reset closes the conversation and journal before using the same builder as startup and creates fresh quest/inventory state.
 - Scene roots own all entities. The foundation root releases its shared procedural materials on destruction. Engine Script destruction releases the stock controller's input sources.
-- The application owns HUD/dialogue actions, E-key handling, and the resize listener. It connects quest state to the HUD on load. `app.destroy()` disconnects dialogue callbacks, destroys scene-owned state, and removes both UI surfaces and external listeners; `main.ts` invokes that path on Vite module disposal.
+- The application owns HUD/dialogue/journal actions, journal visibility, E/J-key handling, and the resize listener. It connects quest/inventory state to the UI on load. `syncControls()` suspends gameplay whenever either modal is open. `app.destroy()` disconnects dialogue callbacks, destroys scene-owned state, and removes all three UI surfaces and external listeners; `main.ts` invokes that path on Vite module disposal.
 - Physics uses the starter's local Ammo runtime and loads before app/rigid-body creation. In this AppBase setup, `app.start()` installs the Ammo physics world, so it must run before building scene colliders/bodies. Loading failures reach the startup error display. URLs respect Vite's relative base path.
 
 ## Player, animation, and camera
@@ -83,7 +87,7 @@ The upstream script integrates camera-relative movement and camera positioning i
 - Camera distance: 5 m; target height: 0.5 m above the player's pivot; initial pitch: 15°; FOV: 55°. Position/look-at damping is 0.97 (fraction retained per millisecond) for smooth follow. Upstream orbit sensitivity, collision padding/damping, pitch limits, and zoom behavior remain in the shipped implementation.
 - `PlayerAnimation` retains velocity-driven arm/leg swings and body bob. Limb nodes are looked up once. There are no GLB clips, animation assets, or retargeting in this milestone.
 - `CharacterModel` builds the original six-part humanoid. Player and stationary NPC share geometry/materials as appropriate; only the player has a movement/animation script.
-- `setPlayerControlsEnabled` toggles the stock controller's public `enabled` property. Dialogue disables both movement and orbit updates, zeroes horizontal velocity, and preserves vertical physics. Closing re-enables the controller. The application time scale is unaffected.
+- `setPlayerControlsEnabled` toggles the stock controller's public `enabled` property. Dialogue and journal disable movement and orbit updates, zero horizontal velocity, and preserve vertical physics. Closing the modal re-enables the controller. The application time scale is unaffected.
 
 **Compatibility constraint:** the starter corrects ledge grounding by replacing the controller's internal `_grounded` property with nine downward probes. There is no public ground-query hook in 2.23.3. That one existing compatibility shim is isolated in `PlayerController.ts`. On any PlayCanvas upgrade, inspect the shipped script and re-test jumps on a ledge and above foliage before accepting the upgrade. `src/scripts.d.ts` declares only public fields this project configures.
 
@@ -105,13 +109,13 @@ The upstream script integrates camera-relative movement and camera positioning i
 3. Publish `InteractionState` (target label and message) only when the visible state changes.
 4. `interact()` rechecks the target immediately, then runs the callback or starts a four-second message timer. It is ignored while the app is paused or interactions are suspended.
 
-`setSuspended(true)` clears the prompt/message and blocks selection/actions during dialogue. Both targets use a 2.3 m radius; the nearest unobstructed one wins. World actions remain owned by scene composition rather than DOM event handlers.
+`setSuspended(true)` clears the prompt/message and blocks selection/actions during dialogue or journal use. Both targets use a 2.3 m radius; the nearest unobstructed one wins. World actions remain owned by scene composition rather than DOM event handlers.
 
 After an eligible action, `onInteract(targetId)` publishes its stable target ID. The target is captured before running the action because a callback may suspend interactions and clear selection. Range, occlusion, disabled-target, pause, and suspension checks all precede this event. Destruction clears both interaction subscribers and target references.
 
 `Game.ts` forwards a fresh E press while pointer lock belongs to the game canvas. Repeated keydown events and modified shortcuts are ignored. The HUD button calls the same action for pointer/touch input. Range and visibility rules are enforced for both paths.
 
-`GameHud.render` renders interaction state with `textContent`; `renderQuest` renders the quest title, status, current objective or completion message, and completed/total counts. Quest feedback uses a polite live region and persists independently of the four-second interaction message. Controls and the quest tracker sit side by side on desktop/landscape and stack on narrow screens. The DOM is not the game-state store. The current lightweight DOM overlay is sufficient; the existing React dependencies can support later UI work without moving state into components.
+`GameHud.render` renders interaction state with `textContent`; `renderQuest` renders the quest title, status, current objective or completion message, and completed/total counts. `renderInventory` updates the journal button's clue count and a polite acquisition notice naming the latest clue. Quest and clue feedback persist independently of the four-second interaction message. Controls and the quest tracker sit side by side on desktop/landscape and stack on narrow screens. The DOM is not the game-state store. The current lightweight DOM overlay is sufficient; the existing React dependencies can support later UI work without moving state into components.
 
 ## NPC dialogue
 
@@ -126,7 +130,7 @@ After an eligible action, `onInteract(targetId)` publishes its stable target ID.
 
 `DialoguePanel` is a native modal `<dialog>` with text-only content rendering, response buttons, native focus containment, keyboard Tab/Enter navigation, Escape cancellation, and touch controls. It sends node/choice IDs back to the model. Every response change focuses the first choice; closing restores focus to the canvas. Desktop players click the scene to regain pointer lock. The panel scrolls inside short viewports.
 
-`Game.ts` coordinates dialogue state with player controls, pointer-lock release, and interaction suspension. It disconnects callbacks before destroying the app, so an open conversation cannot access a destroyed controller. Node tests cover state transitions, authoring errors, and validated choice events; browser acceptance covers input handoff, UI, reset, and teardown. See LW-C001 and LW-C002 in [TASKS.md](TASKS.md).
+`Game.ts` coordinates dialogue and journal state with player controls, pointer-lock release, and interaction suspension through `syncControls()`. Journal opening is ignored during dialogue; suspended interactions prevent talking while the journal is open. It disconnects callbacks before destroying the app, so an open conversation cannot access a destroyed controller. Node tests cover state transitions, authoring errors, and validated choice events; browser acceptance covers input handoff, UI, reset, and teardown. See LW-C001 through LW-C003 in [TASKS.md](TASKS.md).
 
 ## Quest tracking
 
@@ -145,11 +149,28 @@ The authored foundation quest is **Signal check**:
 | Active, 1/3   | `interaction`: `signal-box`                               | Active, 2/3: report back to the guide   |
 | Active, 2/3   | `dialogue-choice`: `foundation-guide / greeting / report` | Completed, 3/3                          |
 
-`FoundationScene.ts` owns the models and routes `DialogueSystem.onChoice` and `InteractionSystem.onInteract` into typed quest events. It selects guide content from current quest progress and destroys both models with the scene root. Neither the dialogue runner nor the interaction selector imports the quest system. `Game.ts` connects quest snapshots to `GameHud.renderQuest`; presentation never advances objectives.
+`FoundationScene.ts` owns the models and routes `DialogueSystem.onChoice` and `InteractionSystem.onInteract` into typed quest events. It selects guide content from current quest progress and destroys the models with the scene root. Neither the dialogue runner nor the interaction selector imports the quest system. `Game.ts` connects quest snapshots to `GameHud.renderQuest`; presentation never advances objectives.
 
 Checking the box before accepting does not count. Reading or declining the offer, cancelling a conversation, and opening the guide after inspection do not complete objectives. A completed quest remains completed until scene reset or reload. Progress is session-local; save/load belongs to its later roadmap task.
 
-`pnpm test` runs eight dialogue tests and eleven quest/integration tests, including alternative authored data, exact event matching, ordering, duplicates, reset, stale callbacks, and the actual guide/box IDs.
+`pnpm test` includes eight dialogue tests and eleven quest/integration tests, covering alternative authored data, exact event matching, ordering, duplicates, reset, stale callbacks, and the actual guide/box IDs.
+
+## Inventory and clue journal
+
+`InventorySystem` is an engine-independent TypeScript model owned by the scene. The installed Engine has no inventory runner; this model needs no entities or frame updates. `InventoryItemDefinition` contains a stable ID, title, source, and readable description. Definitions live in `src/data/items.ts`.
+
+- Construction copies the catalog and rejects blank or duplicate IDs. Acquired IDs are private to each instance.
+- `acquire(itemId)` returns `true` and publishes `onStateChange` only for the first acquisition of a known ID. Unknown, duplicate, and post-destruction acquisitions return `false` without publishing.
+- `state.items` returns copies in acquisition order. Mutating catalog inputs or returned snapshots cannot modify stored items.
+- `reset()` clears acquired IDs and publishes only if inventory changed. `destroy()` drops the catalog, collected IDs, and subscriber, and rejects later acquisition/reset calls.
+
+The authored foundation clue is `signal-box-note` (**Signal box note**), found at the **Amber signal box**. After a validated `signal-box` interaction, `FoundationScene.ts` routes the event into the quest and independently calls `inventory.acquire(SIGNAL_BOX_NOTE.id)`. The clue can be collected before accepting the quest. An early pickup still requires reinspection after accepting to advance the quest, and reporting never consumes the clue. The note's maintenance text belongs to the foundation tutorial.
+
+`GameHud` displays the count and latest acquisition notice. `JournalPanel` renders a native modal `<dialog>` with an empty-state hint or text-only clue cards containing title, source, and full description. Native focus containment and the focused **Close journal** button support keyboard and touch use; short viewports scroll within the panel.
+
+`Game.ts` owns journal visibility separately from the inventory. J or the HUD button toggles the journal; J, Escape, or **Close journal** closes it. J works with or without pointer lock, while repeated or Ctrl/Alt/Meta-modified keydowns are ignored. Opening suspends controls/interactions and releases pointer lock. Closing returns focus to the canvas; clicking the scene resumes desktop play. Closing clears rendered cards but preserves collected items. Reset closes the panel before destroying the old scene and binds the new empty inventory; reload also starts fresh. Application teardown removes journal listeners and markup.
+
+Seven inventory tests cover unique acquisition, catalog validation, same-title/different-ID items, ordering, snapshot isolation, independent instances, reset/reacquisition, and retained callbacks after destruction. `pnpm test` runs **26 tests** across all gameplay models. Browser acceptance and the portable manual route are recorded in LW-C003 in [TASKS.md](TASKS.md).
 
 ## Asset and content boundaries
 
@@ -163,7 +184,6 @@ These are reserved responsibilities, not implemented systems:
 
 | Location                                                          | First feature that should introduce it                |
 | ----------------------------------------------------------------- | ----------------------------------------------------- |
-| `systems/InventorySystem.ts`                                      | A usable item and protected quest-item behavior       |
 | `systems/CutsceneSystem.ts`                                       | An authored sequence with input handoff/skip behavior |
 | `systems/SaveSystem.ts`                                           | Versioned state and a verified checkpoint/load path   |
 | `episodes/episode-01/{CoffeeShop,Beach,Hospital,KiroweenCity}.ts` | The corresponding approved scene milestone            |

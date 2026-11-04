@@ -14,6 +14,7 @@ import {
     WOOD_PROPS
 } from '../data/foundation';
 import type { BoxDefinition } from '../data/foundation';
+import { SIGNAL_BOX_NOTE } from '../data/items';
 import { SIGNAL_CHECK_QUEST } from '../data/quests';
 import { createCamera } from '../player/CameraController';
 import { addCharacterCollision, createCharacterModel } from '../player/CharacterModel';
@@ -21,12 +22,14 @@ import { PlayerAnimation } from '../player/PlayerAnimation';
 import { addPlayerController, setPlayerControlsEnabled } from '../player/PlayerController';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
+import { InventorySystem } from '../systems/InventorySystem';
 import { QuestSystem } from '../systems/QuestSystem';
 
 export type FoundationScene = {
     interactions: InteractionSystem;
     dialogue: DialogueSystem;
     quest: QuestSystem;
+    inventory: InventorySystem;
     setControlsEnabled: (enabled: boolean) => void;
 };
 
@@ -142,15 +145,20 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
 
     const dialogue = new DialogueSystem();
     const quest = new QuestSystem(SIGNAL_CHECK_QUEST);
+    const inventory = new InventorySystem([SIGNAL_BOX_NOTE]);
     dialogue.onChoice = (selection) => quest.handle({ type: 'dialogue-choice', ...selection });
     root.once('destroy', () => {
         dialogue.destroy();
         quest.destroy();
+        inventory.destroy();
     });
     const interactions = root.addComponent('script')!.create(InteractionSystem, {
         properties: {
             player,
-            onInteract: (targetId) => quest.handle({ type: 'interaction', targetId }),
+            onInteract: (targetId) => {
+                quest.handle({ type: 'interaction', targetId });
+                if (targetId === SIGNAL_BOX.name) inventory.acquire(SIGNAL_BOX_NOTE.id);
+            },
             targets: [
                 {
                     id: SIGNAL_BOX.name,
@@ -179,6 +187,7 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
         interactions,
         dialogue,
         quest,
+        inventory,
         setControlsEnabled: (enabled) => setPlayerControlsEnabled(controller, enabled)
     };
 };
