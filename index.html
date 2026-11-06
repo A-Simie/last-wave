@@ -2,10 +2,13 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/png" href="/src/assets/playcanvas.png" />
+        <link rel="icon" type="image/svg+xml" href="%BASE_URL%assets/pumpkin-icon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Last Wave — third-person gameplay foundation." />
-        <title>Last Wave | Gameplay Foundation</title>
+        <meta
+            name="description"
+            content="Last Wave — an autumn mystery. An ordinary afternoon at Tideline is only the beginning."
+        />
+        <title>Last Wave | The Last Normal Day</title>
     </head>
     <body>
         <canvas
@@ -13,7 +16,17 @@
             tabindex="0"
             aria-label="Last Wave game. Controls are listed on screen."
         ></canvas>
-        <div id="startup-status" role="status">Starting Last Wave…</div>
+        <div id="startup-status" role="status">
+            <img
+                class="startup-brand"
+                src="%BASE_URL%assets/last-wave-logo.svg"
+                alt="Last Wave"
+                width="300"
+                height="86"
+            />
+            <span class="loading-ring" aria-hidden="true"></span>
+            <span>Starting Last Wave…</span>
+        </div>
         <script type="module" src="/src/main.ts"></script>
     </body>
 </html>

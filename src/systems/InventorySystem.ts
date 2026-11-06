@@ -3,10 +3,25 @@ export type InventoryItemDefinition = {
     readonly title: string;
     readonly description: string;
     readonly source: string;
+    readonly kind?: 'clue' | 'quest';
 };
 
 export type InventoryState = {
     readonly items: readonly InventoryItemDefinition[];
+};
+
+export type InventorySnapshot = {
+    readonly itemIds: readonly string[];
+};
+
+export const isInventorySnapshot = (value: unknown, knownIds: readonly string[]): value is InventorySnapshot => {
+    if (!value || typeof value !== 'object') return false;
+    const snapshot = value as Partial<InventorySnapshot>;
+    return (
+        Array.isArray(snapshot.itemIds) &&
+        Array.from(snapshot.itemIds).every((id) => typeof id === 'string' && knownIds.includes(id)) &&
+        new Set(snapshot.itemIds).size === snapshot.itemIds.length
+    );
 };
 
 export class InventorySystem {
@@ -26,6 +41,21 @@ export class InventorySystem {
 
     get state(): InventoryState {
         return { items: [...this.acquired].map((id) => ({ ...this.definitions.get(id)! })) };
+    }
+
+    get snapshot(): InventorySnapshot {
+        return { itemIds: [...this.acquired] };
+    }
+
+    restore(snapshot: unknown): boolean {
+        if (this.destroyed || !isInventorySnapshot(snapshot, [...this.definitions.keys()])) return false;
+        const current = [...this.acquired];
+        if (current.length !== snapshot.itemIds.length || current.some((id, index) => id !== snapshot.itemIds[index])) {
+            this.acquired.clear();
+            snapshot.itemIds.forEach((id) => this.acquired.add(id));
+            this.onStateChange?.(this.state);
+        }
+        return true;
     }
 
     acquire(itemId: string): boolean {

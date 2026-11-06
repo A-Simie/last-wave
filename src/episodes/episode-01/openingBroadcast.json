@@ -1,0 +1,39 @@
+{
+    "file": "climate-reporter.mp4",
+    "poster": "climate-reporter.jpg",
+    "captions": "climate-reporter.vtt",
+    "label": "CLIMATE REPORT \u00b7 VOA",
+    "duration": 15.4,
+    "cues": [
+        {
+            "start": 0.39,
+            "end": 3.71,
+            "text": "From drought to flooding, extreme weather and climate change"
+        },
+        {
+            "start": 3.71,
+            "end": 5.54,
+            "text": "is being felt around the world."
+        },
+        {
+            "start": 5.54,
+            "end": 7.95,
+            "text": "Global temperatures are rising."
+        },
+        {
+            "start": 7.95,
+            "end": 9.92,
+            "text": "But why does that matter?"
+        },
+        {
+            "start": 9.93,
+            "end": 12.33,
+            "text": "What do rising temperatures mean for us,"
+        },
+        {
+            "start": 12.33,
+            "end": 15.19,
+            "text": "and will fixing the problem cost you money?"
+        }
+    ]
+}

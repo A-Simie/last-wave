@@ -10,6 +10,8 @@ export type Interactable = {
     readonly entity: Entity;
     readonly radius: number;
     readonly action: InteractionAction;
+    readonly isAvailable?: () => boolean;
+    readonly promptOffset?: readonly [number, number, number];
 };
 
 export type InteractionState = {
@@ -36,6 +38,14 @@ export class InteractionSystem extends Script {
 
     get state(): InteractionState {
         return { targetLabel: this.target?.label ?? null, message: this.message };
+    }
+
+    getTargetPosition(out: Vec3): boolean {
+        if (!this.target || this.suspended) return false;
+        out.copy(this.target.entity.getPosition());
+        const offset = this.target.promptOffset;
+        if (offset) out.set(out.x + offset[0], out.y + offset[1], out.z + offset[2]);
+        return true;
     }
 
     initialize() {
@@ -96,7 +106,7 @@ export class InteractionSystem extends Script {
         let closestDistance = Infinity;
 
         for (const target of this.targets) {
-            if (!target.entity.enabled) continue;
+            if (!target.entity.enabled || target.isAvailable?.() === false) continue;
             const distance = this.distance.sub2(target.entity.getPosition(), position).lengthSq();
             if (distance > target.radius * target.radius || distance >= closestDistance) continue;
 

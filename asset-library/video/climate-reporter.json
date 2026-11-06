@@ -1,0 +1,26 @@
+{
+    "title": "The Inside Story — Confronting the Climate Crisis, Episode 89",
+    "source": "https://www.voanews.com/a/7069153.html",
+    "download": "https://voa-video-ns.akamaized.net/pangeavideo/2023/04/0/01/01000000-0aff-0242-b2a7-08db474face3_720p.mp4?cb=edbdcc9e7",
+    "captionSource": "https://www.voanews.com/a/7069150.html",
+    "author": "Voice of America (voanews.com)",
+    "speaker": "Elizabeth Lee, VOA correspondent",
+    "date": "2023-04-27",
+    "license": "Public domain — footage produced exclusively by Voice of America; credit retained. Third-party agency footage is excluded.",
+    "terms": "https://www.voanews.com/p/5338.html",
+    "checked": "2026-11-06",
+    "sourceStart": 54,
+    "sourceDuration": 17.2,
+    "inPoint": 1.25,
+    "duration": 15.4,
+    "label": "CLIMATE REPORT · VOA",
+    "edits": "Preserve the newsroom presenter excerpt from programme 00:54–01:11.2. Runtime uses 00:55.25–01:10.65, resized to 960×540 and encoded as H.264/AAC. Retain the original voice. Match captions to the source transcript and word timestamps from offline whisper.cpp b5454/base.en. The game's separate local bulletin and offshore mystery are fictional.",
+    "cues": [
+        { "start": 0.39, "end": 3.71, "text": "From drought to flooding, extreme weather and climate change" },
+        { "start": 3.71, "end": 5.54, "text": "is being felt around the world." },
+        { "start": 5.54, "end": 7.95, "text": "Global temperatures are rising." },
+        { "start": 7.95, "end": 9.92, "text": "But why does that matter?" },
+        { "start": 9.93, "end": 12.33, "text": "What do rising temperatures mean for us," },
+        { "start": 12.33, "end": 15.19, "text": "and will fixing the problem cost you money?" }
+    ]
+}

@@ -1,23 +1,17 @@
-import { Color, Entity, StandardMaterial, Vec3 } from 'playcanvas';
+import { Entity, Vec3 } from 'playcanvas';
 
+import type { GameAssets } from '../core/AssetManager';
 import { selectGuideDialogue } from '../data/dialogues';
-import {
-    BLOCKS,
-    GROUND,
-    GUIDE_INTERACTION,
-    NPC_POSITION,
-    PINE_LAYERS,
-    PLAYER_SPAWN,
-    SIGNAL_BOX,
-    TREES,
-    WALLS,
-    WOOD_PROPS
-} from '../data/foundation';
-import type { BoxDefinition } from '../data/foundation';
+import { GUIDE_INTERACTION, NPC_POSITION, PLAYER_SPAWN, SIGNAL_BOX } from '../data/foundation';
 import { SIGNAL_BOX_NOTE } from '../data/items';
 import { SIGNAL_CHECK_QUEST } from '../data/quests';
+import { createCafeSurroundings } from '../episodes/episode-01/CafeSurroundings';
+import { STARTER_BAG } from '../episodes/episode-01/opening';
+import { createOpeningPrototype } from '../episodes/episode-01/OpeningPrototype';
+import { createStreetLife } from '../episodes/episode-01/StreetLife';
+import { createAnimatedCharacter } from '../player/AnimatedCharacter';
 import { createCamera } from '../player/CameraController';
-import { addCharacterCollision, createCharacterModel } from '../player/CharacterModel';
+import { addCharacterCollision } from '../player/CharacterModel';
 import { PlayerAnimation } from '../player/PlayerAnimation';
 import { addPlayerController, setPlayerControlsEnabled } from '../player/PlayerController';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -25,84 +19,34 @@ import { InteractionSystem } from '../systems/InteractionSystem';
 import { InventorySystem } from '../systems/InventorySystem';
 import { QuestSystem } from '../systems/QuestSystem';
 
+import { FOUNDATION_SCENE_ID, isFoundationSnapshot } from './FoundationState';
+import type { FoundationSnapshot } from './FoundationState';
+import { createMaterial as material, createStaticBox } from './primitives';
+import { ScreenProjection } from './ScreenProjection';
+import type { ScreenPoint } from './ScreenProjection';
+
 export type FoundationScene = {
     interactions: InteractionSystem;
     dialogue: DialogueSystem;
     quest: QuestSystem;
     inventory: InventorySystem;
+    opening: ReturnType<typeof createOpeningPrototype>;
     setControlsEnabled: (enabled: boolean) => void;
+    getSnapshot: () => FoundationSnapshot;
+    getScreenAnchors: () => { speaker: ScreenPoint | null; interaction: ScreenPoint | null };
 };
 
-const material = (name: string, r: number, g: number, b: number) => {
-    const result = new StandardMaterial();
-    result.name = name;
-    result.diffuse = new Color(r, g, b);
-    result.update();
-    return result;
-};
-
-const createStaticBox = (parent: Entity, definition: BoxDefinition, material: StandardMaterial) => {
-    const { name, position, size, yaw = 0 } = definition;
-    const entity = new Entity(name);
-    parent.addChild(entity);
-    entity.setPosition(...position);
-    entity.setEulerAngles(0, yaw, 0);
-    entity.addComponent('collision', {
-        type: 'box',
-        halfExtents: new Vec3(size[0] / 2, size[1] / 2, size[2] / 2)
-    });
-    entity.addComponent('rigidbody', { type: 'static' });
-
-    const visual = new Entity(`${name}-visual`);
-    visual.setLocalScale(...size);
-    visual.addComponent('render', { type: 'box', material });
-    entity.addChild(visual);
-    return entity;
-};
-
-export const createFoundationScene = (root: Entity): FoundationScene => {
+export const createFoundationScene = (
+    root: Entity,
+    assets: GameAssets,
+    snapshot?: FoundationSnapshot
+): FoundationScene => {
+    if (snapshot && !isFoundationSnapshot(snapshot)) throw new Error('Invalid foundation checkpoint.');
     const materials = {
-        ground: material('ground', 0.2, 0.4, 0.18),
-        block: material('obstacles', 0.34, 0.35, 0.3),
-        wall: material('walls', 0.3, 0.36, 0.42),
-        wood: material('wood', 0.34, 0.18, 0.08),
-        leaves: material('leaves', 0.08, 0.3, 0.12),
-        tips: material('pine-tips', 0.12, 0.4, 0.16),
-        shirt: material('player-shirt', 0.15, 0.55, 0.9),
-        skin: material('skin', 0.78, 0.53, 0.35),
         pants: material('pants', 0.18, 0.29, 0.52),
-        npc: material('guide-shirt', 0.6, 0.27, 0.65),
         signal: material('signal-box', 0.95, 0.62, 0.1)
     };
     root.once('destroy', () => Object.values(materials).forEach((entry) => entry.destroy()));
-
-    createStaticBox(root, GROUND, materials.ground);
-    WALLS.forEach((box) => createStaticBox(root, box, materials.wall));
-    BLOCKS.forEach((box) => createStaticBox(root, box, materials.block));
-    WOOD_PROPS.forEach((box) => createStaticBox(root, box, materials.wood));
-
-    for (const [i, { x, z, size }] of TREES.entries()) {
-        const tree = createStaticBox(
-            root,
-            {
-                name: `tree-${i}`,
-                position: [x, size * 0.9, z],
-                size: [size * 0.38, size * 1.8, size * 0.38]
-            },
-            materials.wood
-        );
-        for (const [j, { y, width, height }] of PINE_LAYERS.entries()) {
-            const crown = new Entity(`tree-${i}-crown-${j}`);
-            crown.setLocalPosition(0, size * (y - 0.9), 0);
-            tree.addChild(crown);
-            // Foliage blocks camera rays but remains passable to the player.
-            crown.addComponent('collision', { type: 'cone', radius: (size * width) / 2, height: size * height });
-            const visual = new Entity('foliage');
-            visual.setLocalScale(size * width, size * height, size * width);
-            visual.addComponent('render', { type: 'cone', material: j === 1 ? materials.tips : materials.leaves });
-            crown.addChild(visual);
-        }
-    }
 
     const signalBox = createStaticBox(root, SIGNAL_BOX, materials.signal);
     const panel = new Entity('signal-panel');
@@ -116,19 +60,23 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
     npc.setPosition(...NPC_POSITION);
     addCharacterCollision(npc);
     npc.addComponent('rigidbody', { type: 'static' });
-    npc.addChild(createCharacterModel(materials.npc, materials.skin, materials.pants));
+    const guide = createAnimatedCharacter(assets.characters.friendB, 'friendB', 'guide-character');
+    npc.addChild(guide.root);
+    guide.root.setLocalPosition(0, -1, 0);
 
     const player = new Entity('player');
     root.addChild(player);
-    player.setPosition(...PLAYER_SPAWN);
+    player.setPosition(...(snapshot?.playerPosition ?? PLAYER_SPAWN));
     addCharacterCollision(player);
     player.addComponent('rigidbody', { type: 'dynamic', mass: 70, angularFactor: Vec3.ZERO });
-    const model = createCharacterModel(materials.shirt, materials.skin, materials.pants);
+    const character = createAnimatedCharacter(assets.characters.friendA, 'friendA', 'character');
+    const model = character.root;
+    model.setLocalPosition(0, -1, 0);
     player.addChild(model);
 
-    const camera = createCamera(root);
+    const camera = createCamera(root, player.getPosition());
     const controller = addPlayerController(player, camera, model);
-    model.addComponent('script')!.create(PlayerAnimation);
+    const animation = model.addComponent('script')!.create(PlayerAnimation, { properties: { character } })!;
 
     const light = new Entity('sun');
     light.addComponent('light', {
@@ -145,13 +93,16 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
 
     const dialogue = new DialogueSystem();
     const quest = new QuestSystem(SIGNAL_CHECK_QUEST);
-    const inventory = new InventorySystem([SIGNAL_BOX_NOTE]);
+    const inventory = new InventorySystem([SIGNAL_BOX_NOTE, STARTER_BAG]);
     dialogue.onChoice = (selection) => quest.handle({ type: 'dialogue-choice', ...selection });
     root.once('destroy', () => {
         dialogue.destroy();
         quest.destroy();
         inventory.destroy();
     });
+    if (snapshot && (!quest.restore(snapshot.quest) || !inventory.restore(snapshot.inventory))) {
+        throw new Error('The foundation checkpoint could not be restored.');
+    }
     const interactions = root.addComponent('script')!.create(InteractionSystem, {
         properties: {
             player,
@@ -183,11 +134,50 @@ export const createFoundationScene = (root: Entity): FoundationScene => {
         } satisfies Partial<InteractionSystem>
     })!;
 
+    const surroundings = createCafeSurroundings(root, interactions.app);
+    const street = createStreetLife(surroundings, assets, player);
+    const opening = createOpeningPrototype(
+        root,
+        player,
+        model,
+        camera,
+        interactions,
+        dialogue,
+        inventory,
+        assets,
+        snapshot?.opening
+    );
+    const projection = new ScreenProjection();
+    const anchor = new Vec3();
+
     return {
         interactions,
         dialogue,
         quest,
         inventory,
-        setControlsEnabled: (enabled) => setPlayerControlsEnabled(controller, enabled)
+        opening,
+        getScreenAnchors: () => ({
+            speaker: opening.getSpeakerPosition(anchor) ? projection.project(opening.activeCamera, anchor) : null,
+            interaction: interactions.getTargetPosition(anchor)
+                ? projection.project(opening.activeCamera, anchor)
+                : null
+        }),
+        setControlsEnabled: (enabled) => {
+            setPlayerControlsEnabled(controller, enabled);
+            animation.paused = !enabled;
+            character.anim.playing = enabled;
+            opening.setControlsEnabled(enabled);
+            street.paused = !enabled && !opening.waitingToStart && !opening.cutscene.state;
+        },
+        getSnapshot: () => {
+            const position = player.getPosition();
+            return {
+                sceneId: FOUNDATION_SCENE_ID,
+                playerPosition: [position.x, position.y, position.z],
+                quest: quest.snapshot,
+                inventory: inventory.snapshot,
+                opening: opening.quest.snapshot
+            };
+        }
     };
 };

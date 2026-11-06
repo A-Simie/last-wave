@@ -4,6 +4,49 @@ import { test } from 'node:test';
 import { SIGNAL_BOX_NOTE } from '../src/data/items.ts';
 import { InventorySystem } from '../src/systems/InventorySystem.ts';
 
+test('inventory restoration replaces state once, preserves order, and copies saved IDs', () => {
+    const other = { ...SIGNAL_BOX_NOTE, id: 'other-note' };
+    const inventory = new InventorySystem([SIGNAL_BOX_NOTE, other]);
+    inventory.acquire(SIGNAL_BOX_NOTE.id);
+    const changes = [];
+    inventory.onStateChange = (state) => changes.push(state.items.map(({ id }) => id));
+    const snapshot = { itemIds: [other.id, SIGNAL_BOX_NOTE.id] };
+
+    assert.equal(inventory.restore(snapshot), true);
+    assert.equal(inventory.restore(snapshot), true);
+    assert.deepEqual(inventory.state.items, [other, SIGNAL_BOX_NOTE]);
+    assert.deepEqual(changes, [[other.id, SIGNAL_BOX_NOTE.id]]);
+    snapshot.itemIds.length = 0;
+    inventory.snapshot.itemIds.push('fake');
+    assert.deepEqual(inventory.snapshot.itemIds, [other.id, SIGNAL_BOX_NOTE.id]);
+    assert.equal(inventory.acquire(SIGNAL_BOX_NOTE.id), false);
+    assert.equal(inventory.restore({ itemIds: [] }), true);
+    assert.equal(inventory.acquire(SIGNAL_BOX_NOTE.id), true);
+});
+
+test('invalid inventory restoration is atomic and destruction rejects retained restores', () => {
+    const inventory = new InventorySystem([SIGNAL_BOX_NOTE]);
+    inventory.acquire(SIGNAL_BOX_NOTE.id);
+    const before = inventory.snapshot;
+    let changes = 0;
+    inventory.onStateChange = () => changes++;
+    for (const snapshot of [
+        null,
+        {},
+        { itemIds: 'signal-box-note' },
+        { itemIds: [SIGNAL_BOX_NOTE.id, 'unknown'] },
+        { itemIds: [SIGNAL_BOX_NOTE.id, SIGNAL_BOX_NOTE.id] },
+        { itemIds: [1] },
+        { itemIds: new Array(1) }
+    ]) {
+        assert.equal(inventory.restore(snapshot), false);
+        assert.deepEqual(inventory.snapshot, before);
+    }
+    inventory.destroy();
+    assert.equal(inventory.restore(before), false);
+    assert.equal(changes, 0);
+});
+
 test('inventory starts empty and unknown IDs cannot create items or publish changes', () => {
     const inventory = new InventorySystem([SIGNAL_BOX_NOTE]);
     let notifications = 0;

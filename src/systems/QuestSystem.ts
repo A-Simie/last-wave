@@ -5,7 +5,8 @@ export type QuestEvent =
           readonly nodeId: string;
           readonly choiceId: string;
       }
-    | { readonly type: 'interaction'; readonly targetId: string };
+    | { readonly type: 'interaction'; readonly targetId: string }
+    | { readonly type: 'cutscene-complete'; readonly cutsceneId: string };
 
 export type QuestObjective = {
     readonly id: string;
@@ -18,6 +19,24 @@ export type QuestDefinition = {
     readonly title: string;
     readonly objectives: readonly QuestObjective[];
     readonly completionMessage: string;
+};
+
+export type QuestSnapshot = {
+    readonly questId: string;
+    readonly completedObjectiveIds: readonly string[];
+};
+
+export const isQuestSnapshot = (value: unknown, definition: QuestDefinition): value is QuestSnapshot => {
+    if (!value || typeof value !== 'object') return false;
+    const snapshot = value as Partial<QuestSnapshot>;
+    return (
+        snapshot.questId === definition.id &&
+        Array.isArray(snapshot.completedObjectiveIds) &&
+        snapshot.completedObjectiveIds.length <= definition.objectives.length &&
+        definition.objectives
+            .slice(0, snapshot.completedObjectiveIds.length)
+            .every((objective, index) => objective.id === snapshot.completedObjectiveIds![index])
+    );
 };
 
 export type QuestState = {
@@ -34,6 +53,9 @@ export type QuestState = {
 const matchesEvent = (expected: QuestEvent, event: QuestEvent): boolean => {
     if (expected.type === 'interaction') {
         return event.type === 'interaction' && expected.targetId === event.targetId;
+    }
+    if (expected.type === 'cutscene-complete') {
+        return event.type === 'cutscene-complete' && expected.cutsceneId === event.cutsceneId;
     }
     return (
         event.type === 'dialogue-choice' &&
@@ -66,7 +88,27 @@ export class QuestSystem {
 
     constructor(definition: QuestDefinition) {
         validateQuest(definition);
-        this.definition = definition;
+        this.definition = {
+            ...definition,
+            objectives: definition.objectives.map((objective) => ({ ...objective, event: { ...objective.event } }))
+        };
+    }
+
+    get snapshot(): QuestSnapshot {
+        return {
+            questId: this.definition.id,
+            completedObjectiveIds: this.definition.objectives.slice(0, this.completedCount).map(({ id }) => id)
+        };
+    }
+
+    restore(snapshot: unknown): boolean {
+        if (this.destroyed || !isQuestSnapshot(snapshot, this.definition)) return false;
+        const count = snapshot.completedObjectiveIds.length;
+        if (count !== this.completedCount) {
+            this.completedCount = count;
+            this.onStateChange?.(this.state);
+        }
+        return true;
     }
 
     get state(): QuestState {

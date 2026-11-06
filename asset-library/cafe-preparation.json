@@ -1,0 +1,438 @@
+{
+    "archives": [
+        {
+            "file": "asset-library/archives/KayKit_Furniture_Bits_1.0_FREE.zip",
+            "entries": 335,
+            "bytes": 3780559,
+            "sha256": "e6d75f34c5545486b5a8f45f86209dbd49092f3e77ae23011bdb87edab89e7e4"
+        },
+        {
+            "file": "asset-library/archives/KayKit_Restaurant_Bits_1.0_FREE.zip",
+            "entries": 893,
+            "bytes": 11298866,
+            "sha256": "75f75f0a1ae569f3f2348fa7a04ccd45d2f010d419045755c70ae43289b68e4b"
+        },
+        {
+            "file": "asset-library/archives/kenney_food-kit.zip",
+            "entries": 1018,
+            "bytes": 4606270,
+            "sha256": "cdad90853682499b94c9fda2f87678b24bfd8f3264e0ed323f6b6a27fd7c6f6f"
+        },
+        {
+            "file": "asset-library/archives/kenney_furniture-kit.zip",
+            "entries": 1557,
+            "bytes": 5130729,
+            "sha256": "e67652d0932cee41683f74711c03d3e192a2af9979ef8e6b237711f5482d46b0"
+        },
+        {
+            "file": "asset-library/archives/kenney_retro-urban-kit.zip",
+            "entries": 701,
+            "bytes": 2161463,
+            "sha256": "19201cbcb0d90080dfc33b54f5b4be2089de927c2a23274180798e7166d6b6ca"
+        },
+        {
+            "file": "asset-library/archives/Universal Animation Library[Standard].zip",
+            "entries": 12,
+            "bytes": 15904933,
+            "sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724"
+        },
+        {
+            "file": "asset-library/archives/Universal Base Characters[Standard].zip",
+            "entries": 128,
+            "bytes": 128968391,
+            "sha256": "fdbf1804c90dfc1ea03e992bff7da2dfd1a79318e13270a660180f9308455f40"
+        }
+    ],
+    "models": [
+        {
+            "id": "table",
+            "source": "asset-library/source-packs/KayKit_Furniture_Bits_1.0_FREE/KayKit_Furniture_Bits_1.0_FREE/Assets/gltf/table_medium.gltf",
+            "file": "public/assets/props/tideline/table.glb",
+            "bytes": 24364,
+            "sha256": "ac85e80c1954cd681eb17eaaba3d3404a205ee310674c18f2dd414f1822f3741"
+        },
+        {
+            "id": "chair",
+            "source": "asset-library/source-packs/KayKit_Furniture_Bits_1.0_FREE/KayKit_Furniture_Bits_1.0_FREE/Assets/gltf/chair_B_wood.gltf",
+            "file": "public/assets/props/tideline/chair.glb",
+            "bytes": 33352,
+            "sha256": "1397f4700956330a1e0ff4ab894e215f4ffbec245c3d587e28d21e579bcf08f5"
+        },
+        {
+            "id": "roundTable",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/tableRound.glb",
+            "file": "public/assets/props/tideline/roundTable.glb",
+            "bytes": 6452,
+            "sha256": "a130c1929b723b4c68d81dfebda1d3f57eb2cfe8037737872409ec38f16c2bae"
+        },
+        {
+            "id": "counter",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/kitchenBar.glb",
+            "file": "public/assets/props/tideline/counter.glb",
+            "bytes": 5908,
+            "sha256": "fcd45f7aaf78f8c1c9296e37918dcfed036cac0f850a902e00de639502d81eff"
+        },
+        {
+            "id": "counterEnd",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/kitchenBarEnd.glb",
+            "file": "public/assets/props/tideline/counterEnd.glb",
+            "bytes": 11048,
+            "sha256": "f8913f476702762e9854fefcae5285f9fdb2b92799689f7498ad32fafac9296d"
+        },
+        {
+            "id": "backCounter",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/kitchenCabinet.glb",
+            "file": "public/assets/props/tideline/backCounter.glb",
+            "bytes": 10272,
+            "sha256": "8900ad36485e4bfa8072e65c2c6cbe5c794529046169555c9315756cc88d99be"
+        },
+        {
+            "id": "shelf",
+            "source": "asset-library/source-packs/KayKit_Furniture_Bits_1.0_FREE/KayKit_Furniture_Bits_1.0_FREE/Assets/gltf/shelf_A_big.gltf",
+            "file": "public/assets/props/tideline/shelf.glb",
+            "bytes": 25200,
+            "sha256": "62dc459324f9501ec903d4e160a2e964474b39dcefc2edb2e5796d0d945f1caf"
+        },
+        {
+            "id": "fridge",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/kitchenFridge.glb",
+            "file": "public/assets/props/tideline/fridge.glb",
+            "bytes": 19888,
+            "sha256": "291c96551794f2ee80124b4296606b6676f6195e17e36b9abe14b8892f07872a"
+        },
+        {
+            "id": "coffeeMachine",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/kitchenCoffeeMachine.glb",
+            "file": "public/assets/props/tideline/coffeeMachine.glb",
+            "bytes": 13292,
+            "sha256": "f3db5467c633c5d578d299e68c3451271456ca66e7775760120eed9195c5b081"
+        },
+        {
+            "id": "pendant",
+            "source": "asset-library/cafe/ceiling-light.glb",
+            "file": "public/assets/props/tideline/pendant.glb",
+            "bytes": 8352,
+            "sha256": "ece2dca7b726d6ac2baadf0ecf563acb9fb4669a2698e32ccbe89699c9f937e5"
+        },
+        {
+            "id": "television",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/televisionModern.glb",
+            "file": "public/assets/props/tideline/television.glb",
+            "bytes": 6344,
+            "sha256": "a739e79407e021003a763c2a5b042d16c97f1a3b1d3c7bef70c071720f7c80b4"
+        },
+        {
+            "id": "plant",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/pottedPlant.glb",
+            "file": "public/assets/props/tideline/plant.glb",
+            "bytes": 7628,
+            "sha256": "b12a5757e2c8688290a68bba485f2212af589bcb3a30cd4bffe53be73f13762f"
+        },
+        {
+            "id": "smallPlant",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/plantSmall1.glb",
+            "file": "public/assets/props/tideline/smallPlant.glb",
+            "bytes": 8252,
+            "sha256": "8dee92e1ed2656f36ac2a9bbf466cbba5094bf9b17a89a4613e5fdc9ec9ea13b"
+        },
+        {
+            "id": "leafPlant",
+            "source": "asset-library/source-packs/kenney_furniture-kit/Models/GLTF format/plantSmall2.glb",
+            "file": "public/assets/props/tideline/leafPlant.glb",
+            "bytes": 13020,
+            "sha256": "bc8312415fad3646a6a69974ec1d09f051d5bac7104f2c1ba2ff4cb386fb9957"
+        },
+        {
+            "id": "cup",
+            "source": "asset-library/source-packs/kenney_food-kit/Models/GLB format/cup-coffee.glb",
+            "file": "public/assets/props/tideline/cup.glb",
+            "bytes": 16500,
+            "sha256": "8e87502f2516bcfbe832237845df23fec9887eb6199f6c277a700882d09bf001"
+        },
+        {
+            "id": "croissant",
+            "source": "asset-library/source-packs/kenney_food-kit/Models/GLB format/croissant.glb",
+            "file": "public/assets/props/tideline/croissant.glb",
+            "bytes": 20832,
+            "sha256": "7edd7ad6ee9ee07232b72cbeb612dd6a06677b6b411b8bff85e52a7260455b49"
+        },
+        {
+            "id": "muffin",
+            "source": "asset-library/source-packs/kenney_food-kit/Models/GLB format/muffin.glb",
+            "file": "public/assets/props/tideline/muffin.glb",
+            "bytes": 18044,
+            "sha256": "905a982ea5d945f0c34d81a8506ec57ca023d4278d37237473c82d4f28883477"
+        },
+        {
+            "id": "plate",
+            "source": "asset-library/source-packs/kenney_food-kit/Models/GLB format/plate.glb",
+            "file": "public/assets/props/tideline/plate.glb",
+            "bytes": 16912,
+            "sha256": "8e95dcde0448e964478f3fdfcc59c78766615913dbfbfe7e5190b5f042243b9c"
+        },
+        {
+            "id": "jar",
+            "source": "asset-library/source-packs/KayKit_Restaurant_Bits_1.0_FREE/KayKit_Restaurant_Bits_1.0_FREE/Assets/gltf/jar_A_large.gltf",
+            "file": "public/assets/props/tideline/jar.glb",
+            "bytes": 25820,
+            "sha256": "8f0047dce94c7b2a57fe0ab41808120d8a08e502942b970af5d37c4bc0429e63"
+        },
+        {
+            "id": "jarSmall",
+            "source": "asset-library/source-packs/KayKit_Restaurant_Bits_1.0_FREE/KayKit_Restaurant_Bits_1.0_FREE/Assets/gltf/jar_C_medium.gltf",
+            "file": "public/assets/props/tideline/jarSmall.glb",
+            "bytes": 26564,
+            "sha256": "9791915afe9b67d2c6504859630a915797e24ca02138a62fd21b5b91a2a0c4c8"
+        },
+        {
+            "id": "bag",
+            "source": "asset-library/source-packs/kenney_food-kit/Models/GLB format/bag.glb",
+            "file": "public/assets/props/tideline/bag.glb",
+            "bytes": 15444,
+            "sha256": "97c3bd801e01016d9d4d87cc9a4fac2cbb1e9d435c64c42979757a98d8330ea6"
+        },
+        {
+            "id": "pictureFrame",
+            "source": "asset-library/source-packs/KayKit_Furniture_Bits_1.0_FREE/KayKit_Furniture_Bits_1.0_FREE/Assets/gltf/pictureframe_large_B.gltf",
+            "file": "public/assets/props/tideline/pictureFrame.glb",
+            "bytes": 18304,
+            "sha256": "8e4c46c70533a2541607a11d00a1655304bbc7359579336f255aa351b66cba5f"
+        },
+        {
+            "id": "books",
+            "source": "asset-library/source-packs/KayKit_Furniture_Bits_1.0_FREE/KayKit_Furniture_Bits_1.0_FREE/Assets/gltf/book_set.gltf",
+            "file": "public/assets/props/tideline/books.glb",
+            "bytes": 26680,
+            "sha256": "b1e5cc83e9d2c49852fb8b30914b49e9728e9a373ab685aa8e41574039498039"
+        },
+        {
+            "id": "stool",
+            "source": "asset-library/source-packs/KayKit_Furniture_Bits_1.0_FREE/KayKit_Furniture_Bits_1.0_FREE/Assets/gltf/chair_stool_wood.gltf",
+            "file": "public/assets/props/tideline/stool.glb",
+            "bytes": 25992,
+            "sha256": "97653f5e2532dc67434db218c05bc2c1120c154d95c635d22cc4235ab3cfbfda"
+        },
+        {
+            "id": "menu",
+            "source": "asset-library/source-packs/KayKit_Restaurant_Bits_1.0_FREE/KayKit_Restaurant_Bits_1.0_FREE/Assets/gltf/menu.gltf",
+            "file": "public/assets/props/tideline/menu.glb",
+            "bytes": 24748,
+            "sha256": "8067ded231dd6e27434af7a61e2f89de80ffd6da7d92345d06e584b9f71a6f25"
+        },
+        {
+            "id": "fan",
+            "source": "asset-library/source/polyhaven-ceiling-fan.glb",
+            "file": "public/assets/props/tideline/fan.glb",
+            "bytes": 1283464,
+            "sha256": "507d7e4c6d608ff35d7a9cd1ad414a62e1e0e748e1021ac9bfe7442d8a9cd41d"
+        },
+        {
+            "id": "icedDrink",
+            "source": "asset-library/cafe/soda-glass.glb",
+            "file": "public/assets/props/tideline/icedDrink.glb",
+            "bytes": 13668,
+            "sha256": "c162e94ef7372640ae828f31a96687a2d5ee3a777dcdb6aef54ed2fa882d38da"
+        },
+        {
+            "id": "bottle",
+            "source": "asset-library/cafe/bottle.glb",
+            "file": "public/assets/props/tideline/bottle.glb",
+            "bytes": 14988,
+            "sha256": "0a8b220dfa63ddc8be6a4bbd0b8cb3d2db136c68f0d24eeee1dfaae320e480a0"
+        }
+    ],
+    "characters": [
+        {
+            "id": "friendA",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/friendA.glb",
+            "bytes": 2856996,
+            "sha256": "cd6624f84868811fd1e2b78ae651e13efd07a36dca10249ebecdf8e77140326a"
+        },
+        {
+            "id": "friendB",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Female_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/friendB.glb",
+            "bytes": 3192064,
+            "sha256": "77b36edcec3f5dda773c013b683ef0002525b568e2ffab1559ad1073fb941626"
+        },
+        {
+            "id": "barista",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/barista.glb",
+            "bytes": 1967508,
+            "sha256": "770724cde07c8b18b3bed9b0c3415cf52dc95e3f9a420f63255289a1fd34cab7"
+        },
+        {
+            "id": "patronBuzz",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/patronBuzz.glb",
+            "bytes": 1692776,
+            "sha256": "d0ba853802a4023dd623291f268d7bccc2ca75f8a18f5c2ea3ea184e6692bb89"
+        },
+        {
+            "id": "patronLong",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Female_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/patronLong.glb",
+            "bytes": 1912136,
+            "sha256": "abb86d10b237251fec78ffabc1bd7b2401543fd552f7ddf148170ea1ec85f998"
+        },
+        {
+            "id": "patronShort",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Female_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/patronShort.glb",
+            "bytes": 1729048,
+            "sha256": "b9b8855e1330b81ff5a371c71aeb251f39318bed0e9b16bd35404dd55f7c2935"
+        },
+        {
+            "id": "patronBeard",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/patronBeard.glb",
+            "bytes": 1984976,
+            "sha256": "8fb552191fd0121dc683e13ae3b34ae0007beb5a44a949613239d5b17e78ebf1"
+        },
+        {
+            "id": "patronBuns",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Female_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/patronBuns.glb",
+            "bytes": 1936300,
+            "sha256": "e53707321693c6e2aa5284739bb4e8d476b8eb7f91130f1ed1a6760e3bd3212f"
+        },
+        {
+            "id": "commuterSuit",
+            "source": "asset-library/source-packs/Universal Base Characters[Standard]/Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf",
+            "clips": [
+                "Idle_Loop",
+                "Idle_Talking_Loop",
+                "Walk_Loop",
+                "Jog_Fwd_Loop",
+                "Sprint_Loop",
+                "Jump_Loop",
+                "Sitting_Enter",
+                "Sitting_Idle_Loop",
+                "Sitting_Talking_Loop",
+                "Sitting_Exit"
+            ],
+            "file": "public/assets/characters/commuterSuit.glb",
+            "bytes": 1750900,
+            "sha256": "1af220e5dafc69c5627678f7f59eb8a62731edba6207544124931e0097da45ff"
+        }
+    ],
+    "missing": [
+        {
+            "item": "Tailored civilian clothing",
+            "resolution": "Reduce the superhero body's torso and limb cross-sections in bind space, then generate fitted shirts, straight-leg trousers and closed sneakers. Preserve bone lengths, animation targets and skin weights."
+        },
+        {
+            "item": "Reference-matched shoulder bag and smartphone",
+            "resolution": "Use the imported paper tote for the quest bag and a small procedural phone."
+        },
+        {
+            "item": "Complete caf\u00e9 building",
+            "resolution": "Author a measured room shell with large windows, wooden beams and an exit; furnish it with the selected imports."
+        }
+    ],
+    "reserve": [
+        "kenney_retro-urban-kit.zip: audited and extracted; exterior set reserved.",
+        "polyhaven-television-01.glb: usable vintage CRT; the selected flat screen better matches the reference.",
+        "comfy_cafe_4k.exr: 18.7 MB HDR source; reserve rather than a browser download.",
+        "Universal Animation Library root-motion version: reserve; gameplay controls own translation.",
+        "FBX, OBJ, STL, DAE, duplicate and medical assets: preserved outside the selected runtime set."
+    ]
+}

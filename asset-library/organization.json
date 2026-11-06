@@ -1,0 +1,323 @@
+{
+    "date": "2026-11-05",
+    "moves": [
+        {
+            "from": "KayKit_Furniture_Bits_1.0_FREE.zip",
+            "to": "asset-library/archives/KayKit_Furniture_Bits_1.0_FREE.zip",
+            "bytes": 3780559,
+            "sha256": "e6d75f34c5545486b5a8f45f86209dbd49092f3e77ae23011bdb87edab89e7e4"
+        },
+        {
+            "from": "KayKit_Restaurant_Bits_1.0_FREE.zip",
+            "to": "asset-library/archives/KayKit_Restaurant_Bits_1.0_FREE.zip",
+            "bytes": 11298866,
+            "sha256": "75f75f0a1ae569f3f2348fa7a04ccd45d2f010d419045755c70ae43289b68e4b"
+        },
+        {
+            "from": "kenney_food-kit.zip",
+            "to": "asset-library/archives/kenney_food-kit.zip",
+            "bytes": 4606270,
+            "sha256": "cdad90853682499b94c9fda2f87678b24bfd8f3264e0ed323f6b6a27fd7c6f6f"
+        },
+        {
+            "from": "kenney_furniture-kit.zip",
+            "to": "asset-library/archives/kenney_furniture-kit.zip",
+            "bytes": 5130729,
+            "sha256": "e67652d0932cee41683f74711c03d3e192a2af9979ef8e6b237711f5482d46b0"
+        },
+        {
+            "from": "kenney_retro-urban-kit.zip",
+            "to": "asset-library/archives/kenney_retro-urban-kit.zip",
+            "bytes": 2161463,
+            "sha256": "19201cbcb0d90080dfc33b54f5b4be2089de927c2a23274180798e7166d6b6ca"
+        },
+        {
+            "from": "Universal Animation Library[Standard].zip",
+            "to": "asset-library/archives/Universal Animation Library[Standard].zip",
+            "bytes": 15904933,
+            "sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724"
+        },
+        {
+            "from": "Universal Base Characters[Standard].zip",
+            "to": "asset-library/archives/Universal Base Characters[Standard].zip",
+            "bytes": 128968391,
+            "sha256": "fdbf1804c90dfc1ea03e992bff7da2dfd1a79318e13270a660180f9308455f40"
+        },
+        {
+            "from": "Heatwave Conversations at the Coastal Café.png",
+            "to": "docs/references/heatwave-coastal-cafe.png",
+            "bytes": 2122086,
+            "sha256": "6079d5effa4428299a86a85a29e064cc0d6e5e7e13c42fc565892c4b652288b6"
+        },
+        {
+            "from": "pic_reference_1.svg",
+            "to": "docs/references/cafe-layout.svg",
+            "bytes": 2664,
+            "sha256": "4c18b01885cbfbfef2844edc19b996bdc944005820608353855ea28c26a6b314"
+        },
+        {
+            "from": "polyhaven-ceiling-fan.glb",
+            "to": "asset-library/source/polyhaven-ceiling-fan.glb",
+            "bytes": 5196788,
+            "sha256": "c194f073e8f059caea9c91976a35755cc2bba94974ef876544dc3e6055d16309"
+        },
+        {
+            "from": "polyhaven-television-01.glb",
+            "to": "asset-library/cafe/polyhaven-television-01.glb",
+            "bytes": 1551772,
+            "sha256": "884f3fdfe45aef8b0f654d49b9841d75e3b4785cd9350e1feb6605addf05bb21"
+        },
+        {
+            "from": "comfy_cafe_4k.exr",
+            "to": "asset-library/environments/comfy_cafe_4k.exr",
+            "bytes": 18681569,
+            "sha256": "81418b38ffc1ae5c263339d8ed363d822434bea5b62a2393a973e8bd0e9570fb"
+        },
+        {
+            "from": "public/assets/props/cafe/bottle.glb",
+            "to": "asset-library/cafe/bottle.glb",
+            "bytes": 15376,
+            "sha256": "7245e26241cac72d63aa6ad9efb02b32c1d13ff2dd8648401ab14494b5d181f6"
+        },
+        {
+            "from": "public/assets/props/cafe/ceiling-light.glb",
+            "to": "asset-library/cafe/ceiling-light.glb",
+            "bytes": 8840,
+            "sha256": "5a429947d77ab820605844864c4e4c3177407caacb373bc47359cafd45812dd4"
+        },
+        {
+            "from": "public/assets/props/cafe/coffee-machine.glb",
+            "to": "asset-library/cafe/coffee-machine.glb",
+            "bytes": 21488,
+            "sha256": "f60200ffaca35f5d29b7ce4ddc67a79445e4736949cccfb2f30fe6c80afeffbe"
+        },
+        {
+            "from": "public/assets/props/cafe/desk-lamp.glb",
+            "to": "asset-library/cafe/desk-lamp.glb",
+            "bytes": 12832,
+            "sha256": "5ea86e46a2fc36f86500fa6a97dc529dc3464189dc34e586375bae3ee5f68075"
+        },
+        {
+            "from": "public/assets/props/cafe/dining-set.glb",
+            "to": "asset-library/cafe/dining-set.glb",
+            "bytes": 77616,
+            "sha256": "e034abcfd847512bb0608d276295f4e6a54b19906e3d591be513839dcead508a"
+        },
+        {
+            "from": "public/assets/props/cafe/fridge.glb",
+            "to": "asset-library/cafe/fridge.glb",
+            "bytes": 17360,
+            "sha256": "65437d539065381839fdfdff5ea10b7133d28e762e38ff1b6d7e3723f798e408"
+        },
+        {
+            "from": "public/assets/props/cafe/soda-glass.glb",
+            "to": "asset-library/cafe/soda-glass.glb",
+            "bytes": 14092,
+            "sha256": "12f78fdc6aa8dd23a69d8d70eb561aebe8fb892a86bc7dac2870870049e3fac7"
+        },
+        {
+            "from": "public/assets/props/cafe/soda.glb",
+            "to": "asset-library/cafe/soda.glb",
+            "bytes": 27684,
+            "sha256": "ec994a7a4bf924d225f5f50d28dfabe22dea05f1717bcf731dfc77a2bd1d8c29"
+        },
+        {
+            "from": "public/assets/props/cafe/trestle-table.glb",
+            "to": "asset-library/cafe/trestle-table.glb",
+            "bytes": 52208,
+            "sha256": "8e1d0c7493a6adb72a623d04afaa5e47f36349ca15eb20c4b4671dce29e26f1f"
+        },
+        {
+            "from": "public/assets/props/cafe/vending-machine.glb",
+            "to": "asset-library/cafe/vending-machine.glb",
+            "bytes": 135804,
+            "sha256": "fb25c66789dd6d3e3ec804b38d7a0551bd931b393ef3163c3e96966098c06845"
+        },
+        {
+            "from": "items/15 by Daisuke Takeoka - 2S4tGImSXzt.glb",
+            "to": "asset-library/original-downloads/15 by Daisuke Takeoka - 2S4tGImSXzt.glb",
+            "bytes": 45332,
+            "sha256": "e6907a789b4aae59f2ae19b89ef4bd8493efe075fd41b789ee77997ec9d6e3e9"
+        },
+        {
+            "from": "items/Air conditioner by Poly by Google - 4m3lja-ZCkA.glb",
+            "to": "asset-library/original-downloads/Air conditioner by Poly by Google - 4m3lja-ZCkA.glb",
+            "bytes": 29928,
+            "sha256": "3c3f83c02a593b771d8ddbcbaaa2f43085cf297217192b87b5ee3073318bb5b1"
+        },
+        {
+            "from": "items/Bar scene by Poly by Google - cEbi0acnY23.glb",
+            "to": "asset-library/original-downloads/Bar scene by Poly by Google - cEbi0acnY23.glb",
+            "bytes": 4789744,
+            "sha256": "889964235becf7f8b01e20edd87bc70f51fdfc4e3b6b9a1cc134c1af318b4e1c"
+        },
+        {
+            "from": "items/Bottle by Quaternius - FAHsHFXfTf.glb",
+            "to": "asset-library/original-downloads/Bottle by Quaternius - FAHsHFXfTf.glb",
+            "bytes": 15376,
+            "sha256": "7245e26241cac72d63aa6ad9efb02b32c1d13ff2dd8648401ab14494b5d181f6"
+        },
+        {
+            "from": "items/Ceiling Fan.fbx",
+            "to": "asset-library/original-downloads/Ceiling Fan.fbx",
+            "bytes": 30940,
+            "sha256": "34a9b67d3d7fda3c89ebd060fa8d75d589cf3145f39e96b4f8c3ab88c88b44a6"
+        },
+        {
+            "from": "items/Ceiling Light by Quaternius - sRNcgQFbLB.glb",
+            "to": "asset-library/original-downloads/Ceiling Light by Quaternius - sRNcgQFbLB.glb",
+            "bytes": 8840,
+            "sha256": "5a429947d77ab820605844864c4e4c3177407caacb373bc47359cafd45812dd4"
+        },
+        {
+            "from": "items/Cocktail by Kenney - u8dPcdMXta.glb",
+            "to": "asset-library/original-downloads/Cocktail by Kenney - u8dPcdMXta.glb",
+            "bytes": 14788,
+            "sha256": "352b65028884e8fdbf935d92f4ba17356e9b9fde825d77dde8820cd4e4a22fe5"
+        },
+        {
+            "from": "items/Cocktail Glass by MilkAndBanana - FCpfirIQ0a.glb",
+            "to": "asset-library/original-downloads/Cocktail Glass by MilkAndBanana - FCpfirIQ0a.glb",
+            "bytes": 8724,
+            "sha256": "73ff2e2b7cdbbe90c765c0ec4ce77b8c26930a322a3d634dcdb9f53ec124abb0"
+        },
+        {
+            "from": "items/Dentist Chair by davis - DXhRgoTcP4.glb",
+            "to": "asset-library/original-downloads/Dentist Chair by davis - DXhRgoTcP4.glb",
+            "bytes": 4030832,
+            "sha256": "0a9f07e3f5c63e6d077c177d170c99bbb3bde7dcc144d11e350b09e97d36312d"
+        },
+        {
+            "from": "items/Desk by dook - EtJlOllzbf.glb",
+            "to": "asset-library/original-downloads/Desk by dook - EtJlOllzbf.glb",
+            "bytes": 2080236,
+            "sha256": "2e73e2ded1fe03c0e1e5ee08f5d6f8d86ddb6088a3252fe87acc275849f5ea1a"
+        },
+        {
+            "from": "items/Dining Set by CMHT Oculus - emZBrrhot73.glb",
+            "to": "asset-library/original-downloads/Dining Set by CMHT Oculus - emZBrrhot73.glb",
+            "bytes": 77616,
+            "sha256": "e034abcfd847512bb0608d276295f4e6a54b19906e3d591be513839dcead508a"
+        },
+        {
+            "from": "items/First Aid Kit by Quaternius - wP00rePSRD.glb",
+            "to": "asset-library/original-downloads/First Aid Kit by Quaternius - wP00rePSRD.glb",
+            "bytes": 44444,
+            "sha256": "69ba229801c2156228389ba4498f75ddc8663a768d794668e29780de4e803b5e"
+        },
+        {
+            "from": "items/Kitchen Coffee Machine by Kenney - jBUiOz36vs.glb",
+            "to": "asset-library/original-downloads/Kitchen Coffee Machine by Kenney - jBUiOz36vs.glb",
+            "bytes": 21488,
+            "sha256": "f60200ffaca35f5d29b7ce4ddc67a79445e4736949cccfb2f30fe6c80afeffbe"
+        },
+        {
+            "from": "items/Kitchen Fridge by Quaternius - 8sjRm8fnHh.glb",
+            "to": "asset-library/original-downloads/Kitchen Fridge by Quaternius - 8sjRm8fnHh.glb",
+            "bytes": 17360,
+            "sha256": "65437d539065381839fdfdff5ea10b7133d28e762e38ff1b6d7e3723f798e408"
+        },
+        {
+            "from": "items/Light Desk by Quaternius - uJDWrSJGVH.glb",
+            "to": "asset-library/original-downloads/Light Desk by Quaternius - uJDWrSJGVH.glb",
+            "bytes": 12832,
+            "sha256": "5ea86e46a2fc36f86500fa6a97dc529dc3464189dc34e586375bae3ee5f68075"
+        },
+        {
+            "from": "items/Pickup Health by Quaternius - ijqVDSeIM5.glb",
+            "to": "asset-library/original-downloads/Pickup Health by Quaternius - ijqVDSeIM5.glb",
+            "bytes": 42508,
+            "sha256": "9c8436da2de11c937be7fb5541de1ce81fea45fa5b0d3a769104799d28ccbaf0"
+        },
+        {
+            "from": "items/Scalpel by Poly by Google - 9yKgpOpblnf.glb",
+            "to": "asset-library/original-downloads/Scalpel by Poly by Google - 9yKgpOpblnf.glb",
+            "bytes": 33488,
+            "sha256": "195ae7e0423175cf26c1102b705539ed358adf6aa4fc2b7a45eea3fd41615e5d"
+        },
+        {
+            "from": "items/Soda by Quaternius - IqXSdKUMnY.glb",
+            "to": "asset-library/original-downloads/Soda by Quaternius - IqXSdKUMnY.glb",
+            "bytes": 27684,
+            "sha256": "ec994a7a4bf924d225f5f50d28dfabe22dea05f1717bcf731dfc77a2bd1d8c29"
+        },
+        {
+            "from": "items/Soda Can by jeremy - cNjAaDY27fQ.glb",
+            "to": "asset-library/original-downloads/Soda Can by jeremy - cNjAaDY27fQ.glb",
+            "bytes": 17764,
+            "sha256": "9c1a77299d44a006c8afd55e728b02566cc98b137a1aa86286c3fa209db37e53"
+        },
+        {
+            "from": "items/Soda Glass by Kenney - GL1psXgIRp.glb",
+            "to": "asset-library/original-downloads/Soda Glass by Kenney - GL1psXgIRp.glb",
+            "bytes": 14092,
+            "sha256": "12f78fdc6aa8dd23a69d8d70eb561aebe8fb892a86bc7dac2870870049e3fac7"
+        },
+        {
+            "from": "items/Standing Desk by dook - uxIo5ge0pw.glb",
+            "to": "asset-library/original-downloads/Standing Desk by dook - uxIo5ge0pw.glb",
+            "bytes": 1635376,
+            "sha256": "1b8856ca78b78a53244d1db9bd4e8f58da5c12d9c231cfe875b9b0ce1118cda8"
+        },
+        {
+            "from": "items/Stethoscope by Poly by Google - a1ukOFrR9nJ.glb",
+            "to": "asset-library/original-downloads/Stethoscope by Poly by Google - a1ukOFrR9nJ.glb",
+            "bytes": 37892,
+            "sha256": "03ad76a1b38093bf184153ce84335fbef1b5fc39e89eb9609aefc76f62de9dbc"
+        },
+        {
+            "from": "items/Syringe by J-Toastie - MURJ8NK4N9.glb",
+            "to": "asset-library/original-downloads/Syringe by J-Toastie - MURJ8NK4N9.glb",
+            "bytes": 81236,
+            "sha256": "945dfe75cb758565e4494a59de2d44a1dc4c13079e2959a468eca3451d94d00b"
+        },
+        {
+            "from": "items/Table Big by Quaternius - KWaAZIDK9F (1).glb",
+            "to": "asset-library/original-downloads/Table Big by Quaternius - KWaAZIDK9F (1).glb",
+            "bytes": 52208,
+            "sha256": "8e1d0c7493a6adb72a623d04afaa5e47f36349ca15eb20c4b4671dce29e26f1f"
+        },
+        {
+            "from": "items/Table Big by Quaternius - KWaAZIDK9F.glb",
+            "to": "asset-library/original-downloads/Table Big by Quaternius - KWaAZIDK9F.glb",
+            "bytes": 52208,
+            "sha256": "8e1d0c7493a6adb72a623d04afaa5e47f36349ca15eb20c4b4671dce29e26f1f"
+        },
+        {
+            "from": "items/Time Hotel 5.20 (ID Card) by S. Paul Michael - 0ZXI8WCHi9_.glb",
+            "to": "asset-library/original-downloads/Time Hotel 5.20 (ID Card) by S. Paul Michael - 0ZXI8WCHi9_.glb",
+            "bytes": 88832,
+            "sha256": "5301a45cdfe7711e835ee3548dcc2a40b9d7dd07a76aee672b67fd65f6b48624"
+        },
+        {
+            "from": "items/Vending Machine by dook - yNG4vqWVq0.glb",
+            "to": "asset-library/original-downloads/Vending Machine by dook - yNG4vqWVq0.glb",
+            "bytes": 135804,
+            "sha256": "fb25c66789dd6d3e3ec804b38d7a0551bd931b393ef3163c3e96966098c06845"
+        },
+        {
+            "from": "items/Wheelchair by Poly by Google - eeoGDcg9a-a.glb",
+            "to": "asset-library/original-downloads/Wheelchair by Poly by Google - eeoGDcg9a-a.glb",
+            "bytes": 787112,
+            "sha256": "fe07e22bd0e440911d65765b1220c0f2c05bcfde184a156140d2726578e15f0d"
+        },
+        {
+            "from": "items/Wine bar by Anna M - 3LvSiVuhVQ_.glb",
+            "to": "asset-library/original-downloads/Wine bar by Anna M - 3LvSiVuhVQ_.glb",
+            "bytes": 69564,
+            "sha256": "f27ccdf859761c5ee5e6787155cdd185a65ff2d6e29c6f6f6438db63e7dcb772"
+        },
+        {
+            "from": "items/Wine glasses by Poly by Google - 9xNkSFULzxv.glb",
+            "to": "asset-library/original-downloads/Wine glasses by Poly by Google - 9xNkSFULzxv.glb",
+            "bytes": 72060,
+            "sha256": "3cd4454c7f7a63c590e3f75a2b4dede4467b12a0b91a70767cf0b3444931e6d2"
+        },
+        {
+            "from": "public/assets/audio/coastal-bulletin.wav",
+            "to": "asset-library/audio/coastal-bulletin.wav",
+            "bytes": 840686,
+            "sha256": "ac797f276e187524f08c989c16bacc680b6b63062fb693d33f18847d628a024f"
+        }
+    ]
+}

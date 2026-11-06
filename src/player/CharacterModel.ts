@@ -2,13 +2,14 @@ import type { StandardMaterial } from 'playcanvas';
 import { Entity, Vec3 } from 'playcanvas';
 
 import type { Vector3Tuple } from '../data/foundation';
+import { CHARACTER_COLLISION } from '../data/foundation';
 
 export const addCharacterCollision = (entity: Entity) => {
     // The box keeps feet on ledges; its bottom is 1 m below the body's pivot.
     entity.addComponent('collision', {
         type: 'box',
-        halfExtents: new Vec3(0.4, 1.2, 0.4),
-        linearOffset: new Vec3(0, 0.2, 0)
+        halfExtents: new Vec3(...CHARACTER_COLLISION.halfExtents),
+        linearOffset: new Vec3(...CHARACTER_COLLISION.offset)
     });
 };
 

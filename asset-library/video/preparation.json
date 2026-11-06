@@ -1,0 +1,73 @@
+{
+    "sourceFile": {
+        "file": "asset-library/video/climate-reporter-source.mp4",
+        "bytes": 5242661,
+        "sha256": "7ac53be2262d46949812ede4afed1504a6c75a6d9d3f8b3c46b6e1570059c0d7"
+    },
+    "assets": [
+        {
+            "file": "public/assets/video/climate-reporter.mp4",
+            "bytes": 699100,
+            "sha256": "d56ae02bf7990f079e4bb22927e9ba59ed88f6acd2bcf32521e6d3dc6e578eb5"
+        },
+        {
+            "file": "public/assets/video/climate-reporter.jpg",
+            "bytes": 53051,
+            "sha256": "21ddeefad10af6b8d593a3dfa6ca51b883d52b963c571da37cef6e00ee9da8db"
+        },
+        {
+            "file": "public/assets/video/climate-reporter.vtt",
+            "bytes": 448,
+            "sha256": "700acb6ed682a9ea67f65c613c7d9b8954bdf02b87fed113302121a16c46d869"
+        }
+    ],
+    "ffmpeg": "ffmpeg version 7.1-essentials_build-www.gyan.dev Copyright (c) 2000-2024 the FFmpeg developers",
+    "title": "The Inside Story \u2014 Confronting the Climate Crisis, Episode 89",
+    "source": "https://www.voanews.com/a/7069153.html",
+    "download": "https://voa-video-ns.akamaized.net/pangeavideo/2023/04/0/01/01000000-0aff-0242-b2a7-08db474face3_720p.mp4?cb=edbdcc9e7",
+    "captionSource": "https://www.voanews.com/a/7069150.html",
+    "author": "Voice of America (voanews.com)",
+    "speaker": "Elizabeth Lee, VOA correspondent",
+    "date": "2023-04-27",
+    "license": "Public domain \u2014 footage produced exclusively by Voice of America; credit retained. Third-party agency footage is excluded.",
+    "terms": "https://www.voanews.com/p/5338.html",
+    "checked": "2026-11-06",
+    "sourceStart": 54,
+    "sourceDuration": 17.2,
+    "inPoint": 1.25,
+    "duration": 15.4,
+    "label": "CLIMATE REPORT \u00b7 VOA",
+    "edits": "Preserve the newsroom presenter excerpt from programme 00:54\u201301:11.2. Runtime uses 00:55.25\u201301:10.65, resized to 960\u00d7540 and encoded as H.264/AAC. Retain the original voice. Match captions to the source transcript and word timestamps from offline whisper.cpp b5454/base.en. The game's separate local bulletin and offshore mystery are fictional.",
+    "cues": [
+        {
+            "start": 0.39,
+            "end": 3.71,
+            "text": "From drought to flooding, extreme weather and climate change"
+        },
+        {
+            "start": 3.71,
+            "end": 5.54,
+            "text": "is being felt around the world."
+        },
+        {
+            "start": 5.54,
+            "end": 7.95,
+            "text": "Global temperatures are rising."
+        },
+        {
+            "start": 7.95,
+            "end": 9.92,
+            "text": "But why does that matter?"
+        },
+        {
+            "start": 9.93,
+            "end": 12.33,
+            "text": "What do rising temperatures mean for us,"
+        },
+        {
+            "start": 12.33,
+            "end": 15.19,
+            "text": "and will fixing the problem cost you money?"
+        }
+    ]
+}
