@@ -10,6 +10,8 @@ export const OPENING_CUTSCENE: CutsceneDefinition = {
     id: 'e1-cafe-opening',
     title: 'The Last Normal Day',
     setting: 'Late afternoon. A coastal coffee shop. Two fictional friends sit with half-finished drinks.',
+    finishLabel: 'Let’s go',
+    skipLabel: 'Skip intro',
     beats: [
         { id: 'broadcast', speaker: 'Local news', text: NEWS_TRANSCRIPT, shot: 'television' },
         {
@@ -45,7 +47,7 @@ export const STARTER_BAG: InventoryItemDefinition = {
     title: 'Bag & phone',
     source: 'Coffee shop table',
     description:
-        'Your everyday bag, with your phone safely tucked inside. Packed before leaving with your friend.\n\nA protected story item: it stays with you when you save and load a checkpoint.'
+        'Your everyday bag, with your phone safely tucked inside. The phone has 10 credits reserved for two beach day passes.\n\nA protected story item: it stays with you when you save and load a checkpoint.'
 };
 
 export const OPENING_QUEST: QuestDefinition = {
@@ -68,7 +70,7 @@ export const OPENING_QUEST: QuestDefinition = {
             event: { type: 'interaction', targetId: 'cafe-exit' }
         }
     ],
-    completionMessage: 'Ready for the beach. Café opening complete.'
+    completionMessage: 'Out on Seafront Avenue. Ask someone for beach directions.'
 };
 
 export const TV_DIALOGUE: DialogueDefinition = {
@@ -129,8 +131,8 @@ export const OPENING_COMPLETE_DIALOGUE: DialogueDefinition = {
     start: 'handoff',
     nodes: {
         handoff: {
-            text: 'You step out onto Seafront Avenue, your friend a few paces ahead. Commuters hurry past in the afternoon heat.\n\nThe café opening ends here. The beach chapter is next. You can save this checkpoint or explore the street and café.',
-            choices: [{ id: 'continue', label: 'Explore Seafront Avenue', next: null }]
+            text: 'You step out onto Seafront Avenue, your friend beside you. Commuters hurry past in the afternoon heat.\n\n“Let’s ask someone which way the beach is. I could use that breeze.”',
+            choices: [{ id: 'continue', label: 'Ask a pedestrian for directions', next: null }]
         }
     }
 };

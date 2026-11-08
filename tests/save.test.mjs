@@ -11,6 +11,8 @@ import {
 } from '../src/data/foundation.ts';
 import { SIGNAL_BOX_NOTE } from '../src/data/items.ts';
 import { SIGNAL_CHECK_QUEST } from '../src/data/quests.ts';
+import { BEACH_QUEST } from '../src/episodes/episode-01/beach.ts';
+import { ENTRY_QUEST } from '../src/episodes/episode-01/entry.ts';
 import { OPENING_QUEST, STARTER_BAG } from '../src/episodes/episode-01/opening.ts';
 import { OPENING_SOLIDS, OPENING_SPAWN } from '../src/episodes/episode-01/openingLayout.ts';
 import { FOUNDATION_SCENE_ID, isFoundationPosition, isFoundationSnapshot } from '../src/scenes/FoundationState.ts';
@@ -21,13 +23,16 @@ import { SAVE_STORAGE_KEY, SAVE_VERSION, SaveSystem, validateSaveState } from '.
 const now = 1_793_779_200_000;
 const snapshot = (count = 0, clue = count >= 2) => ({
     sceneId: FOUNDATION_SCENE_ID,
+    area: 'tideline',
     playerPosition: [...PLAYER_SPAWN],
     quest: {
         questId: SIGNAL_CHECK_QUEST.id,
         completedObjectiveIds: SIGNAL_CHECK_QUEST.objectives.slice(0, count).map(({ id }) => id)
     },
     inventory: { itemIds: clue ? [SIGNAL_BOX_NOTE.id] : [] },
-    opening: { questId: OPENING_QUEST.id, completedObjectiveIds: [] }
+    opening: { questId: OPENING_QUEST.id, completedObjectiveIds: [] },
+    entry: { questId: ENTRY_QUEST.id, completedObjectiveIds: [] },
+    beach: { questId: BEACH_QUEST.id, completedObjectiveIds: [] }
 });
 const envelope = (state = snapshot()) => ({ version: SAVE_VERSION, savedAt: now, state });
 const storage = () => {
@@ -296,6 +301,9 @@ test('legacy version-1 saves migrate in memory and keep existing storage until a
     );
     const legacy = snapshot(3);
     delete legacy.opening;
+    delete legacy.area;
+    delete legacy.entry;
+    delete legacy.beach;
     const raw = JSON.stringify({ version: 1, savedAt: now, state: legacy });
     local.setItem(SAVE_STORAGE_KEY, raw);
     const result = saves.load();
@@ -303,7 +311,7 @@ test('legacy version-1 saves migrate in memory and keep existing storage until a
     assert.deepEqual(result.save, envelope(snapshot(3)));
     assert.equal(local.getItem(SAVE_STORAGE_KEY), raw);
     saves.save(result.save.state);
-    assert.equal(JSON.parse(local.getItem(SAVE_STORAGE_KEY)).version, 2);
+    assert.equal(JSON.parse(local.getItem(SAVE_STORAGE_KEY)).version, SAVE_VERSION);
     assert.equal(validateSaveState(envelope(legacy)).status, 'invalid');
 });
 
@@ -314,6 +322,10 @@ const withOpening = (count, base = snapshot()) => ({
     opening: {
         questId: OPENING_QUEST.id,
         completedObjectiveIds: OPENING_QUEST.objectives.slice(0, count).map(({ id }) => id)
+    },
+    entry: {
+        questId: ENTRY_QUEST.id,
+        completedObjectiveIds: ENTRY_QUEST.objectives.slice(0, count === 3 ? 3 : 0).map(({ id }) => id)
     }
 });
 

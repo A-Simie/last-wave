@@ -4,10 +4,11 @@ import type { GameAssets } from '../../core/AssetManager';
 import { CAFE_MODELS } from '../../data/cafeModels';
 import { createAnimatedCharacter } from '../../player/AnimatedCharacter';
 import { createCamera, framePlayerCamera } from '../../player/CameraController';
+import { createCompanion } from '../../player/CompanionController';
 import { createModelInstance } from '../../scenes/createModelInstance';
+import { isFoundationPosition } from '../../scenes/FoundationState';
 import { createBoxVisual as box, createMaterial } from '../../scenes/primitives';
-import { CutsceneSystem } from '../../systems/CutsceneSystem';
-import type { CutsceneState } from '../../systems/CutsceneSystem';
+import type { CutsceneState, CutsceneSystem } from '../../systems/CutsceneSystem';
 import type { DialogueDefinition, DialogueSystem } from '../../systems/DialogueSystem';
 import type { InteractionSystem } from '../../systems/InteractionSystem';
 import type { InventorySystem } from '../../systems/InventorySystem';
@@ -17,6 +18,7 @@ import type { QuestSnapshot } from '../../systems/QuestSystem';
 import { createCafeDressing } from './CafeDressing';
 import { CAFE_TABLETOP_Y } from './cafeLayout';
 import { createTelevisionScreen } from './CafeTelevision';
+import { entryReply } from './entry';
 import {
     ATTENDANT_DIALOGUE,
     FRIEND_READY,
@@ -31,6 +33,7 @@ import { OpeningActors } from './OpeningActors';
 import { OpeningCamera } from './OpeningCamera';
 import { FRIEND_ROUTE, OPENING_EXIT, OPENING_SEATS, OPENING_SPAWN, OPENING_TABLE } from './openingLayout';
 import { OpeningMedia } from './OpeningMedia';
+import type { StreetEntryProgress } from './StreetEntryProgress';
 
 export const createOpeningPrototype = (
     root: Entity,
@@ -41,10 +44,11 @@ export const createOpeningPrototype = (
     dialogue: DialogueSystem,
     inventory: InventorySystem,
     assets: GameAssets,
+    cutscene: CutsceneSystem,
+    entry: StreetEntryProgress,
     snapshot?: QuestSnapshot
 ) => {
     const quest = new QuestSystem(OPENING_QUEST);
-    const cutscene = new CutsceneSystem();
     const media = new OpeningMedia(`${import.meta.env.BASE_URL}assets/`);
     let stage: Entity | null = null;
     let camera: Entity | null = null;
@@ -56,7 +60,6 @@ export const createOpeningPrototype = (
     root.once('destroy', () => {
         destroyed = true;
         quest.destroy();
-        cutscene.destroy();
         media.destroy();
     });
     if (snapshot && !quest.restore(snapshot)) throw new Error('Invalid opening progress.');
@@ -102,12 +105,9 @@ export const createOpeningPrototype = (
         const attendantTalk = new Entity('cafe-attendant-talk');
         attendant.addChild(attendantTalk);
         attendantTalk.setLocalPosition(0, 0.7, 0);
-        const friend = new Entity('cafe-friend');
-        stage.addChild(friend);
-        friend.setPosition(...FRIEND_ROUTE[0]);
-        const friendModel = createAnimatedCharacter(assets.characters.friendB, 'friendB', 'cafe-friend-character');
-        friend.addChild(friendModel.root);
-        friendModel.root.setLocalPosition(0, -1, 0);
+        const companion = createCompanion(stage, assets, player, FRIEND_ROUTE[0], isFoundationPosition);
+        const friend = companion.entity;
+        const friendModel = companion.character;
         const seated = (['friendA', 'friendB'] as const).map((id, index) => {
             const character = createAnimatedCharacter(assets.characters[id], id, `cafe-seated-${id}`);
             stage!.addChild(character.root);
@@ -118,7 +118,7 @@ export const createOpeningPrototype = (
             return character;
         });
         actors = stage.addComponent('script')!.create(OpeningActors, {
-            properties: { friend, friendModel, playerModel, seated, attendantModel, patrons, fanBlades }
+            properties: { friend, friendModel, companion, playerModel, seated, attendantModel, patrons, fanBlades }
         })!;
 
         const exit = new Entity('cafe-exit');
@@ -170,7 +170,18 @@ export const createOpeningPrototype = (
                 radius: 1.8,
                 action: {
                     type: 'callback',
-                    run: () => talk(quest.state.completedCount < 2 ? FRIEND_REMINDER : FRIEND_READY)
+                    run: () =>
+                        talk(
+                            quest.state.completedCount < 2
+                                ? FRIEND_REMINDER
+                                : quest.state.completedCount < 3
+                                  ? FRIEND_READY
+                                  : entryReply(
+                                        'e1-friend-street',
+                                        'Friend',
+                                        entry.quest.state.objective?.text ?? 'We made it. Let’s enjoy the sea air.'
+                                    )
+                        )
                 }
             },
             {
@@ -178,12 +189,23 @@ export const createOpeningPrototype = (
                 label: 'Head outside',
                 entity: exit,
                 radius: 1.2,
+                isAvailable: () => !destroyed && quest.state.status !== 'completed',
                 action: {
                     type: 'callback',
                     run: () => {
                         if (destroyed) return;
                         if (quest.state.completedCount < 2) {
                             talk(FRIEND_REMINDER);
+                            return;
+                        }
+                        if (!entry.leaveCafe()) {
+                            talk(
+                                entryReply(
+                                    'e1-controls-reminder',
+                                    'Friend',
+                                    'Take a moment to try moving and looking around. Then meet me at the doorway.'
+                                )
+                            );
                             return;
                         }
                         quest.handle({ type: 'interaction', targetId: 'cafe-exit' });
@@ -215,9 +237,6 @@ export const createOpeningPrototype = (
         }
     };
 
-    cutscene.onFinished = (cutsceneId) => {
-        if (quest.handle({ type: 'cutscene-complete', cutsceneId })) actors?.depart();
-    };
     media.onBroadcastEnded = () => cutscene.advance(OPENING_CUTSCENE.id, 'broadcast');
     buildStage();
 
@@ -231,8 +250,11 @@ export const createOpeningPrototype = (
 
     return {
         quest,
-        cutscene,
         media,
+        companion: actors!.companion,
+        finishCutscene: (cutsceneId: string) => {
+            if (quest.handle({ type: 'cutscene-complete', cutsceneId })) actors?.depart();
+        },
         update: (dt: number) => {
             media.update(dt);
             screen?.update();
@@ -257,7 +279,8 @@ export const createOpeningPrototype = (
         },
         present,
         getSpeakerPosition: (out: Vec3) =>
-            !!cutscene.state && !!actors?.getSpeakerPosition(cutscene.state.beat.speaker, out),
+            cutscene.state?.cutsceneId === OPENING_CUTSCENE.id &&
+            !!actors?.getSpeakerPosition(cutscene.state.beat.speaker, out),
         setControlsEnabled: (enabled: boolean) => {
             if (actors) actors.paused = !enabled;
         }

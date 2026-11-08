@@ -1,4 +1,4 @@
-// Loaded by the dev server only (see vite.config.ts), so production builds never include it
+// Imported after launch in development only.
 import { Inspector } from '@playcanvas/inspector';
 import type { AppBase } from 'playcanvas';
 

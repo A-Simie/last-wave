@@ -6,7 +6,8 @@ export type QuestEvent =
           readonly choiceId: string;
       }
     | { readonly type: 'interaction'; readonly targetId: string }
-    | { readonly type: 'cutscene-complete'; readonly cutsceneId: string };
+    | { readonly type: 'cutscene-complete'; readonly cutsceneId: string }
+    | { readonly type: 'control-practiced'; readonly control: 'move' | 'look' };
 
 export type QuestObjective = {
     readonly id: string;
@@ -17,6 +18,7 @@ export type QuestObjective = {
 export type QuestDefinition = {
     readonly id: string;
     readonly title: string;
+    readonly order?: 'ordered' | 'any';
     readonly objectives: readonly QuestObjective[];
     readonly completionMessage: string;
 };
@@ -33,9 +35,14 @@ export const isQuestSnapshot = (value: unknown, definition: QuestDefinition): va
         snapshot.questId === definition.id &&
         Array.isArray(snapshot.completedObjectiveIds) &&
         snapshot.completedObjectiveIds.length <= definition.objectives.length &&
-        definition.objectives
-            .slice(0, snapshot.completedObjectiveIds.length)
-            .every((objective, index) => objective.id === snapshot.completedObjectiveIds![index])
+        new Set(snapshot.completedObjectiveIds).size === snapshot.completedObjectiveIds.length &&
+        (definition.order === 'any'
+            ? Array.from(snapshot.completedObjectiveIds).every((id) =>
+                  definition.objectives.some((entry) => entry.id === id)
+              )
+            : definition.objectives
+                  .slice(0, snapshot.completedObjectiveIds.length)
+                  .every((objective, index) => objective.id === snapshot.completedObjectiveIds![index]))
     );
 };
 
@@ -45,6 +52,8 @@ export type QuestState = {
     readonly completedCount: number;
     readonly totalCount: number;
     readonly completionMessage: string;
+    readonly order: 'ordered' | 'any';
+    readonly remainingObjectives: readonly Pick<QuestObjective, 'id' | 'text'>[];
 } & (
     | { readonly status: 'inactive' | 'active'; readonly objective: Pick<QuestObjective, 'id' | 'text'> }
     | { readonly status: 'completed'; readonly objective: null }
@@ -56,6 +65,9 @@ const matchesEvent = (expected: QuestEvent, event: QuestEvent): boolean => {
     }
     if (expected.type === 'cutscene-complete') {
         return event.type === 'cutscene-complete' && expected.cutsceneId === event.cutsceneId;
+    }
+    if (expected.type === 'control-practiced') {
+        return event.type === 'control-practiced' && expected.control === event.control;
     }
     return (
         event.type === 'dialogue-choice' &&
@@ -83,7 +95,7 @@ export class QuestSystem {
     onStateChange: ((state: QuestState) => void) | null = null;
 
     private readonly definition: QuestDefinition;
-    private completedCount = 0;
+    private completed = new Set<string>();
     private destroyed = false;
 
     constructor(definition: QuestDefinition) {
@@ -97,56 +109,67 @@ export class QuestSystem {
     get snapshot(): QuestSnapshot {
         return {
             questId: this.definition.id,
-            completedObjectiveIds: this.definition.objectives.slice(0, this.completedCount).map(({ id }) => id)
+            completedObjectiveIds: this.definition.objectives
+                .filter(({ id }) => this.completed.has(id))
+                .map(({ id }) => id)
         };
     }
 
     restore(snapshot: unknown): boolean {
         if (this.destroyed || !isQuestSnapshot(snapshot, this.definition)) return false;
-        const count = snapshot.completedObjectiveIds.length;
-        if (count !== this.completedCount) {
-            this.completedCount = count;
+        const ids = snapshot.completedObjectiveIds;
+        if (ids.length !== this.completed.size || ids.some((id) => !this.completed.has(id))) {
+            this.completed = new Set(ids);
             this.onStateChange?.(this.state);
         }
         return true;
     }
 
     get state(): QuestState {
-        const { id, title, objectives, completionMessage } = this.definition;
+        const { id, title, objectives, completionMessage, order = 'ordered' } = this.definition;
+        const remainingObjectives = objectives
+            .filter(({ id }) => !this.completed.has(id))
+            .map(({ id, text }) => ({ id, text }));
         const progress = {
             questId: id,
             title,
-            completedCount: this.completedCount,
+            completedCount: this.completed.size,
             totalCount: objectives.length,
-            completionMessage
+            completionMessage,
+            order,
+            remainingObjectives
         };
-        const objective = objectives[this.completedCount];
+        const objective = remainingObjectives[0];
         if (!objective) return { ...progress, status: 'completed', objective: null };
         return {
             ...progress,
-            status: this.completedCount === 0 ? 'inactive' : 'active',
+            status: this.completed.size === 0 && order === 'ordered' ? 'inactive' : 'active',
             objective: { id: objective.id, text: objective.text }
         };
     }
 
     handle(event: QuestEvent): boolean {
         if (this.destroyed) return false;
-        const objective = this.definition.objectives[this.completedCount];
+        const remaining = this.definition.objectives.filter(({ id }) => !this.completed.has(id));
+        const objective =
+            this.definition.order === 'any'
+                ? remaining.find((entry) => matchesEvent(entry.event, event))
+                : remaining[0];
         if (!objective || !matchesEvent(objective.event, event)) return false;
-        this.completedCount++;
+        this.completed.add(objective.id);
         this.onStateChange?.(this.state);
         return true;
     }
 
     reset() {
-        if (this.destroyed || this.completedCount === 0) return;
-        this.completedCount = 0;
+        if (this.destroyed || this.completed.size === 0) return;
+        this.completed.clear();
         this.onStateChange?.(this.state);
     }
 
     destroy() {
         this.destroyed = true;
         this.onStateChange = null;
-        this.completedCount = 0;
+        this.completed.clear();
     }
 }

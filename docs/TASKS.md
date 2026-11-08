@@ -1,6 +1,6 @@
 # Last Wave — Task tracker
 
-Last updated: **2026-11-06**. Latest completed task: **LW-A003 — Cinematic Tideline café and animated cast**, including the open street, reporter, four fans, and Halloween branding. Final acceptance is recorded below. Hardware acceptance remains under **LW-F002**; the requested story continuation is retained in **LW-S002–LW-S004**. Earlier task records retain their original verification environments.
+Last updated: **2026-11-08**. Latest completed task: **LW-S003 — Beach exploration**, including a populated white-sand beach, a following friend, three free-order discoveries, calm water, surf/gull ambience and version-4 checkpoints. Automated browser acceptance passed **79/79 checks**, with all **72 report-listed captures** reviewed; repository tests passed **88/88**. Hardware acceptance remains under **LW-F002**; the next story milestone is **LW-S004**. Earlier task records retain their original verification environments.
 
 ## Project checklist
 
@@ -31,8 +31,8 @@ Checked items have working implementations and verification recorded below. Phys
     - [x] Cinematic café and animated cast — 28 prepared props, nine rig variants, four table-centered fans, reporter playback, music, and reader-paced camera/dialogue under LW-A003.
     - [x] Open street — shops/houses, walking pedestrians, suited commuters, sun umbrellas, traffic, drivers, and native batching under LW-A003.
     - [x] Halloween identity — pumpkin/bat/web wordmark, pumpkin favicon, and black branded startup screen.
-- [ ] Guided street and beach entry — instructional modals, pedestrian directions, large entrance, officer directions, tickets, queue, and black loading under LW-S002.
-- [ ] Beach exploration — both characters, white sand, umbrellas, loungers, beachgoers/swimwear, swimmers, and chilled drinks under LW-S003.
+- [x] Guided street and beach entry — lessons, pedestrian directions, solid companion, entrance, officer, passes, queue, and recoverable arrival verified under LW-S002.
+- [x] Beach exploration — both characters, white sand, umbrellas, loungers, swimwear-clad beachgoers/swimmers, chilled drinks, free-order discoveries and ambience verified under LW-S003.
 - [ ] Wave and evacuation — retreat, fleeing birds, pointing crowds, wave reveal, panic, fall, blinking blackout, and black loading under LW-S004.
 - [ ] Hospital awakening and investigation.
 - [ ] Hospital escape puzzle.
@@ -172,7 +172,7 @@ Status: **Supported-Node verification complete; hardware checks pending**. Owner
 - [ ] Check the preserved gamepad mappings, low-frame-rate movement, and representative-device performance.
 - [ ] Record device/browser versions, outcomes, and any concrete follow-up fixes here.
 
-Use the current LW-A003 manual route for the furnished café, reporter, open street, and retained checkpoint. Prepend the portable Node directory documented there to PATH; the workspace's default Node installation has not been upgraded.
+Use the current LW-S002 manual route for launch/media gates, the furnished café, street lessons, admission, arrival and retained checkpoint. Prepend the portable Node directory documented there to PATH; the workspace's default Node installation has not been upgraded.
 
 ## LW-C001 — Reusable NPC dialogue
 
@@ -677,7 +677,7 @@ Owner: **Lead game engineering**. Priority: **P1**. Dependencies: **LW-S001 / LW
 - Presentation: `src/ui/`, `index.html`, `public/assets/{last-wave-logo,pumpkin-icon}.svg`.
 - Asset pipeline: `scripts/`, `asset-library/`, prepared runtime GLBs/media, runtime inventory and credits. No new runtime dependency was added.
 - Imported registry resources are app-owned; instances, procedural resources, media, and batch groups are scene-owned. All 37 stored model inspections match the independently audited fields, including `commuterSuit`.
-- The current opening quest still finishes at the doorway. The street population is ambient; the requested instructional, pedestrian-direction, admission, beach, and disaster progression remains pending below.
+- At LW-A003 acceptance, the opening quest finished at the doorway and street population was ambient. LW-S002 below adds the requested instructional, pedestrian-direction and admission progression; populated beach and disaster remain in LW-S003–LW-S004.
 
 ### Verification record
 
@@ -738,29 +738,194 @@ Workspace-local reports/screenshots are under **`C:\Users\HP\AppData\Local\Temp\
 
 ## LW-S002 — Guided street and beach entry
 
-Owner: **Game/story engineering**. Priority: **P1**. Dependency: **LW-A003**. Status: **Pending; not implemented**.
+Owner: **Game/story engineering**. Priority: **P1**. Dependency: **LW-A003**. Status: **Complete; automated browser acceptance passed**.
 
-- [ ] After collecting belongings, show short movement/look/interaction instructional modals with appropriate keyboard/touch instructions and successful-input handoff.
-- [ ] Add reusable pedestrian conversations for asking beach directions; make the route legible and keep the friend accompanying the player.
-- [ ] Build a large, recognizable beach entrance and a cinematic officer conversation pointing out the ticket booth and entrance queue.
-- [ ] Add the requested ticket-purchase interaction and joining the queue. Prerequisites are ordered, purchases cannot duplicate on repeated input, and admission remains attainable without a grind/softlock.
-- [ ] Transition through a black branded loading screen and stage/validate the replacement before committing it. Preserve belongings and progress, recover on load failure, and place both characters at a safe beach-arrival checkpoint.
-- [ ] Extend versioned save validation/migration for the introduced state/scene boundary. Exercise early/repeated/stale actions, replay, every modal/input handoff, reset/load/rollback, and resource cleanup.
+### Completed implementation
+
+- [x] Added three short, exclusive movement/look/interaction lessons after belongings pickup. Keyboard, mouse and touch instructions match the preserved starter controls. Progress requires **1.3 m of actual movement**, **20° of input-driven camera rotation**, then the eligible doorway interaction; acknowledgement alone grants nothing.
+- [x] Authored eight ordered entry objectives, reusable pedestrian directions and live distance guidance. The signed route runs east past **Lemon Market**, across the quiet side street, then left into the beach plaza. The independent signal-box quest/clue remain playable and tracked.
+- [x] Gave the friend a solid, unit-scale kinematic capsule with continuous stand-up, accompanying routes, adaptive catch-up, waiting and player/actor yielding. Cumulative route projection handles both short planter corners; sideways contact tolerance prevents a player beside the friend blocking its doorway departure.
+- [x] Built the broad sea-green entrance arch, ticket booth, signs, queue rails and animated patrons. Reader-paced officer shots show the booth on the left and queue on the right. Authored dialogue placement keeps those destinations visible on compact screens.
+- [x] Added one attainable **10-credit purchase for two protected day passes**, funded by reserved money on the collected phone. Declining, repeated input and stale callbacks cannot duplicate payment or passes. Officer and queue cinematics share one guarded cutscene system, skip and steady-camera preferences.
+- [x] Added a black branded loading handoff. A disabled candidate is constructed and validated before committing the safe white-sand/boardwalk arrival with both characters. Construction/activation failures retain the original area and paid admission with **Retry entry / Back to the queue**. Successful arrival does not automatically overwrite the manual checkpoint.
+- [x] Extended checkpoints to **version 3**: all three quests, inventory and `tideline` / `beach-arrival` area. Version-1/version-2 reads migrate in memory without rewriting stored bytes; previously completed departures retain the three lessons, and only newly obstructed entrance positions relocate. Restore clears the player body and places nearby actors safely.
+- [x] Added **Launch game** before importing the Engine, development Inspector, physics and models. The initial inert canvas has no graphics context; the loader handles duplicate launch, startup retry and module disposal. **Play story** gates media sources/playback, including unplayed checkpoints. Reload returns to the lightweight launcher.
+- [x] Added immediate visibility/focus media pause and application suspension using the native Engine's time scale/render policy. Returning restores the exact previous settings and existing modal locks. Retired media, scene resources, input listeners and UI are disposed through their owners.
+- [x] Updated architecture, controls, narrative continuity and contributor handoff. Added no dependencies or asset replacements.
+- [x] Closed all eight browser suites, reviewed their 98 captures, reran supported-Node repository checks, and finalized acceptance and hardware follow-up.
 
 This user-requested admission/tutorial sequence extends the source draft's direct café-to-beach handoff and supersedes its earlier no-mandatory-purchase wording for the entry beat. `docs/EPISODE_01.md` records the amendment. The existing signal-box tutorial is independent and does not satisfy these requested street instructions.
 
-**Next implementation step:** author the ordered tutorial/directions/admission state and stable interaction IDs, then integrate the first instructional handoff after belongings pickup using the existing quest/dialogue/modal boundaries.
+### Files and decisions
 
-## LW-S003 — Populated white-sand beach
+- Progress/content/layout: `src/episodes/episode-01/{entry,entryLayout,StreetEntryProgress}.ts` and the existing opening definitions.
+- Scene composition/presentation: `src/episodes/episode-01/{StreetEntry,BeachEntrance,BeachArrival,EntryActors,EntryCamera}.ts`, `OpeningPrototype.ts`, `OpeningActors.ts`, `StreetLife.ts` and `src/scenes/FoundationScene.ts`.
+- Companion/input: `src/player/{CompanionController,CompanionRoute,ControlPractice}.ts`. The generated third-person controller and ledge correction remain the input/movement foundation.
+- Persistence/lifecycle: `src/scenes/FoundationState.ts`, `src/systems/{SaveSystem,QuestSystem,CutsceneSystem}.ts`, `src/core/Game.ts` and the existing staged `SceneManager` contract.
+- UI/launch: `src/ui/{TutorialPanel,TransitionPanel,CheckpointPanel,CutscenePanel,GameHud}.ts`, `game.css`, `index.html`, `src/main.ts`, `src/inspector.ts` and `vite.config.ts`.
+- Verification: `tests/{street-entry,companion-route,save,scene-manager}.test.mjs` and workspace-local muted CDP runners. Shared sign generation accepts an optional height for the wide entrance signs.
+- The area discriminator stays inside `sceneId: 'foundation'`. Imported registry resources remain app-owned; each area owns its entities, procedural materials/textures, batches, media and interactions. Phone funds are derived from bag/pass ownership rather than a second mutable wallet.
 
-Owner: **Environment/story engineering**. Priority: **P1**. Dependency: **LW-S002**. Status: **Pending; not implemented**.
+### Verification record
 
-- [ ] Bring both characters through the arrival fade onto a populated white-sand beach.
-- [ ] Dress it with umbrellas, loungers, people in swimwear, swimmers, and chilled drinks. Use licensed assets or calibrated placeholders and preserve the ordinary relaxed social interval.
-- [ ] Add ambient beach activity/sound and readable guidance for exploration and the next authored story beat.
-- [ ] Verify arrival/save restoration, crowd/prop grounding and collision, mobile layout/performance, and scene/media cleanup.
+Finalized on **2026-11-08**. The preceding session completed the browser suites below; this continuation reviewed their retained reports/screenshots and reran repository checks.
 
-**Next implementation step:** build the beach arrival composition and companion placement against the validated scene/checkpoint contract from LW-S002.
+Environment: Windows, portable **Node 22.23.4**, pnpm **10.32.1**, PlayCanvas **2.23.3**, headless Chrome **156.0.8078.80**, production preview **`http://127.0.0.1:4178/`** and development **`http://127.0.0.1:5178/`**. Suites ran sequentially in one isolated browser on CDP **9223**, with **`--mute-audio`** and browser closure in the runner's `finally` block.
+
+- `pnpm test` — **76/76 passed**, including ordered input/directions/admission, duplicate/stale actions, queue cancellation/retry, every checkpoint stage, migration, area/ownership invariants, arrival candidates, route corner/static-clearance checks and scene rollback.
+- `pnpm typecheck`, `pnpm lint`, and `pnpm build` — **passed**. SHA-256 comparison before/after rebuilding matched all **59 production files**, including `Game-BXyRo9Tc.js`, `index-Dh-j4eZL.js`, and `index-CUgBb-zf.css`. The retained browser evidence covers this byte-identical output.
+- `pnpm exec prettier --check src tests docs README.md AGENTS.md index.html vite.config.ts package.json public/assets asset-library scripts` — **passed**, including the finalized documentation. `pnpm fmt` reports only the previously recorded `pnpm-lock.yaml` formatting finding.
+- Launch/resource acceptance — **11/11 passed**: production/development lazy loading, four compact launcher layouts, keyboard launch, one live app, silent unplayed save/load, explicit decoded reporter/music playback, real background-tab pause/resume, preserved developer time/render settings and modal locks, reset/reload, and blocked-model startup retry.
+- Gameplay — **15/15 passed**: animated café cast and continuous friend stand-up, real WASD/pointer-lock lessons and doorway input, solid companion contact and modal/replay suspension, acknowledged pedestrian directions, keyboard traversal of the signed route, reader-paced officer shots, one protected purchase, visible queue, black loading and safe arrival with friend dialogue/save support.
+- Checkpoints — **16/16 passed**: all nine entry stages, independent clue/pass state, reset/reload retention, dynamic actor clearance, v1 and all four v2 opening stages, newly occupied-position migration, invalid/incompatible state rejection, paid replay, and three resource-stable Tideline/arrival round trips.
+- Recovery — **6/6 passed**: construction/activation rollback, paid-admission retention through Back and Retry, successful entry without automatic saving or duplicate purchase, failed checkpoint construction and retry, reset during officer dialogue, and destruction during black loading with inert retained actions.
+- Touch/responsive acceptance — **28/28 passed** at **390×844**, **844×390**, **360×640**, **320×568**, and **640×360**, plus compact **640×360 desktop**. Actual left/right gestures and doorway taps completed lessons; directions, officer/booth/queue framing, steady mode, purchase, loading, arrival, journal and reset/load remained usable. Compact error/retry/back controls were contained and returned to paid admission.
+- Companion — **5/5 passed**: doorway clearance beside a player, yielding/resumption when directly blocked, waiting within six metres, real sprint traversal through both planter corners and the full street, and sustained sprint-speed arrival collision from all four sides.
+- Independent guide/clue — **7/7 passed**: early clue collection, acceptance, reinspection and one-shot reporting alongside entry progress; reset/load and arrival retention; and readable combined quest/navigation feedback at **320×568 touch** and **640×360 touch/desktop**.
+- Cinematic media — **15/15 passed**: gesture-gated decoded reporter/music playback, captions/mute, time-scale and visibility pause/resume, natural bulletin end, all four reader-paced source replies, replay/skip and stale-event protection, blocked/missing video and music retry, the stalled-playback watchdog, and application cleanup.
+- All eight suites passed **103/103 checks** with **no unexpected console, shader, asset or network issues**. Logged faults were limited to deliberately blocked startup/media requests and injected arrival/checkpoint failures.
+- Visually reviewed all **98 report-listed screenshots** through **15 contact sheets** and selected full-size originals, including desktop/mobile arrival and officer framing. Confirmed the isolated verification browser was closed.
+- `git -c core.safecrlf=false diff --check` — **passed**. Reviewed the pending runtime/test diff, new LW-S002 modules/tests, and finalized documentation diff.
+
+### Reproduction commands
+
+Use the supported portable Node in this workspace, or install a supported version on a fresh clone:
+
+```powershell
+$env:PATH = "$env:LOCALAPPDATA\Temp\opencode\node-v22.23.4-win-x64;$env:PATH"
+pnpm test
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm exec prettier --check src tests docs README.md AGENTS.md index.html vite.config.ts package.json public/assets asset-library scripts
+git -c core.safecrlf=false diff --check
+```
+
+Serve production and development in separate terminals:
+
+```powershell
+pnpm exec vite preview --host 127.0.0.1 --port 4178 --strictPort
+```
+
+```powershell
+pnpm exec vite --host 127.0.0.1 --port 5178 --strictPort
+```
+
+Run browser suites sequentially through the muted owner/cleanup wrapper:
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4178/'
+$env:DEV_URL = 'http://127.0.0.1:5178/'
+$env:VERIFY_PREFIX = 'last-wave-entry-final'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-run-muted.mjs" last-wave-launch-verify.mjs last-wave-entry-gameplay-verify.mjs last-wave-entry-checkpoints-verify.mjs last-wave-entry-recovery-verify.mjs last-wave-entry-touch-verify.mjs last-wave-entry-companion-verify.mjs last-wave-entry-guide-verify.mjs last-wave-cinematic-audio-verify.mjs
+```
+
+Reports are **`last-wave-entry-final-{launch,gameplay,checkpoints,recovery,touch,companion,guide,media}-verification.json`** with corresponding PNG captures under **`C:\Users\HP\AppData\Local\Temp\opencode\`**. The 15 visual-review sheets are `last-wave-entry-review-*.jpg`, generated by `last-wave-entry-review-captures.py` in the same directory. The CDP loader activates Launch game for gameplay suites; launcher checks explicitly opt out. These runners/evidence are workspace-local; repository checks and the manual route below are portable to a fresh clone.
+
+### Manual acceptance, limitations, and next action
+
+1. Open the page and leave it idle. Confirm no game sound/video or 3D asset/GPU startup. Activate **Launch game** with mouse, keyboard or touch; the café loads and waits silently for **Play story**. Verify startup retry if a model request fails.
+2. Play the reporter and friend exchange, collect the bag/phone, and acknowledge each lesson. Confirm actual movement/look is required and **Head outside** completes interaction practice. The solid friend departs, waits and accompanies the route.
+3. Ask a pedestrian for directions; leaving early grants nothing. Acknowledge the route, walk around pedestrians and the planter, follow the signs past Lemon Market and cross the side street to the arch. Stop/run and inspect companion spacing/collision.
+4. Read the four officer beats; inspect the booth and queue shots and steady-camera mode. Visit the booth, decline once, buy both passes, check the receipt/journal, and revisit to confirm there is no second charge.
+5. Join the visible queue. Confirm exclusive black loading followed by both characters on the boardwalk/white-sand arrival, completed entry progress and optional friend dialogue. On a loading failure, inspect **Retry entry** and **Back to the queue**; both retain paid admission.
+6. Save during lessons, street progression, paid admission and arrival. Reset/reload and explicitly load. Confirm the next objective, safe actor placement, all inventory and independent signal quest. Delete the slot without changing current gameplay. Unplayed saves must still wait for Play story.
+7. Switch tabs/focus during media, a modal and loading; return to the same suspended state. Check developer pause/slow-motion/render settings survive. Repeat on compact portrait/landscape layouts and check readable text, visible destinations and ≥44 px controls.
+8. Record physical desktop/mobile devices, gamepads, Firefox/Safari, low-frame-rate movement and representative performance under **LW-F002**. Headless Chrome and touch emulation do not establish hardware/audio-output or cross-engine acceptance. Hot-module replacement was code-reviewed; its live trigger was not exercised.
+
+**Handoff at completion:** complete **LW-F002** hardware acceptance using this route, then extend the arrival composition under **LW-S003**. That beach implementation and its acceptance are now recorded below; LW-S004's wave/blackout remains the next story task.
+
+## LW-S003 — Beach exploration
+
+Owner: **Environment/story engineering**. Priority: **P1**. Dependency: **LW-S002**. Status: **Complete; automated browser acceptance passed**.
+
+### Completed implementation
+
+- [x] Extended the existing black loading handoff into a populated **32×28 m** white-sand/boardwalk area with both friends, preserving the `[0, 1.08, 3.6]` default spawn and paid-admission rollback/retry.
+- [x] Added six striped umbrellas, seven supported loungers, towels, signs, swim markers and a citrus cart with five displayed drinks. Furniture, poles, rails, sign posts and stationary people share authored footprints with checkpoint validation and navigation.
+- [x] Prepared four fitted swimwear variants from preserved **Quaternius CC0** bodies and compatible clips. Each has seven in-place clips and embedded 512 px textures; source records, hashes, bind calibration and animated support offsets are retained. Five stationary beachgoers, an attendant, two yielding walkers and four swimmers provide the relaxed social interval.
+- [x] Added reader-paced friend conversation, two included chilled citrus waters and shoreline observation as three **free-order discoveries**. Both friend replies lead to the same acknowledged social moment; declining/leaving/revisiting cannot grant early or duplicate progress. Optional beachgoer dialogue supplies directions. The HUD lists remaining moments, the nearest stop and a playable chapter-end/save message.
+- [x] Reused the solid companion with clear-ground following around scenery and moving walkers. Routes refresh at most every 0.75 seconds, use **1.15 m walker clearance**, allow outward escape from already-close encounters, and stop/retry when no route is available. Regression coverage includes head-on and already-yielding encounters.
+- [x] Added a reusable **65×65-vertex** calm-water surface, analytic normals and three animated foam bands. Swimmer height follows the same surface function; per-rig idle/walk/swim/float offsets keep feet grounded and heads visible. Beach lighting is tuned separately from Tideline.
+- [x] Generated original **24-second mono surf/gull ambience** without third-party samples. Playback starts after committed arrival or explicit beach Load, shares mute, pauses with beach modals/background/developer time, and exposes retry after blocked/missing/stalled playback. An eight-second watchdog and generation guards protect pending playback and teardown.
+- [x] Added **version-4 checkpoints** for all four quests, inventory and either area. V1–v3 migrate on read without rewriting stored bytes; v3 retains admission and earlier progress, relocating only formerly clear beach positions now occupied by dressing. Every discovery subset restores independently.
+- [x] Kept beach controls readable from **320×568 portrait** through compact landscape/desktop. The wrapping Controls popover stays contained; narrow portrait interaction prompts dock below the objective card.
+- [x] Updated architecture, narrative continuity, asset preparation/credits, controls and contributor handoff. Added no dependencies.
+
+### Files and decisions
+
+- Composition/content: `src/episodes/episode-01/{BeachArrival,BeachDressing,BeachLife,BeachNavigation,BeachWater,BeachAudio}.ts`, `beach.ts`, `beachLayout.ts` and `beachAudio.json`.
+- Integration/persistence: `src/core/Game.ts`, `src/scenes/{FoundationScene,FoundationState}.ts`, `src/systems/{QuestSystem,SaveSystem}.ts`, `src/player/{AnimatedCharacter,CompanionController}.ts`, `src/data/characterModels.ts` and the beach HUD/checkpoint UI.
+- Preparation/provenance: `scripts/{prepare-beach-assets.py,beach_clothing.py,prepare-beach-audio.py}`, shared helpers in `prepare-cafe-assets.py`, `asset-library/beach-{selection,preparation,inspection}.json`, `asset-library/audio/beach-preparation.json` and the prepared files/credits in `public/assets/`.
+- Rules remain engine-independent: `QuestSystem` defaults to ordered objectives and adds validated unique subsets for `order: 'any'`; snapshots use canonical authored order. `FoundationState` owns admission/area/discovery invariants. `tests/beach.test.mjs` covers these contracts and static/dynamic navigation.
+- Imported containers remain app-owned; each area owns its instances, procedural meshes/materials/textures, batch groups, interactions and media. The existing controller and ledge correction remain the movement foundation.
+- The two drinks are included in the paid passes and count as one shared discovery. Loungers are unoccupied; swimming is ambient beyond the rail. Completion leaves exploration/save available at the LW-S004 continuation point.
+
+### Verification record
+
+Finalized on **2026-11-08** using Windows, portable **Node 22.23.4**, pnpm **10.32.1**, PlayCanvas **2.23.3** and headless Chrome **156.0.8078.80** at **`http://127.0.0.1:4178/`**. Isolated CDP browsers used **`--mute-audio`** and closed in the runner's `finally` block.
+
+- `pnpm test` — **88/88 passed**, including all six discovery orders/eight subsets, same-size progress rollback, acknowledged dialogue, v1–v4 migration/ownership/position invariants, static navigation and two moving-walker regressions.
+- `pnpm typecheck`, `pnpm lint` and `pnpm build` — **passed** after the final portrait-layout change. Production chunks are `Game-DJpzqDj7.js`, `index-Bjb8ZjmZ.js` and `index-BejHlyc-.css`.
+- `pnpm exec prettier --check src tests docs README.md AGENTS.md index.html vite.config.ts package.json public/assets asset-library scripts` — **passed** after formatting the root README and shipped asset README/credits. `pnpm fmt` reports only the previously recorded **`pnpm-lock.yaml`** formatting finding.
+- Visual/animation — **3/3 passed**: complete arrival, furniture/swimwear captures, and movement in at least two non-root joints for every one of the 12 ambient rigs.
+- Gameplay — **12/12 passed**: silent unplayed launch with all 41 containers, real queue-to-beach handoff, walking/sprinting to the cart/shore, acknowledged conversations, no duplicate charge/progress, all six discovery orders, traversable lounger/umbrella aisles, following friend and manual v4 save after completion.
+- Checkpoint/recovery — **21/21 passed**: all eight discovery subsets, reset/reload retention, v1/v2/v3 migration, newly occupied legacy positions, malformed/unpaid/out-of-area saves, blocked/full storage, construction/activation rollback, paid retry, failed checkpoint activation, four alternating area reloads, deletion and app destruction with inert retained actions.
+- Audio/pause — **14/14 passed**: decoded 24-second loop, shared mute across areas, modal/zero-time/tab/focus suspension, preserved developer pause, blocked autoplay/request recovery, eight-second loading/stall timeout, late promise isolation, and source/listener/watchdog teardown.
+- Touch/responsive — **12/12 passed** at **390×844**, **844×390**, **360×640**, **320×568**, **640×360 touch** and **640×360 desktop**. Real left/right drags move/stop/look; arrival/retry/help/interaction remain contained without overlap. All three discoveries, completion, journal and checkpoint work with readable scrolling modals and ≥44 px controls.
+- Environment/collision — **16/16 passed**: population/prop counts and unit-scale physical roots; finite animated water/foam with unit normals and stable buffers; sprint collision at four rails, cart, rotated lounger, umbrella pole, beachgoer and attendant; solid friend, player/walker yielding, and both approaching/already-yielding companion detours without overlap or deadlock.
+- Posed-vertex measurement — **1/1 passed**, sampling **21 poses per ambient character** for land grounding, visible swimmer heads and submerged lower geometry.
+- Total browser acceptance: **79/79 checks**, with **no unexpected console, shader, asset or network issues**. Expected logs were limited to injected candidate failures, a deliberately blocked ambience request and an aborted retired media request. Environment/pose suites were refreshed after the detour correction; touch/visual/gameplay were refreshed after the final portrait fix.
+- Reviewed all **72 report-listed screenshots** using **14 contact sheets** and selected full-size originals, including lounger supports, swimmer waterlines, shoreline text and compact portrait/landscape controls. All isolated verification browsers are closed.
+- Asset verification — **92 unique manifest-file size/SHA-256 checks passed**, covering all **30 supplied originals**, all **41 prepared GLBs**, source archives/files and media. Validated all four new GLB structures/clip catalogs and the WAV format. Four new rigs total **6,896,708 bytes**; all prepared GLBs total **27,660,744 bytes**; ambience is **1,058,444 bytes**.
+- Post-format production reconciliation — rebuilt successfully, then matched all **60 public files** to their deployed copies. **62/64 build-file SHA-256 hashes** match the retained pre-format report, including JavaScript, CSS, entry HTML, models and media. The two changed files are the formatted `dist/assets/README.md` and `dist/assets/credits.html`. All manifest/GLB/WAV checks passed again.
+- `git -c core.safecrlf=false diff --check` — **passed**. Reviewed the tracked runtime/test diff, new beach modules/tests/preparation scripts, manifests, credits and finalized documentation. LW-S002 and LW-S003 changes remain uncommitted.
+
+Normal beach observations: **41 containers / 517 registry assets / 31 bodies and colliders / 317 renders / 14 animations / four interaction targets / 97 textures**. Alternating reloads retained **83 persistent textures / 387 geometry buffers / 8,399,780 vertex bytes / 1,511,100 index bytes** on the beach and **103 / 535 / 9,212,020 / 1,610,760** respectively in Tideline. Engine skin palettes and dynamic batch partitions may change transient totals; cleanup checks also verify ownership and stable persistent resources.
+
+### Reproduction commands
+
+Run repository checks with supported Node, then serve production in a separate terminal:
+
+```powershell
+$env:PATH = "$env:LOCALAPPDATA\Temp\opencode\node-v22.23.4-win-x64;$env:PATH"
+pnpm test
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm exec prettier --check src tests docs README.md AGENTS.md index.html vite.config.ts package.json public/assets asset-library scripts
+pnpm fmt
+git -c core.safecrlf=false diff --check
+```
+
+```powershell
+pnpm exec vite preview --host 127.0.0.1 --port 4178 --strictPort
+```
+
+Workspace-local browser and artifact commands:
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4178/'
+$env:VERIFY_PREFIX = 'last-wave-beach-acceptance'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-run-muted.mjs" last-wave-beach-visual.mjs last-wave-beach-gameplay-verify.mjs last-wave-beach-recovery-verify.mjs last-wave-beach-audio-verify.mjs last-wave-beach-touch-verify.mjs last-wave-beach-environment-verify.mjs last-wave-beach-pose-measure.mjs
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-beach-artifact-check.mjs"
+python "$env:LOCALAPPDATA\Temp\opencode\last-wave-beach-review-captures.py"
+```
+
+Evidence lives under **`C:\Users\HP\AppData\Local\Temp\opencode\`**: `last-wave-beach-acceptance-{visual,gameplay,recovery,audio,touch,environment,pose-measure}-verification.json`, their PNG captures, `last-wave-beach-review-*.jpg`, `last-wave-beach-capture-index.json` and `last-wave-beach-artifact-verification.json`. The preserved `last-wave-beach-artifact-verification-pre-format.json` and `last-wave-beach-artifact-reconciliation.json` record the final build comparison. Runners/evidence are workspace-local; repository checks and the manual route below are portable to a fresh clone.
+
+### Manual acceptance, limitations, and next action
+
+1. Follow LW-S002's launch/story/lessons/directions/officer/ticket/queue route. Confirm black loading reaches both characters on the populated beach, retains both passes and starts surf/gull ambience only after arrival.
+2. Walk the boardwalk, umbrella/lounger aisles and beach perimeter. Inspect feet, lounger supports, swimwear, four animated swimmers and calm water/foam. Stop near the friend, cross a walker's path, then move away; check collision, waiting, detours and resumption.
+3. In any order, finish the friend's exchange, accept the two included citrus waters and acknowledge the shoreline. Leave/decline once and revisit; incomplete choices must remain available and completed discoveries must count once. Read the optional beachgoer dialogue.
+4. Save after zero, one, two and three discoveries. Restart/reload and explicitly Load; confirm exact discoveries, earlier quests, bag/passes/clue and safe nearby actors. Completion keeps walking/interactions/save available. Deleting the slot must preserve live progress.
+5. Open dialogue, journal and checkpoint; switch tabs/focus and exercise developer pause. Beach motion/audio must pause without rewinding or losing progress. Toggle sound across a café restart and beach reload; block the ambience request once and verify **Enable beach sound** recovery.
+6. Repeat in narrow portrait and compact landscape, including the expanded Controls menu and sound-retry label. Check readable scrollable dialogs, ≥44 px buttons and separation of interaction prompts from objectives/help.
+
+Physical mobile/desktop devices, physical gamepads, Firefox/Safari, hardware audio quality/output, sustained frame-time/memory budgets and low-frame-rate collision acceptance remain under **LW-F002**. Headless Chrome and touch emulation establish functional/layout coverage, not representative device performance. Live HMR remains code-reviewed rather than exercised. The bounded placeholder-dressed beach has ambient swimming and empty loungers; player swimming/seating and carried-drink animations are outside this milestone.
+
+**Next concrete action:** complete **LW-F002** device/browser/performance acceptance using the route above. The next selectable story task is **LW-S004**: define and test the warning → evacuation → fall → blinking blackout state sequence at the beach continuation point, then layer its water/crowd/camera/audio presentation. The hospital remains a separate later scene.
 
 ## LW-S004 — Wave, panic, and blackout
 
@@ -776,7 +941,7 @@ Owner: **Gameplay/cinematic engineering**. Priority: **P1**. Dependency: **LW-S0
 
 ## Deferred backlog
 
-The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). The current playable scene and checkpoint destination are the foundation area, including the cinematic café and open street. The complete requested tutorial/admission/beach/disaster continuation is retained in LW-S002–LW-S004 above; hospital, Kiroween City, multiplayer, and backend work follow their own milestones.
+The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). The foundation scene now includes Tideline/open street and populated beach exploration, with version-4 checkpoints for both areas. LW-S002 supplies tutorials/admission; LW-S003 supplies the relaxed beach interval. LW-S004 retains the wave/blackout continuation. Hospital, Kiroween City, multiplayer and backend work follow their own milestones.
 
 ## Completion protocol
 

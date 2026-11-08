@@ -1,3 +1,4 @@
+import { OPENING_CUTSCENE } from '../episodes/episode-01/opening';
 import type { OpeningMediaState } from '../episodes/episode-01/OpeningMedia';
 import type { ScreenPoint } from '../scenes/ScreenProjection';
 import type { CutsceneState } from '../systems/CutsceneSystem';
@@ -30,7 +31,7 @@ export class CutscenePanel {
         this.root.setAttribute('aria-label', 'The Last Normal Day');
         this.root.innerHTML = `
             <div class="cinematic-heading">
-                <p>LAST WAVE <span>THE LAST NORMAL DAY</span></p>
+                <p>LAST WAVE <span data-cutscene-title></span></p>
                 <button type="button" data-cutscene-skip>Skip intro</button>
             </div>
             <div class="speech-bubble" data-speech aria-live="polite" aria-atomic="true" hidden>
@@ -100,6 +101,9 @@ export class CutscenePanel {
     get muted() {
         return !this.soundInput.checked;
     }
+    set muted(value: boolean) {
+        this.soundInput.checked = !value;
+    }
 
     render(state: CutsceneState | null) {
         this.state = state;
@@ -108,6 +112,10 @@ export class CutscenePanel {
             return;
         }
         const broadcast = state.beat.id === 'broadcast';
+        this.root.setAttribute('aria-label', state.title);
+        this.root.dataset.cutscene = state.cutsceneId;
+        this.root.querySelector('[data-cutscene-title]')!.textContent = state.title;
+        this.root.querySelector('[data-cutscene-skip]')!.textContent = state.skipLabel ?? 'Skip scene';
         this.root.dataset.beat = state.beat.id;
         this.speech.hidden = broadcast;
         this.speaker.textContent = state.beat.speaker;
@@ -115,7 +123,7 @@ export class CutscenePanel {
         this.nextButton.textContent = broadcast
             ? 'Skip bulletin'
             : state.index + 1 === state.totalCount
-              ? 'Let’s go'
+              ? (state.finishLabel ?? 'Continue')
               : 'Next';
         this.renderMedia(this.media);
         if (!this.root.open) this.root.showModal();
@@ -124,7 +132,7 @@ export class CutscenePanel {
 
     renderMedia(media: OpeningMediaState) {
         this.media = media;
-        const broadcast = this.state?.beat.id === 'broadcast';
+        const broadcast = this.state?.cutsceneId === OPENING_CUTSCENE.id && this.state.beat.id === 'broadcast';
         const failed = media.phase === 'blocked' || media.phase === 'unavailable';
         this.subtitle.hidden = !broadcast || !media.caption || (!failed && !media.muted && !this.captionsInput.checked);
         this.subtitle.textContent = media.caption;
@@ -143,13 +151,20 @@ export class CutscenePanel {
 
     setSpeakerAnchor(point: ScreenPoint | null) {
         if (this.speech.hidden || !this.state) return;
-        this.speech.style.visibility = point ? 'visible' : 'hidden';
-        if (!point) return;
+        this.speech.style.visibility = 'visible';
+        this.speech.dataset.offscreen = String(!point);
+        const placement = this.state.beat.dialoguePlacement;
+        this.speech.dataset.placement = placement ?? 'speaker';
+        point ??= { x: window.innerWidth / 2, y: window.innerHeight - 100 };
         const { offsetWidth: width, offsetHeight: height } = this.speech;
-        const left = Math.max(12, Math.min(window.innerWidth - width - 12, point.x - width / 2));
+        const left = placement
+            ? placement === 'top-left'
+                ? 12
+                : window.innerWidth - width - 12
+            : Math.max(12, Math.min(window.innerWidth - width - 12, point.x - width / 2));
         const top = Math.max(
             window.innerHeight <= 500 ? 60 : 76,
-            Math.min(window.innerHeight - height - 100, point.y - height - 28)
+            placement ? 0 : Math.min(window.innerHeight - height - 100, point.y - height - 28)
         );
         this.speech.style.left = `${left}px`;
         this.speech.style.top = `${top}px`;

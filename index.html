@@ -13,10 +13,11 @@
     <body>
         <canvas
             id="application-canvas"
+            inert
             tabindex="0"
             aria-label="Last Wave game. Controls are listed on screen."
         ></canvas>
-        <div id="startup-status" role="status">
+        <div id="startup-status">
             <img
                 class="startup-brand"
                 src="%BASE_URL%assets/last-wave-logo.svg"
@@ -24,8 +25,13 @@
                 width="300"
                 height="86"
             />
-            <span class="loading-ring" aria-hidden="true"></span>
-            <span>Starting Last Wave…</span>
+            <span class="loading-ring" aria-hidden="true" hidden></span>
+            <p id="startup-message" role="status">An ordinary afternoon at Tideline is only the beginning.</p>
+            <button id="launch-game" type="button">Launch game</button>
+            <p class="startup-hint">
+                The 3D scene loads after launch. Choose Play story inside to start sound and video.
+            </p>
+            <noscript>Enable JavaScript to launch Last Wave.</noscript>
         </div>
         <script type="module" src="/src/main.ts"></script>
     </body>

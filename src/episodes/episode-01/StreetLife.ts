@@ -41,6 +41,7 @@ export class StreetLife extends Script {
     cars!: Car[];
     carried!: CarriedProp[];
     drivers!: AnimatedCharacter[];
+    obstacles: Entity[] = [];
     private suspended = false;
     private readonly direction = new Vec3();
 
@@ -70,7 +71,8 @@ export class StreetLife extends Script {
             };
             const blocked =
                 (player.y < 3 && blockedBy(player, 1.1)) ||
-                this.walkers.some((other) => other !== walker && blockedBy(other.character.root.getPosition(), 0.65));
+                this.walkers.some((other) => other !== walker && blockedBy(other.character.root.getPosition(), 0.65)) ||
+                this.obstacles.some((other) => other.enabled && blockedBy(other.getPosition(), 0.7));
             walker.character.play(blocked ? 'idle' : 'walk');
             if (blocked) continue;
             walker.heading = math.lerpAngle(
@@ -90,6 +92,16 @@ export class StreetLife extends Script {
             const position = car.root.getPosition();
             const ahead = (player.x - position.x) * car.direction;
             if (player.y < 3 && Math.abs(player.z - position.z) < 1.55 && ahead > -2.5 && ahead < 4.5) continue;
+            if (
+                this.obstacles.some((other) => {
+                    const point = other.getPosition();
+                    const gap = (point.x - position.x) * car.direction;
+                    return (
+                        other.enabled && point.y < 3 && Math.abs(point.z - position.z) < 1.55 && gap > -2.5 && gap < 4.5
+                    );
+                })
+            )
+                continue;
             if (
                 this.cars.some((other) => {
                     const gap = (other.root.getPosition().x - position.x) * car.direction;

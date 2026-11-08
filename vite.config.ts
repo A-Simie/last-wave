@@ -10,15 +10,5 @@ export default defineConfig({
         // first frame needs, so warn only for chunks well past that rather than at Vite's 500 kB default
         chunkSizeWarningLimit: 3000
     },
-    plugins: [
-        {
-            // Dev only: install the PlayCanvas Inspector before the app starts (press ` to toggle)
-            name: 'playcanvas-inspector',
-            apply: 'serve',
-            config: () => ({ optimizeDeps: { include: ['@playcanvas/inspector'] } }),
-            transformIndexHtml: () => [
-                { tag: 'script', attrs: { type: 'module', src: '/src/inspector.ts' }, injectTo: 'head-prepend' }
-            ]
-        }
-    ]
+    optimizeDeps: { include: ['@playcanvas/inspector'] }
 });

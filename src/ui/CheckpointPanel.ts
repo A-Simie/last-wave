@@ -1,4 +1,7 @@
+import { SIGNAL_BOX_NOTE } from '../data/items';
 import { SIGNAL_CHECK_QUEST } from '../data/quests';
+import { BEACH_QUEST } from '../episodes/episode-01/beach';
+import { BEACH_PASSES, ENTRY_QUEST } from '../episodes/episode-01/entry';
 import { OPENING_QUEST, STARTER_BAG } from '../episodes/episode-01/opening';
 import type { SaveResult } from '../systems/SaveSystem';
 
@@ -45,7 +48,7 @@ export class CheckpointPanel {
             <p id="checkpoint-policy">One checkpoint for this site in this browser. Saving replaces it.
                 Resetting or reloading starts a fresh area; load to restore your saved progress.</p>
             <section class="checkpoint-slot" aria-label="Saved checkpoint">
-                <h3>Tideline café</h3>
+                <h3 data-checkpoint-area>Episode 01</h3>
                 <p data-checkpoint-summary></p>
             </section>
             <p class="checkpoint-feedback" data-checkpoint-feedback role="status" aria-live="polite" aria-atomic="true"></p>
@@ -84,10 +87,15 @@ export class CheckpointPanel {
         if (slot.status === 'ready') {
             const { savedAt, state } = slot.save;
             const hasBag = state.inventory.itemIds.includes(STARTER_BAG.id);
-            const clues = state.inventory.itemIds.length - Number(hasBag);
+            const clues = Number(state.inventory.itemIds.includes(SIGNAL_BOX_NOTE.id));
             const opening = state.opening.completedObjectiveIds.length;
-            this.summary.textContent = `Saved ${new Date(savedAt).toLocaleString()}. ${state.quest.completedObjectiveIds.length} / ${SIGNAL_CHECK_QUEST.objectives.length} objectives complete · ${clues} ${clues === 1 ? 'clue' : 'clues'}.${opening ? ` Story opening: ${opening} / ${OPENING_QUEST.objectives.length}.${hasBag ? ' Bag & phone packed.' : ''}` : ''}`;
+            this.root.querySelector('[data-checkpoint-area]')!.textContent =
+                state.area === 'beach-arrival' ? 'Seafront Beach · exploration' : 'Tideline & Seafront Avenue';
+            this.summary.textContent = `Saved ${new Date(savedAt).toLocaleString()}. ${state.quest.completedObjectiveIds.length} / ${SIGNAL_CHECK_QUEST.objectives.length} signal objectives · ${clues} ${clues === 1 ? 'clue' : 'clues'}.${opening ? ` Opening: ${opening} / ${OPENING_QUEST.objectives.length}.${hasBag ? ' Bag & phone packed.' : ''} Beach route: ${state.entry.completedObjectiveIds.length} / ${ENTRY_QUEST.objectives.length}.${state.inventory.itemIds.includes(BEACH_PASSES.id) ? ' Two passes paid.' : ''}` : ''}`;
+            if (state.area === 'beach-arrival')
+                this.summary.textContent += ` Beach moments: ${state.beach.completedObjectiveIds.length} / ${BEACH_QUEST.objectives.length}.`;
         } else {
+            this.root.querySelector('[data-checkpoint-area]')!.textContent = 'Episode 01';
             this.summary.textContent = SLOT_MESSAGES[slot.status];
         }
         this.feedback.textContent = message;

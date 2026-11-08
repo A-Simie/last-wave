@@ -3,12 +3,15 @@ export type CutsceneBeat = {
     readonly speaker: string;
     readonly text: string;
     readonly shot: string;
+    readonly dialoguePlacement?: 'top-left' | 'top-right';
 };
 
 export type CutsceneDefinition = {
     readonly id: string;
     readonly title: string;
     readonly setting: string;
+    readonly finishLabel?: string;
+    readonly skipLabel?: string;
     readonly beats: readonly CutsceneBeat[];
 };
 
@@ -16,6 +19,8 @@ export type CutsceneState = {
     readonly cutsceneId: string;
     readonly title: string;
     readonly setting: string;
+    readonly finishLabel?: string;
+    readonly skipLabel?: string;
     readonly beat: CutsceneBeat;
     readonly index: number;
     readonly totalCount: number;
@@ -35,6 +40,8 @@ export class CutsceneSystem {
             cutsceneId: this.definition.id,
             title: this.definition.title,
             setting: this.definition.setting,
+            finishLabel: this.definition.finishLabel,
+            skipLabel: this.definition.skipLabel,
             beat: { ...this.definition.beats[this.index] },
             index: this.index,
             totalCount: this.definition.beats.length

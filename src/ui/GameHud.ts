@@ -1,3 +1,4 @@
+import type { BeachAudioState } from '../episodes/episode-01/BeachAudio';
 import type { ScreenPoint } from '../scenes/ScreenProjection';
 import type { InteractionState } from '../systems/InteractionSystem';
 import type { InventoryState } from '../systems/InventorySystem';
@@ -13,32 +14,38 @@ export class GameHud {
     private readonly questStatus: HTMLElement;
     private readonly questObjective: HTMLElement;
     private readonly questProgress: HTMLElement;
+    private readonly optionalQuest: HTMLElement;
     private readonly interactButton: HTMLButtonElement;
     private readonly resetButton: HTMLButtonElement;
     private readonly journalButton: HTMLButtonElement;
     private readonly checkpointButton: HTMLButtonElement;
     private readonly storyButton: HTMLButtonElement;
+    private readonly beachAudioButton: HTMLButtonElement;
     private readonly eyebrow: HTMLElement;
     private readonly clueNotice: HTMLElement;
+    private readonly navigation: HTMLElement;
     private hasTarget = false;
     private readonly onInteract: () => void;
     private readonly onReset: () => void;
     private readonly onJournal: () => void;
     private readonly onCheckpoint: () => void;
     private readonly onStory: () => void;
+    private readonly onBeachAudio: () => void;
 
     constructor(
         onInteract: () => void,
         onReset: () => void,
         onJournal: () => void,
         onCheckpoint: () => void,
-        onStory: () => void
+        onStory: () => void,
+        onBeachAudio: () => void
     ) {
         this.onInteract = onInteract;
         this.onReset = onReset;
         this.onJournal = onJournal;
         this.onCheckpoint = onCheckpoint;
         this.onStory = onStory;
+        this.onBeachAudio = onBeachAudio;
         this.root.className = 'hud';
         this.root.innerHTML = `
             <div class="hud-summary">
@@ -50,6 +57,7 @@ export class GameHud {
                     </div>
                     <div class="hud-actions">
                         <button type="button" data-journal aria-haspopup="dialog" aria-controls="clue-journal">Journal</button>
+                        <button type="button" data-beach-audio hidden>Beach sound</button>
                         <details class="controls-help">
                             <summary>Controls</summary>
                             <div class="controls-popover">
@@ -72,6 +80,8 @@ export class GameHud {
                         <p class="eyebrow" data-quest-status></p>
                         <p class="objective" data-quest-objective></p>
                         <p class="quest-progress" data-quest-progress></p>
+                        <p class="navigation-hint" data-navigation hidden></p>
+                        <p class="optional-quest" data-optional-quest hidden></p>
                     </div>
                 </section>
             </div>
@@ -91,18 +101,22 @@ export class GameHud {
         this.questStatus = this.root.querySelector<HTMLElement>('[data-quest-status]')!;
         this.questObjective = this.root.querySelector<HTMLElement>('[data-quest-objective]')!;
         this.questProgress = this.root.querySelector<HTMLElement>('[data-quest-progress]')!;
+        this.optionalQuest = this.root.querySelector<HTMLElement>('[data-optional-quest]')!;
         this.interactButton = this.root.querySelector<HTMLButtonElement>('[data-interact]')!;
         this.resetButton = this.root.querySelector<HTMLButtonElement>('[data-reset]')!;
         this.journalButton = this.root.querySelector<HTMLButtonElement>('[data-journal]')!;
         this.checkpointButton = this.root.querySelector<HTMLButtonElement>('[data-checkpoint]')!;
         this.storyButton = this.root.querySelector<HTMLButtonElement>('[data-story]')!;
+        this.beachAudioButton = this.root.querySelector<HTMLButtonElement>('[data-beach-audio]')!;
         this.eyebrow = this.root.querySelector<HTMLElement>('[data-mode]')!;
         this.clueNotice = this.root.querySelector<HTMLElement>('[data-clue-notice]')!;
+        this.navigation = this.root.querySelector<HTMLElement>('[data-navigation]')!;
         this.interactButton.addEventListener('click', onInteract);
         this.resetButton.addEventListener('click', onReset);
         this.journalButton.addEventListener('click', onJournal);
         this.checkpointButton.addEventListener('click', onCheckpoint);
         this.storyButton.addEventListener('click', onStory);
+        this.beachAudioButton.addEventListener('click', onBeachAudio);
         document.body.append(this.root);
     }
 
@@ -117,25 +131,60 @@ export class GameHud {
     setPromptAnchor(point: ScreenPoint | null) {
         this.prompt.hidden = !this.hasTarget || !point;
         if (!point) return;
-        this.prompt.style.left = `${Math.max(100, Math.min(window.innerWidth - 100, point.x))}px`;
-        this.prompt.style.top = `${Math.max(100, Math.min(window.innerHeight - 80, point.y + 22))}px`;
+        this.prompt.style.setProperty('--prompt-x', `${Math.max(100, Math.min(window.innerWidth - 100, point.x))}px`);
+        this.prompt.style.setProperty(
+            '--prompt-y',
+            `${Math.max(100, Math.min(window.innerHeight - 80, point.y + 22))}px`
+        );
     }
 
-    renderQuest(state: QuestState) {
+    renderQuest(state: QuestState, openingPrompt = false) {
         this.quest.dataset.status = state.status;
+        this.quest.dataset.order = state.order;
         this.questTitle.textContent = state.title;
-        this.questStatus.textContent = {
-            inactive: 'Quest available',
-            active: 'Quest active',
-            completed: 'Quest complete'
-        }[state.status];
+        this.questStatus.textContent =
+            state.order === 'any' && state.status !== 'completed'
+                ? 'Explore at your pace · Any order'
+                : {
+                      inactive: 'Quest available',
+                      active: 'Quest active',
+                      completed: 'Quest complete'
+                  }[state.status];
         this.questObjective.textContent =
             state.status === 'completed'
                 ? state.completionMessage
-                : state.status === 'inactive'
+                : openingPrompt
                   ? 'An afternoon at Tideline. Best enjoyed with sound.'
-                  : state.objective.text;
-        this.questProgress.textContent = `${state.completedCount} / ${state.totalCount} objectives complete`;
+                  : state.order === 'any'
+                    ? state.remainingObjectives.map(({ text }) => text).join(' · ')
+                    : state.objective.text;
+        this.questProgress.textContent = `${state.completedCount} / ${state.totalCount} ${state.order === 'any' ? 'beach moments shared' : 'objectives complete'}`;
+    }
+
+    renderBeachAudio(state: BeachAudioState | null) {
+        this.beachAudioButton.hidden = !state;
+        if (!state) return;
+        const retry = state.phase === 'blocked' || state.phase === 'unavailable' || state.phase === 'idle';
+        this.beachAudioButton.textContent = retry
+            ? 'Enable beach sound'
+            : state.muted
+              ? 'Sound: Off'
+              : state.phase === 'loading'
+                ? 'Loading sound…'
+                : 'Sound: On';
+        this.beachAudioButton.setAttribute('aria-pressed', String(!state.muted && !retry));
+        this.beachAudioButton.title =
+            state.phase === 'unavailable'
+                ? 'Beach sound unavailable. Activate to retry.'
+                : 'Gentle surf and distant gulls';
+    }
+
+    renderOptionalQuest(state: QuestState | null) {
+        const visible = state && state.status !== 'inactive';
+        this.optionalQuest.hidden = !visible;
+        this.optionalQuest.textContent = visible
+            ? `${state.title} · ${state.status === 'completed' ? state.completionMessage : state.objective.text}`
+            : '';
     }
 
     renderInventory({ items }: InventoryState) {
@@ -148,11 +197,26 @@ export class GameHud {
             : '';
     }
 
-    renderStory(state: QuestState) {
-        const started = state.status !== 'inactive';
+    renderStory(state: QuestState | null, area: 'tideline' | 'beach-arrival') {
+        const started = state?.status !== 'inactive';
+        this.root.dataset.area = area;
         this.root.dataset.ready = String(!started);
+        this.storyButton.hidden = !state;
         this.storyButton.textContent = started ? 'Replay intro' : 'Play story';
-        this.eyebrow.textContent = started ? 'Episode 01 · Tideline café' : 'Tideline café · Late afternoon';
+        this.eyebrow.textContent =
+            area === 'beach-arrival'
+                ? 'Episode 01 · Seafront Beach'
+                : state && state.completedCount >= 3
+                  ? 'Episode 01 · Seafront Avenue'
+                  : started
+                    ? 'Episode 01 · Tideline café'
+                    : 'Tideline café · Late afternoon';
+    }
+
+    renderNavigation(hint: { label: string; distance: number } | null) {
+        this.navigation.hidden = !hint;
+        const text = hint ? `${hint.label} · ${hint.distance} m` : '';
+        if (this.navigation.textContent !== text) this.navigation.textContent = text;
     }
 
     setCutsceneActive(active: boolean) {
@@ -165,6 +229,7 @@ export class GameHud {
         this.journalButton.removeEventListener('click', this.onJournal);
         this.checkpointButton.removeEventListener('click', this.onCheckpoint);
         this.storyButton.removeEventListener('click', this.onStory);
+        this.beachAudioButton.removeEventListener('click', this.onBeachAudio);
         this.root.remove();
     }
 }

@@ -8,11 +8,13 @@ export const createTextSign = (
     name: string,
     lines: readonly string[],
     background: string,
-    width = 1.8
+    width = 1.8,
+    height?: number
 ) => {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 256;
+    const panelHeight = height ?? width / 2;
+    canvas.width = Math.min(2048, Math.round((256 * width) / panelHeight));
+    canvas.height = Math.round((canvas.width * panelHeight) / width);
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Story signs require a canvas context.');
     context.fillStyle = background;
@@ -21,8 +23,14 @@ export const createTextSign = (
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     lines.forEach((line, index) => {
-        context.font = `${index === 0 ? 'bold 44' : '30'}px system-ui, sans-serif`;
-        context.fillText(line, 256, (256 / (lines.length + 1)) * (index + 1), 470);
+        const size = height ? canvas.height * (index === 0 ? 0.32 : 0.2) : index === 0 ? 44 : 30;
+        context.font = `${index === 0 ? 'bold ' : ''}${size}px system-ui, sans-serif`;
+        context.fillText(
+            line,
+            canvas.width / 2,
+            (canvas.height / (lines.length + 1)) * (index + 1),
+            canvas.width * 0.92
+        );
     });
-    return createCanvasPanel(owner, device, name, canvas, width, width / 2).panel;
+    return createCanvasPanel(owner, device, name, canvas, width, panelHeight).panel;
 };

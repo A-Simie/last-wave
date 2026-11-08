@@ -33,7 +33,7 @@ export class OpeningMedia {
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
-        this.music = new Audio(`${baseUrl}audio/${audio.music.file}`);
+        this.music = new Audio();
         this.music.loop = true;
         this.music.preload = 'none';
         this.music.volume = 0.18;
@@ -46,6 +46,8 @@ export class OpeningMedia {
             { signal: this.events.signal }
         );
         document.addEventListener('visibilitychange', () => this.syncPause(), { signal: this.events.signal });
+        window.addEventListener('focus', () => this.syncPause(), { signal: this.events.signal });
+        window.addEventListener('blur', () => this.syncPause(), { signal: this.events.signal });
     }
 
     get video() {
@@ -96,7 +98,7 @@ export class OpeningMedia {
     }
 
     retry() {
-        if (this.destroyed) return;
+        if (this.destroyed || !this.started) return;
         if (this.music.error) this.music.load();
         this.playMusic();
         if (this.phase === 'blocked' || this.phase === 'unavailable') {
@@ -123,22 +125,28 @@ export class OpeningMedia {
     }
 
     private playMusic() {
-        if (!this.started || this.paused || document.hidden) return;
+        if (!this.started || this.suspended) return;
+        if (!this.music.getAttribute('src')) this.music.src = `${this.baseUrl}audio/${audio.music.file}`;
         void this.music
             .play()
             .then(() => {
-                if (this.destroyed || !this.musicFailed) return;
+                if (this.destroyed || this.suspended) {
+                    this.music.pause();
+                    return;
+                }
+                if (!this.musicFailed) return;
                 this.musicFailed = false;
                 this.publish();
             })
             .catch(() => {
-                if (this.destroyed || document.hidden || this.paused) return;
+                if (this.destroyed || this.suspended) return;
                 this.musicFailed = true;
                 this.publish();
             });
     }
 
     private createClip() {
+        if (!this.started || this.destroyed) return;
         const video = document.createElement('video');
         this.clip = video;
         this.clipEvents = new AbortController();
@@ -153,7 +161,7 @@ export class OpeningMedia {
             'playing',
             () => {
                 if (this.clip !== video || this.destroyed) return;
-                if (this.paused || document.hidden) {
+                if (this.suspended) {
                     video.pause();
                     return;
                 }
@@ -186,7 +194,7 @@ export class OpeningMedia {
     }
 
     private resumeClip(video: HTMLVideoElement) {
-        if (this.destroyed || this.clip !== video || document.hidden || this.paused) return;
+        if (this.destroyed || this.clip !== video || this.suspended) return;
         if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
             clearTimeout(this.watchdog);
             this.phase = 'playing';
@@ -195,23 +203,27 @@ export class OpeningMedia {
         }
         this.watchClip(video);
         void video.play().catch((error: unknown) => {
-            if (document.hidden || this.paused) return;
+            if (this.suspended) return;
             const blocked = error instanceof DOMException && error.name === 'NotAllowedError';
             this.failClip(video, blocked ? 'blocked' : 'unavailable');
         });
     }
 
     private watchClip(video: HTMLVideoElement) {
-        if (this.clip !== video || this.destroyed || document.hidden || this.paused) return;
+        if (this.clip !== video || this.destroyed || this.suspended) return;
         clearTimeout(this.watchdog);
         this.phase = 'loading';
         this.publish();
         this.watchdog = setTimeout(() => this.failClip(video, 'unavailable'), 8000);
     }
 
+    private get suspended() {
+        return this.paused || document.hidden || !document.hasFocus();
+    }
+
     private syncPause() {
         if (this.destroyed) return;
-        if (document.hidden || this.paused) {
+        if (this.suspended) {
             clearTimeout(this.watchdog);
             this.music.pause();
             this.clip?.pause();

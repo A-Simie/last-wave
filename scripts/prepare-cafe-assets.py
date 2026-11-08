@@ -212,6 +212,13 @@ def clothe(model, outfit):
     attributes = shape_face(attributes, outfit["body"] == "Female", outfit.get("face"))
     groups = make_clothing(attributes, indices, outfit["body"] == "Female", outfit.get("suit", False))
     skin_material = model.material(source, primitive["material"], True)
+    colors = {"shirt": outfit["shirt"], "denim": outfit.get("trousers", [0.028, 0.055, 0.087, 1]),
+              "shoes": [0.065, 0.045, 0.032, 1], "soles": [0.57, 0.52, 0.43, 1],
+              "collar": [0.91, 0.88, 0.81, 1], "tie": [0.3, 0.055, 0.025, 1]}
+    apply_clothing(model, groups, skin_material, colors, "cafe")
+
+
+def apply_clothing(model, groups, skin_material, colors, prefix):
     primitives = []
     for region, group in groups.items():
         part = {"attributes": {}, "indices": model.array([(i,) for i in group.indices], "SCALAR", 5123), "material": skin_material}
@@ -219,11 +226,8 @@ def clothe(model, outfit):
             part["attributes"][name] = model.array(rows, "VEC" + str(len(rows[0])), 5123 if name == "JOINTS_0" else 5126)
         if region != "skin":
             part["material"] = len(model.doc["materials"])
-            color = {"shirt": outfit["shirt"], "denim": outfit.get("trousers", [0.028, 0.055, 0.087, 1]),
-                     "shoes": [0.065, 0.045, 0.032, 1], "soles": [0.57, 0.52, 0.43, 1],
-                     "collar": [0.91, 0.88, 0.81, 1], "tie": [0.3, 0.055, 0.025, 1]}[region]
-            model.doc["materials"].append({"name": "cafe-" + region, "doubleSided": True,
-                                           "pbrMetallicRoughness": {"baseColorFactor": color, "metallicFactor": 0, "roughnessFactor": 0.95}})
+            model.doc["materials"].append({"name": prefix + "-" + region, "doubleSided": True,
+                                           "pbrMetallicRoughness": {"baseColorFactor": colors[region], "metallicFactor": 0, "roughnessFactor": 0.95}})
         primitives.append(part)
     # Single-primitive skinned nodes avoid duplicate skin-cache references in Engine 2.23.3.
     model.doc["meshes"][2]["primitives"] = primitives[:1]
@@ -231,7 +235,7 @@ def clothe(model, outfit):
     parent = next(node for node in model.doc["nodes"] if body_index in node.get("children", []))
     for region, primitive in zip(list(groups)[1:], primitives[1:]):
         node = copy.deepcopy(model.doc["nodes"][body_index])
-        node["name"] = "cafe-" + region
+        node["name"] = prefix + "-" + region
         node["mesh"] = len(model.doc["meshes"])
         model.doc["meshes"].append({"name": node["name"], "primitives": [primitive]})
         parent["children"].append(len(model.doc["nodes"]))
@@ -258,12 +262,12 @@ def add_hair(model, source):
         model.doc["nodes"].append(child)
 
 
-def add_animations(model, source):
+def add_animations(model, source, clips=None):
     target_paths = paths(model.doc)
     source_paths = {index: name for name, index in paths(source[0]).items()}
     model.doc["animations"] = []
     for clip in source[0]["animations"]:
-        if clip["name"] not in SELECTION["clips"]:
+        if clip["name"] not in (clips if clips is not None else SELECTION["clips"]):
             continue
         result = {"name": clip["name"], "channels": [], "samplers": []}
         for channel in clip["channels"]:

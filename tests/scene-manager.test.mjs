@@ -94,6 +94,32 @@ test('a failed replacement preserves an already-disabled scene', () => {
     scenes.destroy();
 });
 
+test('activation failure restores the old area after it was suspended and disposes the arrival candidate', () => {
+    const { app, scenes } = setup();
+    const old = scenes.load('tideline', (root) => root);
+    let cleaned = 0;
+    assert.throws(
+        () =>
+            scenes.load('beach-arrival', (root) => {
+                root.once('destroy', () => cleaned++);
+                const onHierarchyStateChanged = root._onHierarchyStateChanged;
+                root._onHierarchyStateChanged = function (enabled) {
+                    if (enabled) {
+                        assert.equal(old.enabled, false);
+                        throw new Error('arrival activation failed');
+                    }
+                    return onHierarchyStateChanged.call(this, enabled);
+                };
+                return root;
+            }),
+        /arrival activation failed/
+    );
+    assert.equal(old.enabled, true);
+    assert.deepEqual(app.root.children, [old]);
+    assert.equal(cleaned, 1);
+    scenes.destroy();
+});
+
 test('nested transitions are rejected and do not displace the scene being constructed', () => {
     const { app, scenes } = setup();
     const current = scenes.load('foundation-scene', (root) => {

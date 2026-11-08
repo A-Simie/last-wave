@@ -3,18 +3,18 @@
 Place licensed runtime assets in `characters/`, `animations/`, `environments/`, `props/`, `audio/`, `video/`, and `textures/`.
 Vite copies this directory into the build; use URLs relative to `import.meta.env.BASE_URL`.
 
-The foundation combines procedural geometry with the imported café set below. Record source, author, license, and attribution alongside each external asset. Inspect GLB bounds and animation clips before placement.
+The foundation combines procedural geometry with the imported café and beach sets below. Record source, author, license, and attribution alongside each external asset. Inspect GLB bounds and animation clips before placement.
 
 The starter's Ammo runtime and its license remain in `public/ammo/`.
 
 ## Runtime café set — LW-A003
 
-The furnished **Tideline** room and open street are built at startup. **Play story** begins the cinematic sequence. Imported furniture, plants, food, four table-centered fans, and animated people accompany project-created architecture, vehicles, carried umbrellas/briefcases, illustrations, signs, and Halloween branding. Creators, licenses, and media edits are listed in [art and media credits](credits.html), linked from **Save / load → Art & audio credits**.
+The furnished **Tideline** room and open street are built after **Launch game**. **Play story** begins the cinematic sequence. Imported furniture, plants, food, four table-centered fans, and animated people accompany project-created architecture, vehicles, carried umbrellas/briefcases, illustrations, signs, and Halloween branding. Creators, licenses, and media edits are listed in [art and media credits](credits.html), linked from **Save / load → Art & audio credits**.
 
 | Runtime location                          | Contents                                                       |      Bytes | Source/license                                                           |
 | ----------------------------------------- | -------------------------------------------------------------- | ---------: | ------------------------------------------------------------------------ |
 | `props/tideline/`                         | 28 self-contained prop GLBs                                    |  1,741,332 | KayKit, Kenney, Quaternius, Poly Haven; CC0                              |
-| `characters/`                             | Nine rigged GLBs, ten clips each; includes the suited commuter | 19,022,704 | Quaternius Universal Base Characters / Animation Library; CC0            |
+| `characters/` (café variants)             | Nine rigged GLBs, ten clips each; includes the suited commuter | 19,022,704 | Quaternius Universal Base Characters / Animation Library; CC0            |
 | `audio/tideline-afternoon.wav`            | Original 25.263-second music loop                              |  2,228,256 | Project-created synthesis, no external samples                           |
 | `video/climate-reporter.mp4`              | 15.4-second H.264/AAC clip, 960×540                            |    699,100 | Elizabeth Lee / VOA newsroom presentation; public domain, original voice |
 | `video/climate-reporter.jpg` / `.vtt`     | Poster and six synchronized caption cues                       |     53,499 | Derived from the credited footage/transcript                             |
@@ -27,6 +27,21 @@ The furnished **Tideline** room and open street are built at startup. **Play sto
 The TV's original footage/voice uses `openingBroadcast.json` cues and a canvas-backed screen. The excerpt is programme **00:55.25–01:10.65** of _The Inside Story — Confronting the Climate Crisis_, Episode 89. The fictional coastal bulletin remains separate story content in `opening.ts`. The older Navy footage/source specification and synthetic `coastal-bulletin.wav` are archived outside this runtime tree. Model assets preload once; media starts from Play story or an explicit checkpoint load and is released on scene replacement.
 
 All **30 originally supplied files** remain byte-preserved under `asset-library/`, including the former ten-model café set. `catalog.json` records their original filenames, current archive paths, and SHA-256 hashes. `cafe-selection.json`, `cafe-preparation.json`, and the audio/video manifests document the current runtime preparation. Source packs, unused files, and tooling are not deployed by Vite.
+
+## Runtime beach set — LW-S003
+
+| Runtime location                             | Contents                                                         |     Bytes | Source/license                                                |
+| -------------------------------------------- | ---------------------------------------------------------------- | --------: | ------------------------------------------------------------- |
+| `characters/beach{Teal,Coral,Gold,Blue}.glb` | Four swimwear rigs, seven compatible clips each, 512 px textures | 6,896,708 | Quaternius Universal Base Characters / Animation Library; CC0 |
+| `audio/seafront-afternoon.wav`               | Original 24-second surf/gull loop, mono 22,050 Hz PCM            | 1,058,444 | Project-created synthesis, no external samples                |
+
+The beach reuses the barista as its attendant and both principal character rigs. `BeachDressing.ts` creates the white-sand boardwalk, six striped umbrellas, seven loungers and citrus cart; five displayed drinks reuse the calibrated café `bottle` and `icedDrink` containers. The population is five stationary beachgoers, the attendant, two walkers and four swimmers, plus the two friends. Loungers are currently unoccupied.
+
+`beach-selection.json`, `beach-preparation.json` and `beach-inspection.json` preserve appearance choices, source/archive and runtime hashes, decoded geometry and clip/joint paths. The rigs include idle, talk, walk, seated, seated-talk, forward-swim and treading-water clips. `characterModels.ts` records uniform calibration plus per-model animated sand/waterline support heights; 21 posed-vertex samples and live joint-motion checks verify the used clips. The same height function drives the calm water surface and swimmers.
+
+`BeachWater.ts` owns dynamic, reusable surface/foam buffers. `BeachAudio.ts` owns source-free ambience until committed entry or explicit beach Load, shares the café sound preference, pauses with beach modals/background/developer pause, and exposes retry after an eight-second loading/stall watchdog. Runtime audio settings and hashes are in `asset-library/audio/beach-preparation.json`.
+
+The shared preload is now **41 containers: 28 props and 13 rigs**. Prepared GLBs total **27,660,744 bytes**. New models remain self-contained without additional decoder/runtime dependencies; assets preload once after Launch game and remain app-owned across area changes.
 
 ## Choosing additional art
 
@@ -70,4 +85,4 @@ Prefer one coherent environment kit and matching character proportions. Marketpl
 6. Attach the visual character to its gameplay root, calibrate its feet/scale/facing, and use `AnimatedCharacter.ts` with inspected, path-compatible clips. Verify non-root joint motion in the browser. Keep physics roots unscaled and author colliders independently of visual detail.
 7. Arrange the café, add materials and lighting, connect the existing interaction/quest IDs, and verify camera clearance, pickup visibility, animation, loading/reset cleanup, and browser performance. Preload assets before committing scene replacement; the current scene builder is synchronous.
 
-See [the source-library notes](../../asset-library/README.md) for offline preparation commands. Hardware performance and physical-device acceptance remain under LW-F002; the dedicated café-to-beach transition remains under LW-S002.
+See [the source-library notes](../../asset-library/README.md) for offline preparation commands. LW-S002 supplies the recoverable café/street-to-beach handoff; LW-S003 supplies beach exploration. Hardware performance and physical-device acceptance remain under LW-F002.
