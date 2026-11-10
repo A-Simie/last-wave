@@ -53,7 +53,8 @@ const snapshot = (count) => ({
     inventory: { itemIds: [SIGNAL_BOX_NOTE.id, STARTER_BAG.id, ...(count >= 6 ? [BEACH_PASSES.id] : [])] },
     opening: questAt(OPENING_QUEST, count >= 3 ? 3 : 2),
     entry: questAt(ENTRY_QUEST, count),
-    beach: questAt(BEACH_QUEST, 0)
+    beach: questAt(BEACH_QUEST, 0),
+    wave: 'before-wave'
 });
 const envelope = (state, version = SAVE_VERSION) => ({ version, savedAt: 1793952000000, state });
 
@@ -224,7 +225,7 @@ test('entry invariants reject skipped lessons, forged tickets, missing funds pre
         { ...snapshot(7), area: 'beach-arrival', playerPosition: BEACH_ARRIVAL_SPAWN },
         { ...snapshot(8), area: 'tideline', playerPosition: QUEUE_MARK },
         { ...snapshot(8), playerPosition: QUEUE_MARK },
-        { ...snapshot(8), playerPosition: [0, 1, -16] }
+        { ...snapshot(8), playerPosition: [0, 1, -36] }
     ])
         assert.equal(validateSaveState(envelope(invalid)).status, 'invalid', JSON.stringify(invalid));
     assert.equal(validateSaveState(envelope({ ...state, area: 'hospital' })).status, 'incompatible');

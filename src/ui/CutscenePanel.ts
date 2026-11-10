@@ -1,5 +1,8 @@
+import type { BeachAudioState } from '../episodes/episode-01/BeachAudio';
 import { OPENING_CUTSCENE } from '../episodes/episode-01/opening';
 import type { OpeningMediaState } from '../episodes/episode-01/OpeningMedia';
+import { eyelidClosure } from '../episodes/episode-01/WaveProgress';
+import type { WaveState } from '../episodes/episode-01/WaveProgress';
 import type { ScreenPoint } from '../scenes/ScreenProjection';
 import type { CutsceneState } from '../systems/CutsceneSystem';
 
@@ -18,6 +21,8 @@ export class CutscenePanel {
     private readonly events = new AbortController();
     private state: CutsceneState | null = null;
     private media: OpeningMediaState = { phase: 'idle', caption: '', muted: false, musicFailed: false };
+    private environment: BeachAudioState | null = null;
+    private readonly eyelids: HTMLElement;
 
     constructor(
         onAdvance: (cutsceneId: string, beatId: string) => void,
@@ -30,6 +35,7 @@ export class CutscenePanel {
         this.root.id = 'story-opening';
         this.root.setAttribute('aria-label', 'The Last Normal Day');
         this.root.innerHTML = `
+            <div class="wave-eyelids" data-wave-eyelids aria-hidden="true" hidden><div></div><div></div></div>
             <div class="cinematic-heading">
                 <p>LAST WAVE <span data-cutscene-title></span></p>
                 <button type="button" data-cutscene-skip>Skip intro</button>
@@ -51,6 +57,7 @@ export class CutscenePanel {
             </div>
         `;
         this.speech = this.root.querySelector<HTMLElement>('[data-speech]')!;
+        this.eyelids = this.root.querySelector<HTMLElement>('[data-wave-eyelids]')!;
         this.speaker = this.root.querySelector<HTMLElement>('[data-cutscene-speaker]')!;
         this.text = this.root.querySelector<HTMLElement>('#cutscene-text')!;
         this.subtitle = this.root.querySelector<HTMLElement>('[data-subtitle]')!;
@@ -98,6 +105,9 @@ export class CutscenePanel {
     get reducedMotion() {
         return this.motionInput.checked;
     }
+    get captionsEnabled() {
+        return this.captionsInput.checked;
+    }
     get muted() {
         return !this.soundInput.checked;
     }
@@ -132,6 +142,18 @@ export class CutscenePanel {
 
     renderMedia(media: OpeningMediaState) {
         this.media = media;
+        if (this.environment) {
+            const phase = this.environment.phase;
+            const failed = phase === 'blocked' || phase === 'unavailable' || phase === 'idle';
+            this.subtitle.hidden = true;
+            this.retryButton.hidden = !failed;
+            this.audioStatus.textContent = failed
+                ? 'Sound unavailable · captions remain available'
+                : phase === 'loading'
+                  ? 'Loading sound…'
+                  : '';
+            return;
+        }
         const broadcast = this.state?.cutsceneId === OPENING_CUTSCENE.id && this.state.beat.id === 'broadcast';
         const failed = media.phase === 'blocked' || media.phase === 'unavailable';
         this.subtitle.hidden = !broadcast || !media.caption || (!failed && !media.muted && !this.captionsInput.checked);
@@ -147,6 +169,22 @@ export class CutscenePanel {
                     : media.phase === 'loading'
                       ? 'Tuning in…'
                       : 'Coastal news';
+    }
+
+    renderEnvironment(state: BeachAudioState | null) {
+        this.environment = state;
+        this.renderMedia(this.media);
+    }
+
+    renderWave(state: WaveState | null) {
+        const blinking = state?.phase === 'blinking';
+        this.eyelids.hidden = !blinking && state?.phase !== 'falling';
+        if (this.eyelids.hidden) return;
+        const closure = blinking ? eyelidClosure(state.elapsed, this.reducedMotion) : 0;
+        this.eyelids.style.setProperty('--eyelid-closure', `${closure * 65}%`);
+        this.eyelids.style.backdropFilter = this.reducedMotion
+            ? 'none'
+            : `blur(${blinking ? 1.5 + closure * 2.5 : Math.min(2, state!.elapsed)}px)`;
     }
 
     setSpeakerAnchor(point: ScreenPoint | null) {

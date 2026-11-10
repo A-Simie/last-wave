@@ -3,12 +3,13 @@ import type { AppBase } from 'playcanvas';
 
 import type { GameAssets } from '../../core/AssetManager';
 import { CAFE_MODELS } from '../../data/cafeModels';
+import type { BoxDefinition } from '../../data/foundation';
 import { createModelInstance } from '../../scenes/createModelInstance';
 import { createTextSign } from '../../scenes/createTextSign';
 import { createBoxVisual as box, createMaterial, createStaticBody, createStaticBox } from '../../scenes/primitives';
 
 import { BEACH_DRINK_CART, BEACH_DRESSING_SOLIDS, BEACH_LOUNGERS, BEACH_UMBRELLAS } from './beachLayout';
-import { BEACH_ARRIVAL_GROUND, BEACH_ARRIVAL_SOLIDS } from './entryLayout';
+import { BEACH_ARRIVAL_GROUND, BEACH_ARRIVAL_SOLIDS, BEACH_SHORE_Z } from './entryLayout';
 
 export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAssets) => {
     const root = new Entity('beach-dressing');
@@ -30,11 +31,31 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
         material.update();
     }
     createStaticBox(root, BEACH_ARRIVAL_GROUND, materials.sand);
-    box(root, 'beach-distant-sand', [0, -0.12, -1.6], [180, 0.2, 28.8], materials.sand);
-    for (let z = -10; z < 11.5; z += 0.45)
+    box(root, 'beach-distant-sand', [0, -0.12, -12], [180, 0.2, 48], materials.sand);
+    createStaticBox(
+        root,
+        {
+            name: 'beach-submerged-sand',
+            position: [0, -0.41, -107],
+            size: [240, 0.2, 142]
+        },
+        materials.sand
+    );
+    for (let z = BEACH_SHORE_Z + 1; z < 11.5; z += 0.45)
         box(root, `arrival-board-${z}`, [0, 0.014, z], [5.5, 0.028, 0.42], materials.wood);
-    for (const definition of BEACH_ARRIVAL_SOLIDS.slice(1)) {
+    let gate: Entity | undefined;
+    const rails: BoxDefinition[] = BEACH_ARRIVAL_SOLIDS.slice(1).flatMap((definition) =>
+        definition.name === 'arrival-rear-rail'
+            ? [
+                  { ...definition, name: 'arrival-rear-west', position: [-25.6, 0.7, 11.7], size: [44.2, 1.4, 0.16] },
+                  { ...definition, name: 'arrival-rear-east', position: [25.6, 0.7, 11.7], size: [44.2, 1.4, 0.16] },
+                  { ...definition, name: 'arrival-evacuation-gate', size: [7, 1.4, 0.16] }
+              ]
+            : [definition]
+    );
+    for (const definition of rails) {
         const fence = createStaticBody(root, definition);
+        if (definition.name === 'arrival-evacuation-gate') gate = fence;
         const [width, height, depth] = definition.size;
         const horizontal = width > depth;
         for (const y of [-0.15, 0.55])
@@ -46,8 +67,9 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
                 materials.rope
             );
         const length = Math.max(width, depth);
-        for (let i = 0; i <= 10; i++) {
-            const p = -length / 2 + (length * i) / 10;
+        const count = Math.ceil(length / 2.8);
+        for (let i = 0; i <= count; i++) {
+            const p = -length / 2 + (length * i) / count;
             box(fence, `post-${i}`, horizontal ? [p, 0, 0] : [0, 0, p], [0.12, height, 0.12], materials.teal);
         }
     }
@@ -79,6 +101,7 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
             indices.push(start, start + 1, start + 2, start + 2, start + 1, start + 3, start + 2, start + 3, start + 4);
         }
         const mesh = new Mesh(app.graphicsDevice);
+        root.once('destroy', () => mesh.destroy());
         mesh.setPositions(positions);
         mesh.setNormals(calculateNormals(positions, indices));
         mesh.setIndices(indices);
@@ -152,10 +175,10 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
         post.addChild(sign);
         sign.setLocalPosition(0, definition.size[1] / 2, 0.07);
     }
-    for (const [index, x] of [-13, -6.5, 0, 6.5, 13].entries()) {
+    for (const [index, x] of [-42, -31.5, -21, -10.5, 0, 10.5, 21, 31.5, 42].entries()) {
         const buoy = new Entity(`beach-swim-marker-${index}`);
         root.addChild(buoy);
-        buoy.setLocalPosition(x, 0.05, -32);
+        buoy.setLocalPosition(x, 0.27, BEACH_SHORE_Z - 18);
         buoy.setLocalScale(0.44, 0.44, 0.44);
         buoy.addComponent('render', {
             type: 'sphere',
@@ -163,18 +186,25 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
             castShadows: false
         });
     }
-    for (const [index, x, z] of [
-        [0, -12.3, 6.4],
-        [1, 7.8, 7.4],
-        [2, -12, -4.1]
-    ]) {
-        box(root, `beach-towel-${index}`, [x, 0.015, z], [1.2, 0.025, 2], colors[index]);
+    const towels = [
+        [-12.3, 6.4],
+        [7.8, 7.4],
+        [-12, -4.1],
+        ...BEACH_UMBRELLAS.slice(6).map(([x, , z]) => [x + 2.6, z + 0.3])
+    ];
+    for (const [index, [x, z]] of towels.entries()) {
+        box(root, `beach-towel-${index}`, [x, 0.015, z], [1.2, 0.025, 2], colors[index % colors.length]);
         box(root, `beach-towel-stripe-${index}`, [x, 0.031, z + 0.65], [1.2, 0.012, 0.15], materials.cream);
     }
     const group = app.batcher!.addGroup('beach-static', false, 28);
     root.once('destroy', () => app.batcher?.removeGroup(group.id));
     root.findComponents('render').forEach((render) => {
-        render.batchGroupId = group.id;
+        if (!render.entity.isDescendantOf(gate!)) render.batchGroupId = group.id;
     });
-    return { cart };
+    return {
+        cart,
+        openEvacuation: () => {
+            gate!.enabled = false;
+        }
+    };
 };

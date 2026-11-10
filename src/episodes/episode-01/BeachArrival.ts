@@ -3,8 +3,10 @@ import type { AppBase } from 'playcanvas';
 
 import type { GameAssets } from '../../core/AssetManager';
 import type { Vector3Tuple } from '../../data/foundation';
+import type { AnimatedCharacter } from '../../player/AnimatedCharacter';
 import { createCompanion } from '../../player/CompanionController';
 import { isBeachArrivalPosition } from '../../scenes/FoundationState';
+import type { CutsceneSystem } from '../../systems/CutsceneSystem';
 import type { DialogueDefinition, DialogueSystem } from '../../systems/DialogueSystem';
 import type { InteractionSystem } from '../../systems/InteractionSystem';
 import type { QuestSystem } from '../../systems/QuestSystem';
@@ -16,8 +18,10 @@ import { BEACH_SHORE_MARK } from './beachLayout';
 import { createBeachLife } from './BeachLife';
 import { BeachNavigation } from './BeachNavigation';
 import { createBeachWater } from './BeachWater';
+import { createBeachWave } from './BeachWave';
 import { entryReply } from './entry';
 import { BEACH_FRIEND_SPAWN } from './entryLayout';
+import type { WaveCheckpoint } from './WaveProgress';
 
 export const createBeachArrival = (
     parent: Entity,
@@ -26,7 +30,10 @@ export const createBeachArrival = (
     player: Entity,
     interactions: InteractionSystem,
     dialogue: DialogueSystem,
-    quest: QuestSystem
+    quest: QuestSystem,
+    character: AnimatedCharacter,
+    cutscene: CutsceneSystem,
+    checkpoint: WaveCheckpoint
 ) => {
     const root = new Entity('beach-arrival');
     parent.addChild(root);
@@ -53,11 +60,26 @@ export const createBeachArrival = (
     const companion = createCompanion(root, assets, player, near, isBeachArrivalPosition);
     companion.obstacles = life.walkers.map(({ entity }) => entity);
     life.obstacles = [companion.entity];
+    const wave = createBeachWave(
+        root,
+        app,
+        assets,
+        player,
+        character,
+        companion,
+        life,
+        water,
+        dressing,
+        audio,
+        cutscene,
+        quest,
+        checkpoint
+    );
     const shoreline = new Entity('beach-shoreline-look');
     root.addChild(shoreline);
     shoreline.setPosition(...BEACH_SHORE_MARK);
     const open = (definition: DialogueDefinition) => {
-        if (!destroyed) dialogue.open(definition);
+        if (!destroyed && wave.calm) dialogue.open(definition);
     };
     interactions.targets = [
         {
@@ -114,11 +136,13 @@ export const createBeachArrival = (
     return {
         quest,
         audio,
-        setControlsEnabled: (enabled: boolean) => {
-            paused = !enabled;
+        wave,
+        setControlsEnabled: (enabled: boolean, presentationPaused: boolean) => {
+            paused = !enabled || !wave.calm;
             companion.paused = paused;
             life.paused = paused;
-            audio.setPaused(paused);
+            audio.setPaused(wave.calm ? paused : presentationPaused || wave.progress.checkpoint === 'after-blackout');
+            wave.setPaused(wave.calm ? paused : presentationPaused);
         },
         update: (dt: number) => {
             audio.update(dt);
@@ -138,6 +162,7 @@ export const createBeachArrival = (
             else companion.stop();
         },
         getNavigation: () => {
+            if (!wave.calm) return wave.getNavigation();
             const completed = quest.snapshot.completedObjectiveIds;
             const point = player.getPosition();
             const next = stops

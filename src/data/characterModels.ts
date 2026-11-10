@@ -8,12 +8,16 @@ export const BEACH_CHARACTER_MODELS = {
 };
 export type BeachCharacterId = keyof typeof BEACH_CHARACTER_MODELS;
 
+// Sole clearance across the ground's thin paving/boardwalk overlays, measured through each gait cycle.
+export const PLAYER_POSE_HEIGHTS = { idle: 0.033, walk: 0.04, jog: 0.029, sprint: 0.064, jump: 0.04 } as const;
+export const COMPANION_SPRINT_HEIGHT = 0.028;
+
 // Animated support heights relative to sand or the calm water surface.
 export const BEACH_POSE_HEIGHTS = {
-    beachTeal: { idle: 0.025, walk: 0.018, swim: 0.07, float: -0.035 },
-    beachCoral: { idle: 0.025, walk: 0.018, swim: 0.07, float: -0.035 },
-    beachGold: { idle: 0.015, walk: 0.011, swim: 0.035, float: -0.085 },
-    beachBlue: { idle: 0.015, walk: 0.011, swim: 0.035, float: -0.085 }
+    beachTeal: { idle: 0.025, walk: 0.018, sprint: 0.065, swim: 0.07, float: -0.035 },
+    beachCoral: { idle: 0.025, walk: 0.018, sprint: 0.065, swim: 0.07, float: -0.035 },
+    beachGold: { idle: 0.015, walk: 0.011, sprint: 0.069, swim: 0.035, float: -0.085 },
+    beachBlue: { idle: 0.015, walk: 0.011, sprint: 0.069, swim: 0.035, float: -0.085 }
 } as const;
 
 export const CHARACTER_MODELS = {
@@ -32,11 +36,11 @@ export const CHARACTER_MODELS = {
 export type CharacterModelId = keyof typeof CHARACTER_MODELS;
 
 export const CHARACTER_CLIPS = {
-    idle: 'Idle_Loop',
+    idle: 'Casual_Idle_Loop',
     talk: 'Idle_Talking_Loop',
-    walk: 'Walk_Loop',
-    jog: 'Jog_Fwd_Loop',
-    sprint: 'Sprint_Loop',
+    walk: 'Casual_Walk_Loop',
+    jog: 'Relaxed_Jog_Loop',
+    sprint: 'Relaxed_Sprint_Loop',
     jump: 'Jump_Loop',
     sitDown: 'Sitting_Enter',
     seated: 'Sitting_Idle_Loop',
@@ -45,13 +49,22 @@ export const CHARACTER_CLIPS = {
 } as const;
 
 export const BEACH_CHARACTER_CLIPS = {
-    idle: 'Idle_Loop',
+    idle: 'Casual_Idle_Loop',
     talk: 'Idle_Talking_Loop',
-    walk: 'Walk_Loop',
+    walk: 'Casual_Walk_Loop',
+    sprint: 'Relaxed_Sprint_Loop',
+    point: 'Interact',
     seated: 'Sitting_Idle_Loop',
     seatedTalk: 'Sitting_Talking_Loop',
     swim: 'Swim_Fwd_Loop',
     float: 'Swim_Idle_Loop'
 } as const;
 
-export type CharacterPose = keyof typeof CHARACTER_CLIPS | keyof typeof BEACH_CHARACTER_CLIPS;
+export const PLAYER_STORY_CLIPS = { fall: 'Death01' } as const;
+export const DRIVER_CLIPS = { driving: 'Traffic_Driving_Loop' } as const;
+
+export type CharacterPose =
+    | keyof typeof CHARACTER_CLIPS
+    | keyof typeof BEACH_CHARACTER_CLIPS
+    | keyof typeof PLAYER_STORY_CLIPS
+    | keyof typeof DRIVER_CLIPS;

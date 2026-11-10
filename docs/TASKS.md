@@ -1,6 +1,18 @@
 # Last Wave — Task tracker
 
-Last updated: **2026-11-08**. Latest completed task: **LW-S003 — Beach exploration**, including a populated white-sand beach, a following friend, three free-order discoveries, calm water, surf/gull ambience and version-4 checkpoints. Automated browser acceptance passed **79/79 checks**, with all **72 report-listed captures** reviewed; repository tests passed **88/88**. Hardware acceptance remains under **LW-F002**; the next story milestone is **LW-S004**. Earlier task records retain their original verification environments.
+Last updated: **2026-11-10**. Latest completed task: **LW-S004 — Wave, panic, and blackout**, including the playable evacuation/recovery, expanded city/beach, licensed Porsche traffic, relaxed rigged locomotion and version-5 checkpoints. Automated browser acceptance passed **116/116 core checks**, plus two supporting calibration/view checks; repository tests passed **100/100**. Closeout refreshed repository checks, the **13/13** production flow and the asset/deployment audit. Hardware acceptance remains under **LW-F002**. The story continuation point is **after-blackout**; hospital awakening requires a separate task. Earlier task records retain their original verification environments.
+
+Current UI task: **LW-UI001 — Cinematic Forest Login Experience**. Implementation and verification are recorded below. The supplied brief's S003/S004 assumptions are historical: S004 remains complete and no hospital scene is added.
+
+## Repository hygiene — 2026-11-10
+
+- [x] Expanded `.gitignore` to exclude the entire root `asset-library/`, case variants of `New Files/`, `Sign-login/`, coverage, tool caches, pnpm store, TypeScript build metadata and Windows desktop metadata. Existing dependency/build/log/environment/local-evidence exclusions remain.
+- [x] Removed 51 previously tracked library files from Git's index using `git rm -r --cached -- asset-library`. All local library files remain on disk. This stages their removal from future repository snapshots; it does not erase earlier Git history.
+- [x] Removed forest unit-test dependencies on local library PCM and preparation records. A small checked-in soundtrack metadata fixture verifies deployed MP3 bytes/hash, complete cue timings, explicit voices and shared scare timing. Actual decoded audio output remains covered by the existing browser runner; offline PCM energy checks are historical evidence, not fresh-clone requirements.
+- [x] Verified ignore rules for all requested directories, no tracked library files remain, local library files still exist, and runtime assets plus the lockfile remain included. Reviewed the configuration diff. No gameplay/runtime logic changed.
+- [x] Verification: `pnpm test` **109/109 passed**, `pnpm lint`, `pnpm typecheck` and `npm run build` passed using Node 22.23.4. Scoped Prettier and staged/unstaged `git diff --check` passed. Browser checks were not repeated because runtime behavior did not change.
+
+Next action: commit the ignore rules and staged library removals together when ready. If removing already-pushed large files from Git history is wanted, scope that separately; this change affects future snapshots only. Continue LW-UI001 manual acceptance as recorded below.
 
 ## Project checklist
 
@@ -33,11 +45,16 @@ Checked items have working implementations and verification recorded below. Phys
     - [x] Halloween identity — pumpkin/bat/web wordmark, pumpkin favicon, and black branded startup screen.
 - [x] Guided street and beach entry — lessons, pedestrian directions, solid companion, entrance, officer, passes, queue, and recoverable arrival verified under LW-S002.
 - [x] Beach exploration — both characters, white sand, umbrellas, loungers, swimwear-clad beachgoers/swimmers, chilled drinks, free-order discoveries and ambience verified under LW-S003.
-- [ ] Wave and evacuation — retreat, fleeing birds, pointing crowds, wave reveal, panic, fall, blinking blackout, and black loading under LW-S004.
+- [x] Wave and evacuation — retreat, fleeing birds, pointing crowds, wave reveal, playable evacuation, separation, fall, blinking blackout, and recoverable black ending under LW-S004.
+- [x] Expanded city/beach and relaxed locomotion — open beach access/shoreline, larger populations, licensed Porsche traffic and speed-matched rigged movement under LW-S004.
 - [ ] Hospital awakening and investigation.
 - [ ] Hospital escape puzzle.
 - [ ] Kiroween City quests.
 - [ ] Episode-ending transmission.
+
+### Entry experience
+
+- [ ] LW-UI001 — Cinematic forest login: automatic voiced entrance, richer scene, synchronized bat scare and doorway fix passed automated acceptance; audible/acting review and physical-device checks remain.
 
 ### Social game foundation
 
@@ -172,7 +189,7 @@ Status: **Supported-Node verification complete; hardware checks pending**. Owner
 - [ ] Check the preserved gamepad mappings, low-frame-rate movement, and representative-device performance.
 - [ ] Record device/browser versions, outcomes, and any concrete follow-up fixes here.
 
-Use the current LW-S002 manual route for launch/media gates, the furnished café, street lessons, admission, arrival and retained checkpoint. Prepend the portable Node directory documented there to PATH; the workspace's default Node installation has not been upgraded.
+Use the LW-S004 manual route below, including earlier launch/media gates, lessons, admission and discoveries. Record physical-device audio, controls and performance for the expanded world and evacuation. Prepend the portable Node directory documented there to PATH; the workspace's default Node installation has not been upgraded.
 
 ## LW-C001 — Reusable NPC dialogue
 
@@ -833,7 +850,7 @@ Reports are **`last-wave-entry-final-{launch,gameplay,checkpoints,recovery,touch
 7. Switch tabs/focus during media, a modal and loading; return to the same suspended state. Check developer pause/slow-motion/render settings survive. Repeat on compact portrait/landscape layouts and check readable text, visible destinations and ≥44 px controls.
 8. Record physical desktop/mobile devices, gamepads, Firefox/Safari, low-frame-rate movement and representative performance under **LW-F002**. Headless Chrome and touch emulation do not establish hardware/audio-output or cross-engine acceptance. Hot-module replacement was code-reviewed; its live trigger was not exercised.
 
-**Handoff at completion:** complete **LW-F002** hardware acceptance using this route, then extend the arrival composition under **LW-S003**. That beach implementation and its acceptance are now recorded below; LW-S004's wave/blackout remains the next story task.
+**Handoff at completion:** complete **LW-F002** hardware acceptance using this route, then extend the arrival composition under **LW-S003**. Subsequent beach and wave implementations are recorded below.
 
 ## LW-S003 — Beach exploration
 
@@ -925,24 +942,223 @@ Evidence lives under **`C:\Users\HP\AppData\Local\Temp\opencode\`**: `last-wave-
 
 Physical mobile/desktop devices, physical gamepads, Firefox/Safari, hardware audio quality/output, sustained frame-time/memory budgets and low-frame-rate collision acceptance remain under **LW-F002**. Headless Chrome and touch emulation establish functional/layout coverage, not representative device performance. Live HMR remains code-reviewed rather than exercised. The bounded placeholder-dressed beach has ambient swimming and empty loungers; player swimming/seating and carried-drink animations are outside this milestone.
 
-**Next concrete action:** complete **LW-F002** device/browser/performance acceptance using the route above. The next selectable story task is **LW-S004**: define and test the warning → evacuation → fall → blinking blackout state sequence at the beach continuation point, then layer its water/crowd/camera/audio presentation. The hospital remains a separate later scene.
+**Handoff at completion:** complete **LW-F002** device/browser/performance acceptance using the route above, then implement the selected **LW-S004** continuation. Its completed warning/evacuation/blackout record follows. The hospital remains a separate later scene.
 
 ## LW-S004 — Wave, panic, and blackout
 
-Owner: **Gameplay/cinematic engineering**. Priority: **P1**. Dependency: **LW-S003**. Status: **Pending; not implemented**.
+Owner: **Gameplay/cinematic engineering**. Priority: **P1**. Dependency: **LW-S003**. Status: **Complete; automated browser acceptance passed**.
 
-- [ ] Guide attention through **retreating water → fleeing birds → pointing crowds → a large approaching wave**, using clear prompts and authored camera beats.
-- [ ] Add escalating environmental sound, crowd reactions, camera movement, and a clear evacuation route to higher ground; keep the source's danger cue and fictional-anomaly continuity.
-- [ ] Stage crowd panic, the friend's separation, the player's fall, a lowered viewpoint, blinking eyelids closing, and **another black loading screen** at the end of consciousness.
-- [ ] Coordinate animation, wave/water effects, crowd movement, sound and camera timing for believable tension. Carry captions/mute and steady/reduced-motion preferences through every beat.
-- [ ] Define recoverable pre-event/post-blackout checkpoints; test ordered triggers, retry/replay, pause/visibility changes, input restoration, and complete resource teardown. The hospital remains the next separate story scene.
+### Completed implementation
 
-**Next implementation step:** define and verify the warning/evacuation/blackout state sequence before layering the water, crowd, camera, eyelid, and audio presentation.
+- [x] Added explicit **Continue story** after all three beach discoveries. Reader-paced **retreating water → fleeing birds → pointing crowds → wave reveal** beats carry the source's higher-ground danger cue. Warning skip hands off to playable evacuation.
+- [x] Added green-arrow navigation, three ordered route gates, an opened evacuation gate and a solid 4 m-high dune ramp. The crowd separates the friend at the dune approach; reaching the final gate stages a rigged fall, lowered viewpoint, blinking eyelids, an unidentified approaching figure and black loading.
+- [x] Added reusable wave/foam and gull geometry, crowd point/run poses, swimmer-to-run transitions, and procedural rumble/wind, whistle and heartbeat. All **33 evacuees** can reach higher ground, yielding to the player/friend and one another. Captions, shared mute, steady/reduced-motion presentation, pause and retry span the sequence.
+- [x] Added a recoverable ending with **Save blackout checkpoint**, **Replay wave & evacuation**, **Return to the calm beach** and **Save / load menu**. Mid-run **Retry wave** rebuilds the warning. Replay/recovery retain discoveries, passes and the manual slot; failed construction retains the current scene with usable recovery.
+- [x] Added **version-5 checkpoints** with safe `before-wave` / `after-blackout` boundaries. Mid-wave/offshore capture projects onto clear beach ground. Versions 1–4 validate historical geometry before migrating, preserving valid old progress and relocating only newly obstructed positions. No automatic checkpoint write was added.
+- [x] Expanded the city to **320×240 m**, two avenues, **39 neighboring buildings, 20 pedestrians, eight Porsche cars and four drivers**. Expanded the beach to **96×48 m**, **18 umbrellas, 31 loungers, 17 stationary beachgoers, eight walkers, eight swimmers and one attendant**. Removed the entrance cross-gate/rear fence and shoreline fence; the open shallows have ground support.
+- [x] Adapted the supplied PlayCanvas Porsche reference with **Lionsharp Studios / CC BY-SA 4.0** attribution, preserved source, calibrated wheel nodes, fixed calipers, independent clear-coated paint and fitted rigged drivers. Offline reduction retains **52,568 of 652,660 source triangles**.
+- [x] Rebuilt all **13 rig GLBs** with relaxed full-body locomotion: upright breathing posture, open hands, gentle alternating arm swings and authored strides. Shared speed matching, gait hysteresis, phase-preserving blends and post-physics grounding smooth idle/walk/jog/sprint. The stock controls, camera and ledge shim remain the movement foundation.
+- [x] Corrected immediate fall-to-blink visibility and narrow-screen audio-failure layout after visual review. Refreshed the affected browser suites and corrected a supplemental camera fixture before accepting its front/side movement captures.
+- [x] Updated architecture, task/context handoff, narrative continuity, play instructions, asset preparation and shipped credits. Added no runtime dependencies.
+
+### Files and decisions
+
+- State/content: `src/episodes/episode-01/{WaveProgress,wave,waveLayout}.ts`. `WaveProgress` owns `calm → warning → evacuating → separated → falling → blinking → loading → complete`; progression is independent of rendering. Warning beats are reader-paced; the run has no chase timeout. Fall/blink/loading use **2.4 / 6.4 / 1.2 game seconds**.
+- Presentation: `BeachWave.ts`, `WaveSurge.ts`, `WaveBirds.ts`, `WaveCrowd.ts`, `WaveCamera.ts`, `WaveAudio.ts`, `EvacuationRoute.ts`, `src/ui/{WaveEndPanel,CutscenePanel,GameHud}.ts` and `game.css`. One shared `CutsceneSystem` retains cinematic exclusivity; gameplay locking is separate from presentation pause.
+- Integration/recovery: `src/core/{Game,AssetManager}.ts`, `src/scenes/{FoundationScene,FoundationState}.ts`, `src/systems/SaveSystem.ts` and `CheckpointPanel.ts`. `Game.ts` rebuilds replay/recovery through the existing rollback-safe `SceneManager`. Stable beach recovery uses **`[0, 1.04, -25.8]`**; loading after-blackout returns to the ending panel.
+- World/traffic: `src/data/{foundation,vehicleModels}.ts`, `CafeSurroundings.ts`, `StreetLife.ts`, `StreetVehicle.ts`, `BeachEntrance.ts`, `BeachDressing.ts`, `BeachLife.ts`, `BeachWater.ts`, `BeachNavigation.ts`, `beachLayout.ts` and `entryLayout.ts`. Historical geometry remains explicit for old checkpoints.
+- Movement/preparation: `src/data/{locomotion,characterModels}.ts`, `src/player/{AnimatedCharacter,PlayerAnimation,PlayerController,CompanionController}.ts`, `EntryActors.ts`, `scripts/{casual_animation.py,prepare-cafe-assets.py,prepare-beach-assets.py,prepare-traffic-assets.mjs}` and their asset manifests/inspections.
+- Quaternius UAL1 idle/formal-walk profiles retain **22% finger curl** and remove **65% mean spinal hunch**; jog/sprint retain **30% curl**. Runtime uses baked compatible tracks rather than individual-body-part rotation. `PlayerAnimation.postUpdate()` reads completed physics/grounding. Controller tuning is **`speedGround: 20`, `sprintMult: 4.5`**; all input/camera mappings remain stock.
+- Driver seat recline is **−24°**, with **24° baked neck counter-rotation**. `PORSCHE_DRIVER_SEATS` and animated support tables own calibration. Grounding acceptance uses decoded skinned vertices with **bone-world × inverse-bind** matrices and exact collider-top/overlay heights.
+
+### Verification record
+
+Automated acceptance finalized on **2026-11-09**, with a closeout refresh on **2026-11-10**. Environment: Windows, portable **Node 22.23.4**, PlayCanvas **2.23.3**, headless Chrome **156.0.8078.80**, production preview **`http://127.0.0.1:4178/`**. Browser verification ran with **`--mute-audio`**; every isolated browser closed in the runner's `finally` block.
+
+- Repository tests — **100/100 passed** after final runtime/UI corrections. Coverage includes wave prerequisites/order/timing/skip/destruction, v1–v5 migration and ownership, historical geometry conflicts, expanded routes and the existing dialogue/quest/inventory/scene contracts.
+- TypeScript, ESLint and production build — **passed** using the supported Node binary. Current runtime chunks: **`Game-TjUHTAsk.js`**, **`index-C0OeniTa.js`**, **`index-BTLh_8cT.css`**.
+
+| Browser suite            |      Checks | Coverage                                                                                                             |
+| ------------------------ | ----------: | -------------------------------------------------------------------------------------------------------------------- |
+| All rigs                 |       13/13 | Each rig's bound relaxed walk, upright torso, hands, stride and ground contact                                       |
+| Locomotion               |         8/8 | Player idle/walk/jog/sprint, speed synchronization, blending and support                                             |
+| Wave poses               |         3/3 | Grounded point/run/fall presentation and swimmer transitions                                                         |
+| Real-input controls/gait |         7/7 | Walk/sprint/stop, camera-relative movement, jump/landing, zoom and modal handoff                                     |
+| Companion                |         5/5 | Solid following, catch-up, waiting/yielding, route continuity and pause                                              |
+| Porsche traffic          |       11/11 | Calibration, wheel-only rotation, paint isolation, drivers, yielding/wrapping and disposal                           |
+| Expanded world           |         8/8 | Buildings/populations, both street extensions, open barriers/shore, admission, discoveries and saves                 |
+| Wave flow                |       13/13 | Explicit start, four warning beats, actual gate/ramp movement, separation, fall, blink and saved ending              |
+| Recovery/pause           |       15/15 | Skip/retry/replay, safe snapshots, mute/steady, modal/developer/background pause, failed reconstruction and teardown |
+| Crowd                    |         3/3 | All 33 reach safety, eight swimmers become runners, blocking/resumption and clearance                                |
+| Wave audio               |       12/12 | Lazy graph, escalation/filter/pulse, shared mute, pause, failed/late resume, retry/watchdog and cleanup              |
+| Touch/layout             |       18/18 | Portrait/landscape captions, sound retry, actual drags/gates, ≥44 px controls, ending and save/recovery              |
+| **Core total**           | **116/116** | **No unexpected console, shader, asset or network issues**                                                           |
+
+- Supporting checks — **1/1 seated/vehicle calibration** with seven captures and **1/1 supplemental gait views** with four captures. The corrected gait fixture disables the stock camera controller and asserts a stable inspection camera, replacing the earlier invalid sightlines.
+- Measured walking is approximately **1.34 m/s**, sprint **7.55 m/s**, torso lean **7°**, arm/leg correlation **−0.856**, and finger extension **0.97**. Porsche steering grip gaps are approximately **0.0155 / 0.0248 m**. These are sampled acceptance observations, not device-performance claims.
+- Final flow/recovery/touch refresh passed **46/46** after the synchronous player-hide and backed audio-status corrections. Other suites retain their accepted geometry/animation/runtime evidence; earlier vehicle acceptance used `Game-O0Z4UVU7.js`, and most preceding core suites used `Game-B_y6bsdt.js`. Reports retain exact timestamps. Expected issues are canceled retired media and the deliberately injected **`Error: wave builder injected`** rollback failure.
+- Asset audit passed **94 unique file size/SHA-256 records**, including **30 supplied originals**, all **42 GLB structures/calibrations/animation target paths**, Porsche attribution and WAV format. GLB totals: props **1,741,332**, café rigs **19,147,644**, beach rigs **7,170,752**, Porsche **2,656,804** — **30,716,532 bytes**.
+
+Normal city observations: **564 registry assets / 171 textures / 130 bodies and colliders / 2,144 renders / 40 animations**; repeated replacement retained **12,026,396 vertex bytes / 2,207,796 index bytes**. Beach replay/recovery retained **92 bodies/colliders / 944 renders / 37 animations / four targets / 93 persistent textures / 538 geometry buffers / 10,302,532 vertex bytes / 1,923,324 index bytes**. Transient skin palettes/dynamic batches can change on activation, so checks also verify persistent resource identity and live ownership.
+
+#### 2026-11-10 closeout
+
+- Re-ran repository tests (**100/100 passed**), TypeScript, ESLint and production build successfully with **Node 22.23.4** and the commands below. Rebuilt after formatting the shipped credits; runtime chunk names remain those recorded above.
+- Fresh production wave flow passed **13/13 checks**, producing **14 captures**. Actual movement crossed the inland/separation gates and climbed the ramp; fall/blink/loading reached the recoverable ending and saved the version-5 **after-blackout** boundary. Reviewed representative wave, evacuation/separation, fall/blink and ending captures. No unexpected console, shader, asset or network issues; the one recorded issue is expected cancellation of retired beach ambience. The muted isolated browser closed successfully. Report timestamp: **`2026-11-10T07:38:18.433Z`**.
+- Fresh asset/deployment audit passed **94 unique size/SHA-256 records**, **30 supplied originals**, **42 GLBs / 30,716,532 bytes**, and byte-for-byte deployment of **61 public files**. Report timestamp: **`2026-11-10T07:38:24.566Z`**.
+- Closeout edits cover README/task-table formatting, shipped credits wrapping and this verification handoff. Scoped Prettier and `git -c core.safecrlf=false diff --check` passed. Full Prettier reports only the previously recorded **`pnpm-lock.yaml`** formatting finding.
+- Changes remain **uncommitted**. Preserve the unrelated `Sign-login/` work. The next action and hardware/browser/audio/performance limitations remain recorded below under **LW-F002**.
+
+### Reproduction commands
+
+Repository script equivalents, executed with the supported Node binary:
+
+```powershell
+$env:PATH = "$env:LOCALAPPDATA\Temp\opencode\node-v22.23.4-win-x64;$env:PATH"
+node --test tests/*.test.mjs
+node node_modules/typescript/bin/tsc --noEmit
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vite/bin/vite.js build
+node node_modules/prettier/bin/prettier.cjs --check src tests docs README.md AGENTS.md index.html vite.config.ts package.json public/assets asset-library scripts
+node node_modules/prettier/bin/prettier.cjs --check .
+git -c core.safecrlf=false diff --check
+```
+
+Serve production in a separate terminal:
+
+```powershell
+node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4178 --strictPort
+```
+
+Workspace-local browser suites run sequentially inside the muted runner:
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4178/'
+$env:VERIFY_PREFIX = 'last-wave-grounded'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-run-muted.mjs" last-wave-all-rigs.mjs last-wave-locomotion-verify.mjs last-wave-wave-poses.mjs last-wave-controls-gait.mjs last-wave-entry-companion-verify.mjs last-wave-vehicle-verify.mjs last-wave-gait-views.mjs
+$env:VERIFY_PREFIX = 'last-wave-final'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-run-muted.mjs" last-wave-wave-world.mjs last-wave-wave-flow.mjs last-wave-wave-recovery.mjs last-wave-wave-crowd.mjs last-wave-wave-audio.mjs last-wave-wave-touch.mjs
+$env:VERIFY_PREFIX = 'last-wave-closeout'
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-run-muted.mjs" last-wave-wave-flow.mjs
+node "$env:LOCALAPPDATA\Temp\opencode\last-wave-artifact-check.mjs"
+python "$env:LOCALAPPDATA\Temp\opencode\last-wave-review-final-captures.py" grounded
+python "$env:LOCALAPPDATA\Temp\opencode\last-wave-review-final-captures.py" final
+```
+
+Evidence is under **`C:\Users\HP\AppData\Local\Temp\opencode\`**: `last-wave-grounded-wave-{all-rigs,locomotion,poses,controls-gait,gait-views}-verification.json`, `last-wave-grounded-{companion,vehicles}-verification.json`, `last-wave-seated-vehicle-calibration-verification.json`, `last-wave-final-wave-{world,flow,recovery,crowd,audio,touch}-verification.json`, their PNG/contact sheets and `last-wave-{grounded,final}-capture-index.json`. `last-wave-artifact-verification-pre-build.json` retains earlier deployment hashes for reconciliation. These harnesses/evidence are workspace-local; repository checks and the manual route are portable to a fresh clone.
+
+The **2026-11-10** refresh is recorded in **`last-wave-closeout-wave-flow-verification.json`**, its **14 `last-wave-closeout-wave-flow-*.png` captures**, and **`last-wave-artifact-verification.json`** in the same directory.
+
+### Manual acceptance, limitations, and next action
+
+1. Launch and play the café through belongings, actual control practice, pedestrian directions, officer, two passes and queue. Inspect the expanded streets, cars/drivers and relaxed walking from front/side; try walking, sprinting, stopping, diagonal movement, orbit, zoom and jumping. Check traffic yielding and open entrance barriers.
+2. Enter the populated beach. Walk both wings, boardwalk/furniture aisles and supported shallows; inspect feet, relaxed hands, swimmers and water. Complete friend, drinks and shoreline discoveries in any order. Confirm the warning waits for **Continue story**.
+3. Save the calm beach, then read all four warning beats. Test sound/CC/steady controls and **Skip to evacuation**. Turn inland, follow green arrows through Z=0 and the dune approach, and climb the ramp. Check crowd clearance, swimmer transitions, friend separation and final-gate fall.
+4. Watch the rigged fall, ground-level figure, eyelid closure and black loading. Try advancing directly to blink and skipping to the ending. Confirm no player body obscures the viewpoint and all ending buttons are usable.
+5. Save after-blackout, restart/reload and explicitly Load. Close the menu to recover the ending. Replay the wave, return to the calm beach, save during evacuation, and load again; earlier quests/items/discoveries remain, mid-wave saves restart safely, and only explicit saving replaces the slot. Exercise failed storage/reconstruction and retry.
+6. Open journal/checkpoint during evacuation; switch tabs/focus and exercise developer pause/slow motion. Motion, physics and sound must resume from the same state. Block audio resume once and recover through sound retry, with readable captions throughout.
+7. Repeat on physical desktop/mobile and gamepad, including narrow portrait/landscape, ≥44 px controls, backed sound-failure text, right-look/left-move gestures and touch evacuation. Record frame-time/memory and hardware audio observations under **LW-F002**.
+
+**Unverified:** physical devices/gamepads, Firefox/Safari, hardware audio output/quality, sustained representative frame-time/memory budgets, low-frame-rate collision and live HMR. Browser automation was muted and used headless Chrome/touch emulation. The beach has ambient swimming and empty loungers; player swimming/seating and carried-drink animation remain future work. The implemented story ends at blackout.
+
+**Next concrete action:** complete **LW-F002** physical-device/browser/audio/performance acceptance with this route. The next selectable story work is a separate hospital-awakening/investigation task, starting from the version-5 **after-blackout** boundary and the preserved Episode 1 design source.
 
 ## Deferred backlog
 
-The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). The foundation scene now includes Tideline/open street and populated beach exploration, with version-4 checkpoints for both areas. LW-S002 supplies tutorials/admission; LW-S003 supplies the relaxed beach interval. LW-S004 retains the wave/blackout continuation. Hospital, Kiroween City, multiplayer and backend work follow their own milestones.
+The unchecked roadmap items remain future work. Their module boundaries are recorded in [ARCHITECTURE.md](ARCHITECTURE.md). The foundation includes the expanded Tideline/open street, populated beach and wave/evacuation through recoverable blackout, with version-5 checkpoints. LW-S002 supplies tutorials/admission; LW-S003 the relaxed beach interval; LW-S004 its explicit continuation. Hospital, Kiroween City, multiplayer and backend work follow their own milestones.
 
 ## Completion protocol
 
 After each task, record its ID, owner, status, files/decisions, exact verification commands and outcomes, outstanding limitations, and the next concrete action here. Update architecture for changed ownership/contracts. Keep narrative changes in the design references. Mark unchecked behavior explicitly so the next contributor can continue immediately.
+
+## LW-UI001 — Cinematic Forest Login Experience
+
+Owner: **Lead game engineering**. Priority: **P1**. Dependency: existing LW-S004 foundation and supplied login brief/assets. Status: **Revised voiced entrance and doorway fix implemented; automated acceptance passed. Audible/acting review and physical-device acceptance remain open**. Speech is bundled neural synthesis; the TV retains its separate original human recording.
+
+### Current revision — voice, action, automatic entry and café doorway
+
+- [x] Removed the Launch game requirement. The forest opens automatically in the single AppBase; only its two shared rigs load initially. Continue locally prepares the rest of the game set, reusing those assets, before constructing Tideline. Startup and local-entry failures retain retry.
+- [x] Replaced caption-only dialogue and unreliable browser voice choice with a synchronized 44-second MP3: explicit **am_michael male / af_bella female** Kokoro neural voices. Source script, individual PCM lines, model hashes, Apache-2.0 weights/license and MIT offline tool provenance are retained. No speech-generation package ships in the browser.
+- [x] Added in-scene Play with sound / Watch muted recovery for browser autoplay policy. Dialogue, captions and animation follow actual media time when audible; skip, replay, mute, focus pause/resume and cleanup stay coordinated. Returning/reduced-motion visits reach the board; the new `last-wave.forest-seen.v2` lets earlier silent-intro viewers see the revision.
+- [x] Expanded selected supplied scenery from nine to **32 calibrated models**: varied trees/bare trees, grass, rocks, bushes, fences, coffin, graves/slabs, pumpkins, lantern poles, candles and skulls. Added leaf-litter ground, gentle tree sway, lantern glow, authored camera travel/close-ups, speaking gestures, look-up, duck/startle and exit/look-back action. Phone/spotlight use the real left hand and correct local light direction.
+- [x] Eye pairs and bats share measured anchors. Curved flights start at those exact positions, with near-camera and deeper paths. A dedicated impact, wings and cry coincide with the **24-second** burst; the camera recoils with the performers.
+- [x] Fixed the solid friend's café route ending in the door lane. `CAFE_OUTSIDE_WAIT` is beside the exit; the street route continues from that same mark. Player movement remains physical. The browser loads the departure checkpoint, chooses Head outside and uses actual W input to walk beyond Z=7.1 while the friend clears the passage.
+- [x] Organized originals, runtime assets, voice sources and generated evidence; updated architecture, credits and continuation notes. ESLint excludes ignored offline source-tool dependencies. Existing S004 changes remain intact and uncommitted.
+
+Current runtime payload: **35 files / 8,106,010 bytes** (32 scenery GLBs, one eight-clip animation GLB, ambience WAV, story MP3). Desktop uses 42 background trees / 20 bats; mobile uses 26 / 12, plus four foreground trees. No runtime dependency was added. The unlicensed standalone wind MP3 remains preserved only. The full city/beach game set is deferred until local entry.
+
+Current verification, supported **Node 22.23.4**, production preview on port **4180**, muted isolated Chrome:
+
+- `pnpm test`: **109/109 passed**, including dialogue PCM/cue checks, explicit voice assignments, shared scare timing, eye-origin flight paths and doorway clearance/route continuity.
+- `pnpm typecheck`, `pnpm lint`, `pnpm build`: passed. Windows sandbox subprocess/read limitations required supported-Node checks outside the sandbox; offline voice tools remain excluded from lint scope.
+- `node scripts/verify-forest.mjs`: **22/22 groups passed**, **zero unexpected console/shader/network issues**. Covers automatic startup/deferred assets, real female/male media decoding and nonzero analyser output, scare impact, focus resume, animated joints/hand attachment, timeline/forms, mute/replay/skip, portrait/landscape, café handoff/resource cleanup, actual doorway traversal, street/beach checkpoints, teardown, returning/reduced-motion visits and deliberate missing-scenery recovery. Expected injected loader failures are recorded separately. The isolated browser closed in `finally`.
+- Evidence: `verification.local/forest/report.json` and numbered PNGs. Forest walking/eyes/bat/foreground captures were visually reviewed. Browser sound was muted by project policy: analyser evidence proves decoded signal, not hardware listening or a subjective naturalness rating.
+- Source/output audit: **39/39 SHA-256 records passed**; **35/35 deployed forest files match** the prepared runtime files. Scoped Prettier and `git diff --check` passed; the existing full-repository lockfile formatting limitation remains. The doorway capture shows the player beyond the clear exit.
+
+**Next action:** review the audible voices/mix and acting with the user, then finish LW-F002 hardware audio, physical touch/gamepad, Firefox/Safari and representative frame-time/memory checks. Stylized supplied models remain stylized; no photorealistic or human-actor claim is made. Account integration and hospital continuation remain separate milestones.
+
+### First-pass implementation record (superseded by the revision above)
+
+### Original implemented work
+
+- [x] Inspected bootstrap, scene replacement, controller/camera, rig calibration/animation, shared asset loading, local saves, tests and current story status. The brief's S003/S004 assumptions were outdated; S004 and its after-blackout ending remain intact.
+- [x] Added an actual 3D forest to the existing AppBase, before gameplay construction. The initial Launch game gate remains; there is no second renderer/application and no new gameplay checkpoint or chapter.
+- [x] Added a deterministic 35-second, six-phase timeline: darkness, unidentified figures, eyes, spatial bat scare, forest reveal, chain-hung signboard descent/settling. Visible Skip intro, Escape, replay, returning visits and reduced motion lead to the same interactive form.
+- [x] Reused two calibrated Quaternius rigs and existing Halloween wordmark. Prepared compatible torch idle, crouch and startle clips plus speed-matched phone walking; the source torch uses the **left** arm. Phone and spotlight attach to that actual hand. Clips bind to existing paths without scaling bones or duplicating character geometry.
+- [x] Added trees, rocks/bushes, uneven ground mounds, leaves, skulls, gravestones, lantern, pumpkins, webs, low mist, physical eye glints and bounded animated bats. Cold/desaturated moonlight contrasts with local orange light. Mist/lantern motion continues behind the settled form; reduced motion stays steady.
+- [x] Added real HTML labels/inputs, autocomplete, password visibility, keyboard focus, status feedback, sign-in/account-creation boundary, touch-sized local entry and scrollable narrow/short layouts. No credentials, fake sessions, invented endpoints or browser secrets were added.
+- [x] Kept **Continue locally** functional through the existing fresh café route; explicit checkpoint loading retains saved area/progress. No authentication backend exists: sign-in and account creation clearly report that accounts are not connected. A typed async adapter is ready for a real service.
+- [x] Added opt-in TuneSeeker ambience, spatial synthesized footsteps and restrained generated tension cues. Muting, focus/background/zero-time pause and destruction release audio. Captions carry dialogue; blocked audio never prevents entry.
+- [x] Added graceful scenery-load fallback, game-entry retry, resource/listener cleanup and restoration of ambient/fog settings. Fixed missing normals in procedural effects and enabled the shared gameplay camera's scene-color texture required by the existing Porsche lights.
+- [x] Organized the supplied files under `asset-library/forest/originals/`, preserving their bytes and recording SHA-256 hashes. Added preparation, calibration/inspection, licenses and shipped credits. Runtime assets are separated under `public/assets/forest/`.
+- [x] Updated architecture, README and continuation context. No pre-existing S004 work was reverted or committed.
+
+### Assets and performance
+
+| Item                                                           | Source/license                                           | Runtime use                                                          |
+| -------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------- |
+| Three tree variants, rock, bush                                | Supplied KayKit Forest Nature Pack; included CC0 license | Five self-contained GLBs; palette saturation reduced to 25%          |
+| Pumpkin lantern, gravestone, lantern, cat skull                | Supplied Asset Quest Halloween Kit; included CC0 license | Four selected static FBX meshes converted to calibrated GLBs         |
+| Forest ambience 05 (`802063`)                                  | Supplied TuneSeeker Freesound pack; included CC0 license | One looping WAV, loaded only after explicit sound activation         |
+| Two unidentified figures                                       | Existing Quaternius patronBeard/patronLong rigs; CC0     | Shared existing geometry/materials                                   |
+| Torch/crouch/startle/phone-walk tracks                         | Existing Quaternius Universal Animation Library; CC0     | One animation-only GLB; phone-arm tracks retimed to walking duration |
+| Bats, webs, leaves, mounds, phone, signboard and cue synthesis | Project-created                                          | Bounded procedural meshes, DOM/CSS board and Web Audio               |
+| Standalone fronbondi wind MP3                                  | No accompanying license record                           | Preserved only; not deployed                                         |
+
+The **11 new runtime files total 5,603,376 bytes**. No runtime dependencies were added. Mobile uses 26 background trees, 12 bats and four mist volumes; desktop uses 42, 20 and seven respectively. Only desktop moonlight casts a 1024-pixel shadow map; pumpkin and phone lights do not cast shadows. Imported meshes/materials are reused between instances and entry-owned containers unload on handoff. Existing shared game preloading remains approximately 30.7 MB before entry; deferring unrelated city/beach assets is a later loading optimization. No representative-device frame budget is claimed.
+
+References: supplied [PlayCanvas ESM scripts directory](https://github.com/playcanvas/engine/tree/main/scripts/esm), installed **2.23.3** script sources/declarations, existing project scene/animation/asset conventions. Main-branch APIs were not blindly copied into the installed version.
+
+### Verification record — 2026-11-10
+
+Environment: Windows, portable **Node 22.23.4**, pnpm **10.32.1**, PlayCanvas **2.23.3**, muted isolated headless **Chrome 156.0.8078.80**. Final production preview: `http://127.0.0.1:4180/`.
+
+- `pnpm test` — **104/104 passed**, including four new tests for timeline phases/completion, skip equivalence/replay, pause/disposed callbacks and denied/preference storage isolation. Existing save/migration, street, beach and wave tests remain passing. The sandbox initially blocked Node test subprocesses; the unrestricted supported-Node run passed.
+- `pnpm typecheck`, `pnpm lint`, `pnpm build` — passed. Vite build/server subprocesses required running outside the Windows sandbox after `spawn EPERM`.
+- `scripts/verify-forest.mjs` — **17/17 production browser groups passed**: launch/single-Engine gate; real rig-joint motion; actual hand attachment; full timeline/focus/checkpoint isolation; password/account boundary; explicit sound/mute; replay/scare skip; portrait/landscape; café handoff/resource release; street checkpoint; beach checkpoint; clean console/network; teardown; returning visit; reduced motion; blocked-asset fallback/local entry.
+- **Zero unexpected console, shader or network issues** through normal, returning and reduced-motion routes. The separate deliberate fault-injection stage blocks forest GLB requests and records its expected loader/network diagnostics. Intentional canceled media requests during scene replacement are excluded from failure counts.
+- Captured **16 final views**: all cinematic phases plus skipped state, mobile/landscape, café, street/beach checkpoints, reduced motion and fallback. Inspected captures for framing, form readability and clipping, scene visibility, eyes/bats and crouch. The isolated browser closes in the runner's `finally` block.
+- Scoped Prettier and diff whitespace checks passed. Full-repository formatting retains the previously recorded `pnpm-lock.yaml` limitation. Reviewed the task-owned source and integration diff against the pre-existing S004 worktree.
+
+Evidence: `verification.local/forest/report.json` and numbered PNGs, intentionally ignored by Git. The committed runner reads the checked-in Engine devtools hook. Original/output hashes and decoded inspections are in `asset-library/forest/`.
+
+Asset audit: **15/15 source/output SHA-256 records** passed; all **11 deployed runtime files** match the prepared originals byte-for-byte.
+
+Portable browser command after starting a muted isolated Chrome on CDP 9223 and a production preview:
+
+```powershell
+$env:GAME_URL = 'http://127.0.0.1:4180/'
+node scripts/verify-forest.mjs
+```
+
+The runner clears only the forest-seen preference for its first-visit case, temporarily loads checkpoint fixtures, then restores the original checkpoint before teardown. Use an isolated browser profile; never run this against an active player's session.
+
+### Original remaining work and manual route (historical)
+
+- [x] Superseded: bundled licensed-model neural dialogue, cry, wings and impact are implemented in the current revision above.
+- [ ] Verify audible mix, real phone/foot contact through full gait cycles, startle acting, low-end device frame time/memory, physical touch/gamepad and Firefox/Safari under LW-F002. Screen-reader/password-manager behavior is structurally supported but has not been certified with assistive technology.
+- [ ] Re-run earlier complete evacuation suites with the new entry handled by the harness; this task rechecked café entry and street/beach checkpoint loading, not every previous 116-check wave/browser case. All repository wave/save regressions passed.
+
+Current manual route: automatic forest → Play with sound or Watch muted → watch/Skip intro (or Escape) → Tab through labels/password toggle → confirm unavailable account feedback → Continue locally → Play story. Test P/Load for an existing checkpoint; return/reload should show the settled board, Replay should restart the prologue. Try reduced motion, denied storage, offline/missing forest models, portrait and short landscape, and blur/refocus with sound enabled. After belongings and movement/look practice, choose Head outside and walk through the doorway; the friend waits beside it. The canonical story still starts at the café and ends at the S004 blackout.
+
+**Next action:** complete the audible/acting review and physical-device acceptance described in the current revision above. Keep LW-UI001 open for those manual checks. Account/backend work remains a separate persistent-backend milestone; hospital continuation remains a separate story task.

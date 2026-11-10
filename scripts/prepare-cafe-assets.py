@@ -12,6 +12,7 @@ from PIL import Image
 
 from cafe_clothing import fit_body, make_clothing
 from cafe_faces import shape_face
+from casual_animation import PROFILES, rotations
 
 ROOT = Path(__file__).resolve().parents[1]
 LIBRARY = ROOT / "asset-library"
@@ -266,10 +267,11 @@ def add_animations(model, source, clips=None):
     target_paths = paths(model.doc)
     source_paths = {index: name for name, index in paths(source[0]).items()}
     model.doc["animations"] = []
-    for clip in source[0]["animations"]:
-        if clip["name"] not in (clips if clips is not None else SELECTION["clips"]):
-            continue
-        result = {"name": clip["name"], "channels": [], "samplers": []}
+    available = {clip["name"]: clip for clip in source[0]["animations"]}
+    for name in clips if clips is not None else SELECTION["clips"]:
+        profile = PROFILES.get(name)
+        clip = available[profile["source"] if profile else name]
+        result = {"name": name, "channels": [], "samplers": []}
         for channel in clip["channels"]:
             old_index = channel["target"]["node"]
             path = source_paths[old_index]
@@ -281,6 +283,9 @@ def add_animations(model, source, clips=None):
             if property_name == "scale":
                 continue
             output = values(source, sampler["output"])
+            if property_name == "rotation" and profile:
+                node = source[0]["nodes"][old_index]
+                output = rotations(node["name"], output, node.get("rotation", [0, 0, 0, 1]), profile)
             if property_name == "translation":
                 source_rest = source[0]["nodes"][old_index].get("translation", [0, 0, 0])
                 target_rest = model.doc["nodes"][index].get("translation", [0, 0, 0])
@@ -311,7 +316,7 @@ def main():
                 content.extractall(destination)
             archives.append({"file": archive.relative_to(ROOT).as_posix(), "entries": len(content.infolist()), "bytes": archive.stat().st_size,
                              "sha256": hashlib.sha256(archive.read_bytes()).hexdigest()})
-    report = {"archives": archives, "models": [], "characters": [], "missing": SELECTION["missing"], "reserve": SELECTION["reserve"]}
+    report = {"archives": archives, "animationProfiles": PROFILES, "models": [], "characters": [], "missing": SELECTION["missing"], "reserve": SELECTION["reserve"]}
     for item in SELECTION["models"]:
         if "pack" in item:
             pack = SELECTION["packs"][item["pack"]]
@@ -332,9 +337,10 @@ def main():
         clothe(model, item)
         for hair in [item["hair"], *(["Beard"] if item.get("beard") else [])]:
             add_hair(model, load(base / "Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)" / ("Hair_" + hair + ".gltf")))
-        add_animations(model, animation)
+        clips = [*SELECTION["clips"], *item.get("extraClips", [])]
+        add_animations(model, animation, clips)
         result = model.write(ROOT / "public/assets/characters" / (item["id"] + ".glb"))
-        report["characters"].append({"id": item["id"], "source": source.relative_to(ROOT).as_posix(), "clips": SELECTION["clips"], **result})
+        report["characters"].append({"id": item["id"], "source": source.relative_to(ROOT).as_posix(), "clips": clips, **result})
         print(item["id"], result["bytes"])
     (LIBRARY / "cafe-preparation.json").write_text(json.dumps(report, indent=4) + "\n", encoding="utf-8")
 

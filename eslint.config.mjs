@@ -1,3 +1,6 @@
 import typescriptConfig from '@playcanvas/eslint-config/typescript';
 
-export default [{ ignores: ['.claude', '.agents', 'public/ammo'] }, ...typescriptConfig];
+export default [
+    { ignores: ['.claude', '.agents', 'public/ammo', 'asset-library/source-packs/**'] },
+    ...typescriptConfig
+];

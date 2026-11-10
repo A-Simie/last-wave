@@ -90,10 +90,16 @@ export class CheckpointPanel {
             const clues = Number(state.inventory.itemIds.includes(SIGNAL_BOX_NOTE.id));
             const opening = state.opening.completedObjectiveIds.length;
             this.root.querySelector('[data-checkpoint-area]')!.textContent =
-                state.area === 'beach-arrival' ? 'Seafront Beach · exploration' : 'Tideline & Seafront Avenue';
+                state.wave === 'after-blackout'
+                    ? 'Episode 01 · after blackout'
+                    : state.area === 'beach-arrival'
+                      ? 'Seafront Beach · before the wave'
+                      : 'Tideline & Seafront Avenue';
             this.summary.textContent = `Saved ${new Date(savedAt).toLocaleString()}. ${state.quest.completedObjectiveIds.length} / ${SIGNAL_CHECK_QUEST.objectives.length} signal objectives · ${clues} ${clues === 1 ? 'clue' : 'clues'}.${opening ? ` Opening: ${opening} / ${OPENING_QUEST.objectives.length}.${hasBag ? ' Bag & phone packed.' : ''} Beach route: ${state.entry.completedObjectiveIds.length} / ${ENTRY_QUEST.objectives.length}.${state.inventory.itemIds.includes(BEACH_PASSES.id) ? ' Two passes paid.' : ''}` : ''}`;
             if (state.area === 'beach-arrival')
                 this.summary.textContent += ` Beach moments: ${state.beach.completedObjectiveIds.length} / ${BEACH_QUEST.objectives.length}.`;
+            if (state.wave === 'after-blackout')
+                this.summary.textContent += ' Opens at the blackout ending, with replay available.';
         } else {
             this.root.querySelector('[data-checkpoint-area]')!.textContent = 'Episode 01';
             this.summary.textContent = SLOT_MESSAGES[slot.status];

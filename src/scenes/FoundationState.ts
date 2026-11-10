@@ -4,22 +4,28 @@ import {
     NPC_POSITION,
     SIGNAL_BOX,
     NEIGHBOR_BUILDINGS,
-    STREET_PLANTERS
+    STREET_PLANTERS,
+    TIDELINE_V4_BUILDINGS,
+    TIDELINE_V4_GROUND,
+    TIDELINE_V4_PLANTERS
 } from '../data/foundation.ts';
 import type { BoxDefinition } from '../data/foundation.ts';
 import { SIGNAL_BOX_NOTE } from '../data/items.ts';
 import { SIGNAL_CHECK_QUEST } from '../data/quests.ts';
 import { BEACH_QUEST } from '../episodes/episode-01/beach.ts';
-import { BEACH_SOLIDS } from '../episodes/episode-01/beachLayout.ts';
+import { BEACH_SOLIDS, BEACH_V4_SOLIDS } from '../episodes/episode-01/beachLayout.ts';
 import { BEACH_PASSES, ENTRY_QUEST } from '../episodes/episode-01/entry.ts';
 import {
     BEACH_ARRIVAL_GROUND,
-    BEACH_ARRIVAL_SOLIDS,
     BEACH_ARRIVAL_SPAWN,
-    ENTRY_SOLIDS
+    BEACH_V3_GROUND,
+    BEACH_V3_SOLIDS,
+    ENTRY_SOLIDS,
+    ENTRY_V4_SOLIDS
 } from '../episodes/episode-01/entryLayout.ts';
 import { OPENING_QUEST, STARTER_BAG } from '../episodes/episode-01/opening.ts';
 import { OPENING_SOLIDS } from '../episodes/episode-01/openingLayout.ts';
+import type { WaveCheckpoint } from '../episodes/episode-01/WaveProgress.ts';
 import { isInventorySnapshot } from '../systems/InventorySystem.ts';
 import type { InventorySnapshot } from '../systems/InventorySystem.ts';
 import { isQuestSnapshot } from '../systems/QuestSystem.ts';
@@ -36,12 +42,10 @@ export type FoundationSnapshot = {
     readonly opening: QuestSnapshot;
     readonly entry: QuestSnapshot;
     readonly beach: QuestSnapshot;
+    readonly wave: WaveCheckpoint;
 };
 
-const LEGACY_SOLIDS: readonly BoxDefinition[] = [
-    GROUND,
-    ...NEIGHBOR_BUILDINGS,
-    ...STREET_PLANTERS,
+const CAFE_SOLIDS: readonly BoxDefinition[] = [
     ...OPENING_SOLIDS,
     SIGNAL_BOX,
     {
@@ -54,7 +58,8 @@ const LEGACY_SOLIDS: readonly BoxDefinition[] = [
         ]
     }
 ];
-const SOLIDS = [...LEGACY_SOLIDS, ...ENTRY_SOLIDS];
+const LEGACY_SOLIDS = [TIDELINE_V4_GROUND, ...TIDELINE_V4_BUILDINGS, ...TIDELINE_V4_PLANTERS, ...CAFE_SOLIDS];
+const SOLIDS = [GROUND, ...NEIGHBOR_BUILDINGS, ...STREET_PLANTERS, ...CAFE_SOLIDS, ...ENTRY_SOLIDS];
 
 const overlapsSolid = ([x, y, z]: readonly number[], box: BoxDefinition): boolean => {
     // Allow the small contact penetration produced by Ammo while standing against geometry.
@@ -108,11 +113,15 @@ const isAreaPosition = (
 export const isFoundationPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
     isAreaPosition(value, GROUND, SOLIDS);
 export const isLegacyFoundationPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
-    isAreaPosition(value, GROUND, LEGACY_SOLIDS);
+    isAreaPosition(value, TIDELINE_V4_GROUND, LEGACY_SOLIDS);
+export const isV4FoundationPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
+    isAreaPosition(value, TIDELINE_V4_GROUND, [...LEGACY_SOLIDS, ...ENTRY_V4_SOLIDS]);
 export const isBeachArrivalPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
     isAreaPosition(value, BEACH_ARRIVAL_GROUND, BEACH_SOLIDS);
 export const isLegacyBeachArrivalPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
-    isAreaPosition(value, BEACH_ARRIVAL_GROUND, BEACH_ARRIVAL_SOLIDS);
+    isAreaPosition(value, BEACH_V3_GROUND, BEACH_V3_SOLIDS);
+export const isV4BeachArrivalPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
+    isAreaPosition(value, BEACH_V3_GROUND, BEACH_V4_SOLIDS);
 
 export const isFoundationSnapshot = (value: unknown): value is FoundationSnapshot => {
     if (!value || typeof value !== 'object') return false;
@@ -126,7 +135,8 @@ export const isFoundationSnapshot = (value: unknown): value is FoundationSnapsho
         !isInventorySnapshot(snapshot.inventory, [SIGNAL_BOX_NOTE.id, STARTER_BAG.id, BEACH_PASSES.id]) ||
         !isQuestSnapshot(snapshot.opening, OPENING_QUEST) ||
         !isQuestSnapshot(snapshot.entry, ENTRY_QUEST) ||
-        !isQuestSnapshot(snapshot.beach, BEACH_QUEST)
+        !isQuestSnapshot(snapshot.beach, BEACH_QUEST) ||
+        (snapshot.wave !== 'before-wave' && snapshot.wave !== 'after-blackout')
     ) {
         return false;
     }
@@ -145,6 +155,12 @@ export const isFoundationSnapshot = (value: unknown): value is FoundationSnapsho
     if (snapshot.inventory.itemIds.includes(BEACH_PASSES.id) !== entryCount >= 6) return false;
     if ((snapshot.area === 'beach-arrival') !== (entryCount === ENTRY_QUEST.objectives.length)) return false;
     if (snapshot.area !== 'beach-arrival' && snapshot.beach.completedObjectiveIds.length !== 0) return false;
+    if (
+        snapshot.wave === 'after-blackout' &&
+        (snapshot.area !== 'beach-arrival' ||
+            snapshot.beach.completedObjectiveIds.length !== BEACH_QUEST.objectives.length)
+    )
+        return false;
     return true;
 };
 
@@ -156,7 +172,8 @@ export const copyFoundationSnapshot = (snapshot: FoundationSnapshot): Foundation
     inventory: { itemIds: [...snapshot.inventory.itemIds] },
     opening: { questId: snapshot.opening.questId, completedObjectiveIds: [...snapshot.opening.completedObjectiveIds] },
     entry: { questId: snapshot.entry.questId, completedObjectiveIds: [...snapshot.entry.completedObjectiveIds] },
-    beach: { questId: snapshot.beach.questId, completedObjectiveIds: [...snapshot.beach.completedObjectiveIds] }
+    beach: { questId: snapshot.beach.questId, completedObjectiveIds: [...snapshot.beach.completedObjectiveIds] },
+    wave: snapshot.wave
 });
 
 export const createBeachArrivalSnapshot = (current: FoundationSnapshot): FoundationSnapshot => {

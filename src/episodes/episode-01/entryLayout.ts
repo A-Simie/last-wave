@@ -1,5 +1,7 @@
 import type { BoxDefinition, Vector3Tuple } from '../../data/foundation.ts';
 
+import { CAFE_OUTSIDE_WAIT } from './openingLayout.ts';
+
 export const OFFICER_POSITION: Vector3Tuple = [82.5, 1.04, 1.4];
 export const OFFICER_PLAYER_MARK: Vector3Tuple = [82.5, 1.04, 3.55];
 export const OFFICER_FRIEND_MARK: Vector3Tuple = [80.7, 1.04, 2.55];
@@ -13,7 +15,7 @@ export const TICKET_COUNTER: BoxDefinition = {
 };
 
 export const STREET_FRIEND_ROUTE: readonly Vector3Tuple[] = [
-    [8.1, 1.04, 6.65],
+    CAFE_OUTSIDE_WAIT,
     [12.5, 1.04, 6.4],
     [18, 1.04, 6.4],
     [18, 1.04, 7.15],
@@ -25,7 +27,7 @@ export const STREET_FRIEND_ROUTE: readonly Vector3Tuple[] = [
     OFFICER_FRIEND_MARK
 ];
 
-export const ENTRY_SOLIDS: readonly BoxDefinition[] = [
+export const ENTRY_V4_SOLIDS: readonly BoxDefinition[] = [
     TICKET_COUNTER,
     { name: 'ticket-booth-west', position: [73.6, 1.6, -4.5], size: [0.22, 3.2, 3.2] },
     { name: 'ticket-booth-east', position: [77, 1.6, -4.5], size: [0.22, 3.2, 3.2] },
@@ -42,6 +44,10 @@ export const ENTRY_SOLIDS: readonly BoxDefinition[] = [
     { name: 'queue-rail-east', position: [88.3, 0.5, -8.5], size: [0.1, 1, 8] }
 ];
 
+export const ENTRY_SOLIDS = ENTRY_V4_SOLIDS.filter(
+    (solid) => !['beach-entry-gate', 'beach-entry-rear-fence'].includes(solid.name)
+);
+
 export const ENTRY_SHOTS: Record<string, { position: Vector3Tuple; target: Vector3Tuple; fov: number }> = {
     officer: { position: [87, 3.2, 6.5], target: [81.9, 1.7, 0.5], fov: 52 },
     booth: { position: [87.5, 4, 6.2], target: [78.8, 1.8, -2.2], fov: 58 },
@@ -53,15 +59,28 @@ export const ENTRY_SHOTS: Record<string, { position: Vector3Tuple; target: Vecto
 
 export const BEACH_ARRIVAL_SPAWN: Vector3Tuple = [0, 1.08, 3.6];
 export const BEACH_FRIEND_SPAWN: Vector3Tuple = [1.7, 1.04, 3.15];
-export const BEACH_ARRIVAL_GROUND: BoxDefinition = {
+export const BEACH_V3_GROUND: BoxDefinition = {
     name: 'beach-arrival-ground',
     position: [0, -0.1, -2],
     size: [32, 0.2, 28]
 };
-export const BEACH_ARRIVAL_SOLIDS: readonly BoxDefinition[] = [
-    BEACH_ARRIVAL_GROUND,
+export const BEACH_V3_SOLIDS: readonly BoxDefinition[] = [
+    BEACH_V3_GROUND,
     { name: 'arrival-west-rail', position: [-15.7, 0.7, -2], size: [0.16, 1.4, 28] },
     { name: 'arrival-east-rail', position: [15.7, 0.7, -2], size: [0.16, 1.4, 28] },
     { name: 'arrival-rear-rail', position: [0, 0.7, 11.7], size: [31.4, 1.4, 0.16] },
     { name: 'arrival-seafront-rail', position: [0, 0.7, -15.7], size: [31.4, 1.4, 0.16] }
+];
+
+export const BEACH_SHORE_Z = -30;
+export const BEACH_ARRIVAL_GROUND: BoxDefinition = {
+    name: 'beach-arrival-ground',
+    position: [0, -0.1, -12],
+    size: [96, 0.2, 48]
+};
+export const BEACH_ARRIVAL_SOLIDS: readonly BoxDefinition[] = [
+    BEACH_ARRIVAL_GROUND,
+    { name: 'arrival-west-rail', position: [-47.7, 0.7, -12], size: [0.16, 1.4, 48] },
+    { name: 'arrival-east-rail', position: [47.7, 0.7, -12], size: [0.16, 1.4, 48] },
+    { name: 'arrival-rear-rail', position: [0, 0.7, 11.7], size: [95.4, 1.4, 0.16] }
 ];

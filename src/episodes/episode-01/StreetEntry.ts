@@ -150,7 +150,7 @@ export const createStreetEntry = (
         );
     interactions.targets = [
         ...interactions.targets,
-        ...street.walkers.map(({ character }, index) => ({
+        ...street.walkers.map(({ character, model }, index) => ({
             id: `beach-directions-${index}`,
             label: 'Ask beach directions',
             entity: character.root,
@@ -162,7 +162,11 @@ export const createStreetEntry = (
                 run: () => {
                     if (destroyed) return;
                     dialogue.open(
-                        directionsDialogue(index === 0 || index === 4 ? 'Suited commuter' : 'Seafront pedestrian')
+                        directionsDialogue(
+                            model === 'commuterSuit' ? 'Suited commuter' : 'Seafront pedestrian',
+                            character.root.getPosition().x,
+                            character.root.getPosition().z
+                        )
                     );
                 }
             }

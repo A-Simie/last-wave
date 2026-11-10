@@ -1,6 +1,7 @@
 import { Entity, Vec3 } from 'playcanvas';
 
 import type { GameAssets } from '../core/AssetManager';
+import { PLAYER_POSE_HEIGHTS } from '../data/characterModels';
 import { selectGuideDialogue } from '../data/dialogues';
 import { GUIDE_INTERACTION, NPC_POSITION, PLAYER_SPAWN, SIGNAL_BOX } from '../data/foundation';
 import { SIGNAL_BOX_NOTE } from '../data/items';
@@ -9,11 +10,13 @@ import { BEACH_QUEST } from '../episodes/episode-01/beach';
 import { createBeachArrival } from '../episodes/episode-01/BeachArrival';
 import { createCafeSurroundings } from '../episodes/episode-01/CafeSurroundings';
 import { BEACH_PASSES } from '../episodes/episode-01/entry';
+import { BEACH_ARRIVAL_GROUND } from '../episodes/episode-01/entryLayout';
 import { OPENING_CUTSCENE, STARTER_BAG } from '../episodes/episode-01/opening';
 import { createOpeningPrototype } from '../episodes/episode-01/OpeningPrototype';
 import { createStreetEntry } from '../episodes/episode-01/StreetEntry';
 import { StreetEntryProgress } from '../episodes/episode-01/StreetEntryProgress';
 import { createStreetLife } from '../episodes/episode-01/StreetLife';
+import { WAVE_PLAYER_MARK } from '../episodes/episode-01/waveLayout';
 import { createAnimatedCharacter } from '../player/AnimatedCharacter';
 import { createCamera } from '../player/CameraController';
 import { addCharacterCollision } from '../player/CharacterModel';
@@ -46,7 +49,7 @@ export type FoundationScene = {
     present: (state: CutsceneState | null, steady: boolean) => void;
     update: (dt: number) => void;
     getNavigation: () => { label: string; distance: number } | null;
-    setControlsEnabled: (enabled: boolean) => void;
+    setControlsEnabled: (enabled: boolean, presentationPaused: boolean) => void;
     getSnapshot: () => FoundationSnapshot;
     getScreenAnchors: () => { speaker: ScreenPoint | null; interaction: ScreenPoint | null };
 };
@@ -66,12 +69,12 @@ export const createFoundationScene = (
     player.addComponent('rigidbody', { type: 'dynamic', mass: 70, angularFactor: Vec3.ZERO });
     const character = createAnimatedCharacter(assets.characters.friendA, 'friendA', 'character');
     const model = character.root;
-    model.setLocalPosition(0, -1, 0);
+    model.setLocalPosition(0, -1 + PLAYER_POSE_HEIGHTS.idle, 0);
     player.addChild(model);
 
     const camera = createCamera(root, player.getPosition());
-    const controller = addPlayerController(player, camera, model);
-    const animation = model.addComponent('script')!.create(PlayerAnimation, { properties: { character } })!;
+    const { controller, isGrounded } = addPlayerController(player, camera, model);
+    const animation = model.addComponent('script')!.create(PlayerAnimation, { properties: { character, isGrounded } })!;
 
     const light = new Entity('sun');
     light.addComponent('light', {
@@ -168,7 +171,7 @@ export const createFoundationScene = (
             }
         ];
         const surroundings = createCafeSurroundings(root, interactions.app);
-        street = createStreetLife(surroundings, assets, player);
+        street = createStreetLife(interactions.app, surroundings, assets, player);
         opening = createOpeningPrototype(
             root,
             player,
@@ -196,11 +199,23 @@ export const createFoundationScene = (
             !!snapshot
         );
     } else {
-        beach = createBeachArrival(root, interactions.app, assets, player, interactions, dialogue, beachQuest);
+        beach = createBeachArrival(
+            root,
+            interactions.app,
+            assets,
+            player,
+            interactions,
+            dialogue,
+            beachQuest,
+            character,
+            cutscene,
+            snapshot?.wave ?? 'before-wave'
+        );
     }
     cutscene.onFinished = (id) => {
         opening?.finishCutscene(id);
         entry.finishCutscene(id);
+        beach?.wave.progress.finishCutscene(id);
     };
     const practice = player.script!.create(ControlPractice, {
         properties: { camera, onPractised: (control) => entry.practise(control) } satisfies Partial<ControlPractice>
@@ -208,7 +223,11 @@ export const createFoundationScene = (
     const projection = new ScreenProjection();
     const anchor = new Vec3();
     const activeCamera = () =>
-        streetEntry?.camera.camera?.enabled ? streetEntry.camera.camera : (opening?.activeCamera ?? camera.camera!);
+        beach?.wave.camera.camera?.enabled
+            ? beach.wave.camera.camera
+            : streetEntry?.camera.camera?.enabled
+              ? streetEntry.camera.camera
+              : (opening?.activeCamera ?? camera.camera!);
 
     return {
         interactions,
@@ -223,15 +242,21 @@ export const createFoundationScene = (
         present: (state, steady) => {
             opening?.present(state?.cutsceneId === OPENING_CUTSCENE.id ? state : null, steady);
             streetEntry?.present(state, steady);
+            beach?.wave.present(state, steady);
             camera.camera!.enabled =
-                !streetEntry?.camera.camera?.enabled && (!opening || opening.activeCamera === camera.camera);
+                !beach?.wave.camera.camera?.enabled &&
+                !streetEntry?.camera.camera?.enabled &&
+                (!opening || opening.activeCamera === camera.camera);
         },
         update: (dt) => {
             opening?.update(dt);
             streetEntry?.update();
             beach?.update(dt);
         },
-        getNavigation: () => beach?.getNavigation() ?? streetEntry?.getNavigation() ?? null,
+        getNavigation: () =>
+            beach?.wave.progress.running
+                ? beach.wave.getNavigation(camera)
+                : (beach?.getNavigation() ?? streetEntry?.getNavigation() ?? null),
         getScreenAnchors: () => ({
             speaker:
                 cutscene.state &&
@@ -242,12 +267,12 @@ export const createFoundationScene = (
                     : null,
             interaction: interactions.getTargetPosition(anchor) ? projection.project(activeCamera(), anchor) : null
         }),
-        setControlsEnabled: (enabled) => {
+        setControlsEnabled: (enabled, presentationPaused) => {
             setPlayerControlsEnabled(controller, enabled);
             animation.paused = !enabled;
             character.anim.playing = enabled;
             opening?.setControlsEnabled(enabled);
-            beach?.setControlsEnabled(enabled);
+            beach?.setControlsEnabled(enabled, presentationPaused);
             streetEntry?.setControlsEnabled(enabled);
             if (street)
                 street.paused =
@@ -260,12 +285,18 @@ export const createFoundationScene = (
             return {
                 sceneId: FOUNDATION_SCENE_ID,
                 area,
-                playerPosition: [position.x, position.y, position.z],
+                playerPosition:
+                    beach &&
+                    (!beach.wave.calm ||
+                        position.z < BEACH_ARRIVAL_GROUND.position[2] - BEACH_ARRIVAL_GROUND.size[2] / 2 + 0.4)
+                        ? [...WAVE_PLAYER_MARK]
+                        : [position.x, position.y, position.z],
                 quest: quest.snapshot,
                 inventory: inventory.snapshot,
                 opening: opening?.quest.snapshot ?? snapshot!.opening,
                 entry: entry.quest.snapshot,
-                beach: beachQuest.snapshot
+                beach: beachQuest.snapshot,
+                wave: beach?.wave.progress.checkpoint ?? 'before-wave'
             };
         }
     };

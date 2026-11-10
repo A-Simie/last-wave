@@ -32,6 +32,7 @@ export const createCamera = (parent: Entity, playerPosition: Vec3) => {
         fov: 55,
         toneMapping: TONEMAP_NEUTRAL
     });
+    camera.camera!.requestSceneColorMap(true);
     parent.addChild(camera);
     framePlayerCamera(camera, playerPosition);
     return camera;

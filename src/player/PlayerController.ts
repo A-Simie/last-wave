@@ -23,8 +23,8 @@ export const addPlayerController = (player: Entity, camera: Entity, model: Entit
             camera,
             characterModel: model,
             jumpForce: 520,
-            speedGround: 60,
-            sprintMult: 1.5
+            speedGround: 20,
+            sprintMult: 4.5
         } satisfies Partial<ThirdPersonController>
     })!;
 
@@ -45,5 +45,5 @@ export const addPlayerController = (player: Entity, camera: Entity, model: Entit
         }
     });
 
-    return controller;
+    return { controller, isGrounded: () => grounded };
 };

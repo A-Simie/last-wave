@@ -53,6 +53,10 @@ export class BeachAudio {
         this.publish(this.phase);
     }
 
+    setLevel(level: number) {
+        if (!this.destroyed) this.sound.volume = Math.max(0, Math.min(1, level));
+    }
+
     setPaused(paused: boolean) {
         if (this.destroyed || this.paused === paused) return;
         this.paused = paused;

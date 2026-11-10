@@ -3,13 +3,13 @@ import { Entity, Script, Vec3, math } from 'playcanvas';
 import type { GameAssets } from '../../core/AssetManager';
 import { BEACH_POSE_HEIGHTS } from '../../data/characterModels';
 import type { BeachCharacterId } from '../../data/characterModels';
-import type { Vector3Tuple } from '../../data/foundation';
 import { createAnimatedCharacter } from '../../player/AnimatedCharacter';
 import type { AnimatedCharacter } from '../../player/AnimatedCharacter';
 import { createStaticBody } from '../../scenes/primitives';
 
-import { BEACH_DRESSING_SOLIDS, BEACH_STANDING_PEOPLE } from './beachLayout';
+import { BEACH_DRESSING_SOLIDS, BEACH_STANDING_PEOPLE, BEACH_WALKER_ROUTES } from './beachLayout';
 import { beachWaterHeight } from './BeachWater';
+import { BEACH_SHORE_Z } from './entryLayout';
 
 type Walker = {
     entity: Entity;
@@ -19,7 +19,15 @@ type Walker = {
     waypoint: number;
     heading: number;
 };
-type Swimmer = { character: AnimatedCharacter; x: number; z: number; phase: number; swimming: boolean; height: number };
+type Swimmer = {
+    character: AnimatedCharacter;
+    model: BeachCharacterId;
+    x: number;
+    z: number;
+    phase: number;
+    swimming: boolean;
+    height: number;
+};
 
 export class BeachLife extends Script {
     static scriptName = 'beachLife';
@@ -27,6 +35,7 @@ export class BeachLife extends Script {
     characters: AnimatedCharacter[] = [];
     walkers: Walker[] = [];
     swimmers: Swimmer[] = [];
+    standing: { entity: Entity; character: AnimatedCharacter; model: BeachCharacterId }[] = [];
     obstacles: Entity[] = [];
     private suspended = false;
     private time = 0;
@@ -61,7 +70,7 @@ export class BeachLife extends Script {
                     );
                 }
             );
-            walker.character.play(blocked ? 'idle' : 'walk');
+            walker.character.move(blocked ? 0 : Math.min(distance / step, 1));
             walker.character.root.setLocalPosition(
                 0,
                 -1.04 + BEACH_POSE_HEIGHTS[walker.model][blocked ? 'idle' : 'walk'],
@@ -105,8 +114,9 @@ export const createBeachLife = (parent: Entity, assets: GameAssets, player: Enti
         body.addChild(character.root);
         character.root.setLocalPosition(0, -definition.position[1] + BEACH_POSE_HEIGHTS[model].idle, 0);
         character.root.setLocalEulerAngles(0, yaw, 0);
-        character.play(name === 'beach-shore-watcher' ? 'idle' : 'talk', 0);
+        character.play(name.includes('shore-watcher') ? 'idle' : 'talk', 0);
         life.characters.push(character);
+        life.standing.push({ entity: body, character, model });
     }
     const vendorDefinition = BEACH_DRESSING_SOLIDS.find(({ name }) => name === 'beach-vendor')!;
     const vendor = createStaticBody(root, vendorDefinition);
@@ -116,16 +126,13 @@ export const createBeachLife = (parent: Entity, assets: GameAssets, player: Enti
     attendant.play('idle');
     life.characters.push(attendant);
 
-    const route: Vector3Tuple[] = [
-        [-12.5, 1.04, -10.8],
-        [8.5, 1.04, -10.8],
-        [8.5, 1.04, -12.7],
-        [-12.5, 1.04, -12.7]
-    ];
-    for (const [index, model] of (['beachCoral', 'beachGold'] as const).entries()) {
+    const walkerModels = ['beachCoral', 'beachGold', 'beachTeal', 'beachBlue'] as const;
+    for (let index = 0; index < BEACH_WALKER_ROUTES.length * 2; index++) {
+        const model = walkerModels[index % walkerModels.length];
+        const route = BEACH_WALKER_ROUTES[Math.floor(index / 2)];
         const entity = new Entity(`beach-walker-${index}`);
         root.addChild(entity);
-        let start = index * 2;
+        let start = (index % 2) * 2;
         const point = player.getPosition();
         if (Math.hypot(point.x - route[start][0], point.z - route[start][2]) < 1.2) start = (start + 1) % route.length;
         entity.setPosition(...route[start]);
@@ -150,10 +157,14 @@ export const createBeachLife = (parent: Entity, assets: GameAssets, player: Enti
         });
     }
     const swimmers: { model: BeachCharacterId; x: number; z: number; swimming: boolean }[] = [
-        { model: 'beachBlue', x: -9, z: -24, swimming: true },
-        { model: 'beachTeal', x: 8, z: -28, swimming: true },
-        { model: 'beachCoral', x: -2.5, z: -21.5, swimming: false },
-        { model: 'beachGold', x: 1.5, z: -22.2, swimming: false }
+        { model: 'beachBlue', x: -9, z: BEACH_SHORE_Z - 8, swimming: true },
+        { model: 'beachTeal', x: 8, z: BEACH_SHORE_Z - 12, swimming: true },
+        { model: 'beachCoral', x: -2.5, z: BEACH_SHORE_Z - 7, swimming: false },
+        { model: 'beachGold', x: 1.5, z: BEACH_SHORE_Z - 7.5, swimming: false },
+        { model: 'beachTeal', x: -29, z: BEACH_SHORE_Z - 10, swimming: true },
+        { model: 'beachGold', x: 28, z: BEACH_SHORE_Z - 9, swimming: true },
+        { model: 'beachBlue', x: -39, z: BEACH_SHORE_Z - 13, swimming: false },
+        { model: 'beachCoral', x: 39, z: BEACH_SHORE_Z - 15, swimming: false }
     ];
     swimmers.forEach(({ model, x, z, swimming }, index) => {
         const character = createAnimatedCharacter(assets.characters[model], model, `beach-swimmer-${index}`);
@@ -163,7 +174,7 @@ export const createBeachLife = (parent: Entity, assets: GameAssets, player: Enti
         character.root.setPosition(x, beachWaterHeight(x, z, 0) + height, z);
         character.root.setEulerAngles(0, index % 2 ? -90 : 90, 0);
         life.characters.push(character);
-        life.swimmers.push({ character, x, z, phase: index * 1.7, swimming, height });
+        life.swimmers.push({ character, model, x, z, phase: index * 1.7, swimming, height });
     });
     return life;
 };

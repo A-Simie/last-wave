@@ -2,11 +2,28 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { STREET_FRIEND_ROUTE } from '../src/episodes/episode-01/entryLayout.ts';
+import { CAFE_OUTSIDE_WAIT, FRIEND_ROUTE, OPENING_EXIT } from '../src/episodes/episode-01/openingLayout.ts';
 import { projectCompanionRoute } from '../src/player/CompanionRoute.ts';
 import { isFoundationPosition } from '../src/scenes/FoundationState.ts';
 
 const point = ([x, y, z]) => ({ x, y, z });
 const route = STREET_FRIEND_ROUTE.map(point);
+
+test('the friend waits beside the café door and the street route never sends her back into its lane', () => {
+    assert.deepEqual(FRIEND_ROUTE.at(-1), CAFE_OUTSIDE_WAIT);
+    assert.deepEqual(STREET_FRIEND_ROUTE[0], CAFE_OUTSIDE_WAIT);
+    assert.ok(Math.abs(CAFE_OUTSIDE_WAIT[0] - OPENING_EXIT[0]) > 1.2);
+    assert.ok(CAFE_OUTSIDE_WAIT[2] > OPENING_EXIT[2] + 0.6);
+    assert.ok(isFoundationPosition(CAFE_OUTSIDE_WAIT));
+    for (let i = FRIEND_ROUTE.length - 2; i < FRIEND_ROUTE.length; i++) {
+        const a = FRIEND_ROUTE[i - 1],
+            b = FRIEND_ROUTE[i];
+        for (let j = 0; j <= 20; j++) {
+            const p = a.map((value, k) => value + ((b[k] - value) * j) / 20);
+            assert.ok(isFoundationPosition(p), `Café egress route intersects a solid: ${p}`);
+        }
+    }
+});
 
 test('a player past the planter remains ahead during both short north/south route corners', () => {
     for (const friend of [

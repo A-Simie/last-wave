@@ -24,7 +24,9 @@ import {
     createGraphicsDevice
 } from 'playcanvas';
 
+import { openForestEntrance } from '../entry/ForestEntrance';
 import type { EntryLesson } from '../episodes/episode-01/entry';
+import { WAVE_PLAYER_MARK } from '../episodes/episode-01/waveLayout';
 import { createFoundationScene } from '../scenes/FoundationScene';
 import type { FoundationScene } from '../scenes/FoundationScene';
 import type { FoundationSnapshot } from '../scenes/FoundationState';
@@ -37,8 +39,9 @@ import { GameHud } from '../ui/GameHud';
 import { JournalPanel } from '../ui/JournalPanel';
 import { TransitionPanel } from '../ui/TransitionPanel';
 import { TutorialPanel } from '../ui/TutorialPanel';
+import { WaveEndPanel } from '../ui/WaveEndPanel';
 
-import { loadGameAssets, loadPhysics } from './AssetManager';
+import { loadForestCharacters, loadGameAssets, loadPhysics } from './AssetManager';
 import type { GameAssets } from './AssetManager';
 import { SceneManager } from './SceneManager';
 
@@ -87,18 +90,21 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
     let arrival: { elapsed: number; ready: boolean; failed: boolean } | null = null;
     const needsLesson = () => !!scene?.entry.lesson && scene.entry.lesson.id !== practisedLesson;
     const syncControls = () => {
-        const active =
+        const paused =
             background ||
             transitioning ||
             journalOpen ||
             checkpointOpen ||
             tutorialOpen ||
             needsLesson() ||
+            !!scene?.dialogue.state;
+        const active =
+            paused ||
             !!scene?.opening?.waitingToStart ||
-            !!scene?.dialogue.state ||
+            !!scene?.beach?.wave.blocksControls ||
             !!scene?.cutscene.state;
-        scene?.setControlsEnabled(!active);
-        scene?.interactions.setSuspended(active);
+        scene?.setControlsEnabled(!active, paused);
+        scene?.interactions.setSuspended(active || (!!scene?.beach && !scene.beach.wave.calm));
         if (active && document.pointerLockElement === canvas) document.exitPointerLock();
     };
     const closeJournal = () => {
@@ -116,6 +122,7 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             checkpointOpen ||
             tutorialOpen ||
             needsLesson() ||
+            scene.beach?.wave.blocksControls ||
             scene.dialogue.state ||
             scene.cutscene.state
         )
@@ -164,6 +171,27 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         );
         hud.renderOptionalQuest(scene.area === 'tideline' ? scene.quest.state : null);
         hud.renderStory(opening, scene.area);
+        renderWave();
+        syncControls();
+    };
+    const renderBeachAudio = () => {
+        const beach = scene?.beach;
+        const sound = beach ? (beach.wave.calm ? beach.audio : beach.wave.audio) : null;
+        hud.renderBeachAudio(sound?.state ?? null);
+        cutscenePanel.renderEnvironment(beach && !beach.wave.calm ? sound!.state : null);
+    };
+    const renderWave = () => {
+        const beach = scene?.beach;
+        const state = beach?.wave.progress.state ?? null;
+        const ending = state?.phase === 'loading' || state?.phase === 'complete' ? state.phase : null;
+        hud.renderWave(
+            state,
+            beach?.quest.state.status === 'completed',
+            cutscenePanel.captionsEnabled || cutscenePanel.muted || beach?.wave.audio.state.phase !== 'playing'
+        );
+        hud.setCutsceneActive(!!scene?.cutscene.state || !!ending);
+        waveEndPanel.render(ending);
+        renderBeachAudio();
         syncControls();
     };
     const bindScene = () => {
@@ -176,17 +204,20 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         scene.entry.quest.onStateChange = renderQuest;
         if (scene.beach) {
             scene.beach.quest.onStateChange = renderQuest;
-            scene.beach.audio.onStateChange = (state) => hud.renderBeachAudio(state);
+            scene.beach.audio.onStateChange = renderBeachAudio;
+            scene.beach.wave.audio.onStateChange = renderBeachAudio;
+            scene.beach.wave.onStateChange = renderWave;
             scene.beach.audio.setMuted(cutscenePanel.muted);
+            scene.beach.wave.audio.setMuted(cutscenePanel.muted);
         }
-        hud.renderBeachAudio(scene.beach?.audio.state ?? null);
+        renderBeachAudio();
         scene.entry.onArrivalRequested = beginArrival;
         if (scene.opening) scene.opening.quest.onStateChange = renderQuest;
         scene.cutscene.onStateChange = (state) => {
             scene?.present(state, cutscenePanel.reducedMotion);
             syncControls();
-            hud.setCutsceneActive(!!state);
             cutscenePanel.render(state);
+            renderWave();
             if (!state && !transitioning) canvas.focus({ preventScroll: true });
         };
         if (scene.opening) {
@@ -203,8 +234,9 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             if (!state && !journalOpen && !checkpointOpen && !transitioning) canvas.focus({ preventScroll: true });
         };
         hud.render(scene.interactions.state);
+        cutscenePanel.render(scene.cutscene.state);
+        dialoguePanel.render(scene.dialogue.state);
         renderQuest();
-        hud.setCutsceneActive(false);
         hud.renderInventory(scene.inventory.state);
     };
     const replaceScene = (snapshot?: FoundationSnapshot) => {
@@ -212,8 +244,6 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         transitioning = true;
         syncControls();
         try {
-            scene?.dialogue.close();
-            scene?.cutscene.cancel();
             closeJournal();
             scene = scenes.load('foundation-scene', (root) => createFoundationScene(root, assets, snapshot));
             bindScene();
@@ -240,7 +270,9 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         const result = saves.save(scene.getSnapshot());
         const message =
             result.status === 'ready'
-                ? 'Checkpoint saved.'
+                ? scene.beach && !scene.beach.wave.calm && scene.beach.wave.progress.checkpoint === 'before-wave'
+                    ? 'Safe beach checkpoint saved. Loading restarts before the warning.'
+                    : 'Checkpoint saved.'
                 : result.status === 'unavailable'
                   ? 'Checkpoint could not be saved. Browser storage may be blocked or full.'
                   : 'Current state could not be saved. Move to a clear spot and try again.';
@@ -257,7 +289,12 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             replaceScene(result.save.state);
             if (scene?.opening && !scene.opening.waitingToStart) scene.opening.media.start(true);
             scene?.beach?.audio.start();
-            checkpointPanel.render(result, 'Checkpoint loaded. Close to resume exploring.');
+            checkpointPanel.render(
+                result,
+                result.save.state.wave === 'after-blackout'
+                    ? 'Blackout checkpoint loaded. Close for replay and recovery options.'
+                    : 'Checkpoint loaded. Close to resume exploring.'
+            );
         } catch (error) {
             console.error('The checkpoint could not be loaded.', error);
             checkpointPanel.render(result, 'Load failed. Your current area is still available.');
@@ -296,19 +333,69 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             checkpointPanel.render(saves.load(), 'The opening could not be started. Close this menu and try again.');
         }
     };
+    const replayWave = (replay: boolean) => {
+        if (
+            !scene?.beach ||
+            destroyed ||
+            transitioning ||
+            background ||
+            checkpointOpen ||
+            journalOpen ||
+            scene.cutscene.state ||
+            scene.dialogue.state
+        )
+            return;
+        const snapshot = scene.getSnapshot();
+        try {
+            replaceScene({ ...snapshot, wave: 'before-wave', playerPosition: [...WAVE_PLAYER_MARK] });
+            scene.beach?.audio.start();
+            if (replay) scene.beach?.wave.start();
+        } catch (error) {
+            console.error('The beach replay could not be prepared.', error);
+            if (scene.beach?.wave.progress.state.phase === 'complete')
+                waveEndPanel.feedback(
+                    'Replay could not be prepared. Your blackout and saved checkpoint are still available. Try again.'
+                );
+            else {
+                checkpointOpen = true;
+                syncControls();
+                checkpointPanel.render(saves.load(), 'Replay failed. Close to resume, or load a saved checkpoint.');
+            }
+        }
+    };
+    const startStory = () => {
+        if (!scene?.beach) {
+            startOpening();
+            return;
+        }
+        if (
+            destroyed ||
+            transitioning ||
+            background ||
+            checkpointOpen ||
+            journalOpen ||
+            scene.dialogue.state ||
+            scene.cutscene.state
+        )
+            return;
+        if (scene.beach.wave.progress.running) replayWave(true);
+        else scene.beach.wave.start();
+    };
     const hud = new GameHud(
         () => scene?.interactions.interact(),
         resetScene,
         toggleJournal,
         toggleCheckpoint,
-        startOpening,
+        startStory,
         () => {
             if (!scene?.beach || destroyed || transitioning || background) return;
-            const audio = scene.beach.audio;
+            const audio = scene.beach.wave.calm ? scene.beach.audio : scene.beach.wave.audio;
             const retry =
                 audio.state.phase === 'blocked' || audio.state.phase === 'unavailable' || audio.state.phase === 'idle';
             cutscenePanel.muted = retry ? false : !audio.state.muted;
             audio.setMuted(cutscenePanel.muted);
+            scene.beach.audio.setMuted(cutscenePanel.muted);
+            scene.beach.wave.audio.setMuted(cutscenePanel.muted);
             if (retry) audio.start();
         }
     );
@@ -322,17 +409,23 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
     const checkpointPanel = new CheckpointPanel(saveCheckpoint, loadCheckpoint, deleteCheckpoint, closeCheckpoint);
     const cutscenePanel = new CutscenePanel(
         (cutsceneId, beatId) => {
+            if (background || destroyed || transitioning) return;
             scene?.cutscene.advance(cutsceneId, beatId);
         },
         (cutsceneId) => {
+            if (background || destroyed || transitioning) return;
             scene?.cutscene.skip(cutsceneId);
         },
         () => scene?.present(scene.cutscene.state, cutscenePanel.reducedMotion),
         (muted) => {
             scene?.opening?.media.setMuted(muted);
             scene?.beach?.audio.setMuted(muted);
+            scene?.beach?.wave.audio.setMuted(muted);
         },
-        () => scene?.opening?.media.retry()
+        () => {
+            if (scene?.beach) scene.beach.wave.audio.start();
+            else scene?.opening?.media.retry();
+        }
     );
     const tutorialPanel = new TutorialPanel((id) => {
         if (!tutorialOpen || scene?.entry.lesson?.id !== id) return;
@@ -370,6 +463,21 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             syncControls();
             canvas.focus({ preventScroll: true });
         }
+    );
+    const waveEndPanel = new WaveEndPanel(
+        () => {
+            if (!scene?.beach || destroyed || transitioning || scene.beach.wave.progress.state.phase !== 'complete')
+                return;
+            const result = saves.save(scene.getSnapshot());
+            waveEndPanel.feedback(
+                result.status === 'ready'
+                    ? 'Blackout checkpoint saved.'
+                    : 'Checkpoint could not be saved. The previous checkpoint is intact. Try again.'
+            );
+        },
+        () => replayWave(true),
+        () => replayWave(false),
+        toggleCheckpoint
     );
 
     const onKeyDown = ({ key, event }: KeyboardEvent) => {
@@ -462,6 +570,14 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             tutorialPanel.render(scene.entry.lesson);
         }
         scene.update(dt);
+        const wave = scene.beach?.wave;
+        cutscenePanel.renderWave(wave?.progress.state ?? null);
+        if (wave)
+            hud.renderWave(
+                wave.progress.state,
+                scene.beach!.quest.state.status === 'completed',
+                cutscenePanel.captionsEnabled || cutscenePanel.muted || wave.audio.state.phase !== 'playing'
+            );
         hud.renderNavigation(scene.getNavigation());
         const anchors = scene.getScreenAnchors();
         cutscenePanel.setSpeakerAnchor(anchors.speaker);
@@ -497,15 +613,23 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         cutscenePanel.destroy();
         tutorialPanel.destroy();
         transitionPanel.destroy();
+        waveEndPanel.destroy();
         dialoguePanel.destroy();
         hud.destroy();
     });
 
     try {
-        assets = await loadGameAssets(app);
+        const characters = await loadForestCharacters(app);
         // AppBase.start installs the Ammo world before scene bodies are created.
         app.start();
-        replaceScene();
+        await openForestEntrance(
+            app,
+            characters,
+            () => replaceScene(),
+            async () => {
+                assets = await loadGameAssets(app);
+            }
+        );
         return app;
     } catch (error) {
         app.destroy();

@@ -11,9 +11,16 @@ node_modules
 dist
 dist-ssr
 *.local
-asset-library/source-packs/
-asset-library/archives/
-asset-library/original-downloads/
+/asset-library/
+/New [Ff][Ii][Ll][Ee][Ss]/
+/Sign-login/
+coverage/
+.cache/
+.vite/
+.pnpm-store/
+*.tsbuildinfo
+Thumbs.db
+Desktop.ini
 __pycache__/
 *.py[cod]
 .env

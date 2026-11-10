@@ -11,9 +11,10 @@ import {
     BEACH_SHORE_DIALOGUE
 } from '../src/episodes/episode-01/beach.ts';
 import {
-    BEACH_DRESSING_SOLIDS,
     BEACH_DRINK_CART,
-    BEACH_STANDING_PEOPLE
+    BEACH_STANDING_PEOPLE,
+    BEACH_V4_DRESSING_SOLIDS,
+    BEACH_WALKER_ROUTES
 } from '../src/episodes/episode-01/beachLayout.ts';
 import { BeachNavigation } from '../src/episodes/episode-01/BeachNavigation.ts';
 import { BEACH_PASSES, ENTRY_QUEST } from '../src/episodes/episode-01/entry.ts';
@@ -41,7 +42,8 @@ const snapshot = (ids = []) => ({
     opening: questAt(OPENING_QUEST, 3),
     entry: questAt(ENTRY_QUEST, 8),
     inventory: { itemIds: [SIGNAL_BOX_NOTE.id, STARTER_BAG.id, BEACH_PASSES.id] },
-    beach: { questId: BEACH_QUEST.id, completedObjectiveIds: [...ids] }
+    beach: { questId: BEACH_QUEST.id, completedObjectiveIds: [...ids] },
+    wave: 'before-wave'
 });
 const envelope = (state, version = SAVE_VERSION) => ({ version, savedAt: 1793952000000, state });
 
@@ -189,16 +191,19 @@ test('v3 arrival migration retains all three earlier quests, ownership, position
 });
 
 test('only newly occupied legacy beach positions relocate; invalid old geometry and corrupt ownership still fail', () => {
-    for (const solid of BEACH_DRESSING_SOLIDS) {
+    for (const solid of BEACH_V4_DRESSING_SOLIDS) {
         const point = [solid.position[0], 1.04, solid.position[2]];
         assert.equal(isLegacyBeachArrivalPosition(point), true, solid.name);
-        assert.equal(isBeachArrivalPosition(point), false, solid.name);
+        const newlyOccupied = !isBeachArrivalPosition(point);
         const legacy = { ...snapshot(), playerPosition: point };
         delete legacy.beach;
         const migrated = validateSaveState(envelope(legacy, 3));
         assert.equal(migrated.status, 'ready', solid.name);
-        assert.deepEqual(migrated.save.state.playerPosition, BEACH_ARRIVAL_SPAWN);
-        assert.equal(validateSaveState(envelope({ ...legacy, beach: snapshot().beach })).status, 'invalid');
+        assert.deepEqual(migrated.save.state.playerPosition, newlyOccupied ? BEACH_ARRIVAL_SPAWN : point);
+        assert.equal(
+            validateSaveState(envelope({ ...legacy, beach: snapshot().beach })).status,
+            newlyOccupied ? 'invalid' : 'ready'
+        );
     }
     for (const point of [
         [100, 1, 0],
@@ -224,7 +229,12 @@ test('exploration paths connect the arrival, cart, shore and lounger aisles with
         [4, 1.04, 1.4],
         [-13.5, 1.04, -4],
         [11, 1.04, -5],
-        [11.7, 1.04, 9.8]
+        [11.7, 1.04, 9.8],
+        [-44, 1.04, -30],
+        [45, 1.04, -30],
+        [-43, 1.04, 9.8],
+        [43, 1.04, 9.8],
+        [0, 1.04, -34]
     ];
     for (const from of points) {
         for (const to of points) {
@@ -240,6 +250,10 @@ test('exploration paths connect the arrival, cart, shore and lounger aisles with
     }
     assert.equal(navigation.route(BEACH_ARRIVAL_SPAWN, BEACH_DRINK_CART.position), null);
     assert.equal(navigation.clearSegment([-10.8, 1.04, 3.8], [-6.2, 1.04, 3.8]), false);
+    for (const route of BEACH_WALKER_ROUTES) {
+        for (let i = 0; i < route.length; i++)
+            assert.equal(navigation.clearSegment(route[i], route[(i + 1) % route.length]), true);
+    }
 });
 
 test('restored companions stand nearby without overlapping players or occupied walkways', () => {

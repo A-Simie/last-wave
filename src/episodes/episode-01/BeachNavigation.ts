@@ -1,5 +1,7 @@
 import type { Vector3Tuple } from '../../data/foundation.ts';
 
+import { BEACH_ARRIVAL_GROUND } from './entryLayout.ts';
+
 type Point = readonly [number, number, number];
 const gap = (a: Point, b: Point) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 const WALKER_CLEARANCE = 1.15;
@@ -7,13 +9,15 @@ const WALKER_CLEARANCE = 1.15;
 export class BeachNavigation {
     private readonly points: Vector3Tuple[] = [];
     private readonly neighbors: number[][] = [];
+    private readonly edges = new Map<number, boolean>();
     private readonly canStand: (point: Vector3Tuple) => boolean;
 
     constructor(canStand: (point: Vector3Tuple) => boolean) {
         this.canStand = canStand;
         const grid = new Map<string, number>();
-        for (let x = -14; x <= 14; x++) {
-            for (let z = -14; z <= 10; z++) {
+        const { position, size } = BEACH_ARRIVAL_GROUND;
+        for (let x = position[0] - size[0] / 2 + 2; x <= position[0] + size[0] / 2 - 2; x++) {
+            for (let z = position[2] - size[2] / 2 + 2; z <= position[2] + size[2] / 2 - 2; z++) {
                 const point: Vector3Tuple = [x, 1.04, z];
                 if (!canStand(point)) continue;
                 grid.set(`${x},${z}`, this.points.length);
@@ -33,10 +37,20 @@ export class BeachNavigation {
                 [1, 1]
             ]) {
                 const index = grid.get(`${point[0] + dx},${point[2] + dz}`);
-                if (index !== undefined && this.clearSegment(point, this.points[index])) neighbors.push(index);
+                if (index !== undefined) neighbors.push(index);
             }
             this.neighbors.push(neighbors);
         });
+    }
+
+    private clearEdge(a: number, b: number) {
+        const key = Math.min(a, b) * this.points.length + Math.max(a, b);
+        let clear = this.edges.get(key);
+        if (clear === undefined) {
+            clear = this.clearSegment(this.points[a], this.points[b]);
+            this.edges.set(key, clear);
+        }
+        return clear;
     }
 
     private avoidsWalkers(a: Point, b: Point, occupied: readonly Point[]) {
@@ -124,6 +138,7 @@ export class BeachNavigation {
             }
             open.delete(current);
             for (const index of this.neighbors[current]) {
+                if (!this.clearEdge(current, index)) continue;
                 if (!this.avoidsWalkers(this.points[current], this.points[index], occupied)) continue;
                 const nextCost = cost.get(current)! + gap(this.points[current], this.points[index]);
                 if (nextCost >= (cost.get(index) ?? Infinity)) continue;

@@ -6,6 +6,7 @@ from pathlib import Path
 from beach_clothing import make_swimwear
 from cafe_clothing import fit_body
 from cafe_faces import shape_face
+from casual_animation import PROFILES
 
 ROOT = Path(__file__).resolve().parents[1]
 LIBRARY = ROOT / 'asset-library'
@@ -45,7 +46,7 @@ def main():
               'preparation': 'Last Wave fitted, skinned swimwear; 512px textures; path-checked in-place clips.',
               'archives': [record(LIBRARY / 'archives' / name) for name in
                            ['Universal Base Characters[Standard].zip', 'Universal Animation Library[Standard].zip']],
-              'animationSource': record(animation_path), 'characters': []}
+              'animationSource': record(animation_path), 'animationProfiles': PROFILES, 'characters': []}
     for item in selection['characters']:
         source = base / 'Base Characters/Godot - UE' / ('Superhero_' + item['body'] + '_FullBody.gltf')
         hair = base / 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)' / ('Hair_' + item['hair'] + '.gltf')

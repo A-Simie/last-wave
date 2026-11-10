@@ -5,7 +5,7 @@ import './ui/game.css';
 const canvas = document.querySelector<HTMLCanvasElement>('#application-canvas');
 const status = document.querySelector<HTMLDivElement>('#startup-status');
 const message = document.querySelector<HTMLParagraphElement>('#startup-message');
-const launchButton = document.querySelector<HTMLButtonElement>('#launch-game');
+const launchButton = document.querySelector<HTMLButtonElement>('#retry-startup');
 const loading = document.querySelector<HTMLSpanElement>('#startup-status .loading-ring');
 
 if (!canvas || !status || !message || !launchButton || !loading) throw new Error('The game launcher is missing.');
@@ -18,10 +18,11 @@ let disposed = false;
 const launch = async () => {
     if (launching || app || disposed) return;
     launching = true;
+    launchButton.hidden = true;
     launchButton.disabled = true;
     loading.hidden = false;
     message.setAttribute('role', 'status');
-    message.textContent = 'Starting Last Wave…';
+    message.textContent = 'Entering the forest…';
     try {
         if (import.meta.env.DEV) await import('./inspector');
         const { createGame } = await import('./core/Game');
@@ -33,13 +34,18 @@ const launch = async () => {
         }
         status.hidden = true;
         canvas.inert = false;
-        canvas.focus({ preventScroll: true });
+        const entrance = document.querySelector<HTMLElement>('#forest-entry');
+        if (entrance) {
+            const target = entrance.dataset.phase === 'ready' ? '#forest-username' : '[data-forest-play-sound]';
+            entrance.querySelector<HTMLElement>(target)?.focus({ preventScroll: true });
+        } else canvas.focus({ preventScroll: true });
     } catch (error) {
         if (disposed) return;
         console.error('Last Wave could not start.', error);
         message.setAttribute('role', 'alert');
         message.textContent = 'Last Wave could not start. Try again or reload the page.';
         launchButton.textContent = 'Retry launch';
+        launchButton.hidden = false;
         launchButton.disabled = false;
     } finally {
         launching = false;
@@ -48,6 +54,7 @@ const launch = async () => {
 };
 
 launchButton.addEventListener('click', () => void launch(), { signal: events.signal });
+void launch();
 import.meta.hot?.dispose(() => {
     disposed = true;
     events.abort();

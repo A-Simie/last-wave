@@ -3,8 +3,10 @@ import type { GraphicsDevice } from 'playcanvas';
 
 import { createMaterial } from '../../scenes/primitives';
 
+import { BEACH_SHORE_Z } from './entryLayout';
+
 export const beachWaterHeight = (x: number, z: number, time: number) =>
-    -0.09 + 0.04 * Math.sin(z * 1.1 + x * 0.16 + time * 0.7) + 0.018 * Math.sin(x * 0.5 + z * 0.8 + time * 1.2);
+    0.14 + 0.04 * Math.sin(z * 1.1 + x * 0.16 + time * 0.7) + 0.018 * Math.sin(x * 0.5 + z * 0.8 + time * 1.2);
 
 export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     const root = new Entity('beach-water');
@@ -34,7 +36,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         for (let column = 0; column <= columns; column++) {
             const i = row * (columns + 1) + column;
             positions[i * 3] = -120 + (column * 240) / columns;
-            positions[i * 3 + 2] = -16 - row * 2;
+            positions[i * 3 + 2] = BEACH_SHORE_Z - row * 2;
             const deep = Math.min(1, row / 10);
             colors.set([0.26 - deep * 0.14, 0.68 - deep * 0.28, 0.67 - deep * 0.14, 1], i * 4);
             if (row < rows && column < columns)
@@ -42,6 +44,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         }
     }
     const mesh = new Mesh(device);
+    root.once('destroy', () => mesh.destroy());
     mesh.clear(true, false);
     mesh.setIndices(indices);
     mesh.setColors(colors);
@@ -60,17 +63,22 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         }
     }
     const foamMesh = new Mesh(device);
+    root.once('destroy', () => foamMesh.destroy());
     foamMesh.clear(true, false);
     foamMesh.setIndices(foamIndices);
     foamMesh.setNormals(foamNormals);
     const wash = new Entity('beach-gentle-wash');
     root.addChild(wash);
     let time = 0;
-    const update = (dt: number) => {
+    let retreat = 0;
+    const update = (dt: number, retreatTarget = 0) => {
         time += Math.min(dt, 0.1);
+        retreat += Math.max(-dt * 2.6, Math.min(dt * 2.6, retreatTarget - retreat));
         for (let i = 0; i < positions.length; i += 3) {
             const x = positions[i];
-            const z = positions[i + 2];
+            const row = Math.floor(i / 3 / (columns + 1));
+            const z = BEACH_SHORE_Z - retreat - row * 2;
+            positions[i + 2] = z;
             positions[i + 1] = beachWaterHeight(x, z, time);
             const a = Math.cos(z * 1.1 + x * 0.16 + time * 0.7) * 0.04;
             const b = Math.cos(x * 0.5 + z * 0.8 + time * 1.2) * 0.018;
@@ -87,7 +95,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         for (let band = 0; band < 3; band++) {
             for (let column = 0; column < 65; column++) {
                 const x = -80 + column * 2.5;
-                const z = -16.4 - band * 2.8 + Math.sin(time * 0.6 + band + x * 0.17) * 0.24;
+                const z = BEACH_SHORE_Z - 0.4 - retreat - band * 2.8 + Math.sin(time * 0.6 + band + x * 0.17) * 0.24;
                 for (let edge = 0; edge < 2; edge++) {
                     const index = ((band * 65 + column) * 2 + edge) * 3;
                     const depth = z - edge * (0.1 + 0.04 * Math.sin(x * 0.8 + time));
@@ -103,5 +111,11 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     update(0);
     sea.addComponent('render', { meshInstances: [new MeshInstance(mesh, water)], castShadows: false });
     wash.addComponent('render', { meshInstances: [new MeshInstance(foamMesh, foam)], castShadows: false });
-    return { update };
+    return {
+        update,
+        heightAt: (x: number, z: number) => beachWaterHeight(x, z, time),
+        get retreat() {
+            return retreat;
+        }
+    };
 };

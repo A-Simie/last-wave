@@ -48,10 +48,11 @@ export class EntryActors extends Script {
 
     update(dt: number) {
         if (dt <= 0 || this.state?.cutsceneId !== QUEUE_CUTSCENE.id) return;
-        const distance = Math.min(0.6 - this.queueTravel, Math.min(dt, 0.1) * 0.35);
+        const step = Math.min(dt, 0.1);
+        const distance = Math.min(0.6 - this.queueTravel, step * 0.35);
         this.queueTravel += distance;
         for (const character of this.queue) {
-            character.play(distance > 0 ? 'walk' : 'idle');
+            character.move(distance / step);
             this.position.copy(character.root.getPosition());
             this.position.z -= distance;
             character.root.setPosition(this.position);

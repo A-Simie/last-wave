@@ -1,0 +1,105 @@
+{
+    "duration": 44,
+    "file": "forest-story.mp3",
+    "rate": 22050,
+    "cues": [
+        {
+            "start": 4,
+            "end": 5.557,
+            "speaker": "Woman",
+            "text": "Woman: Are you sure this is the right way?"
+        },
+        {
+            "start": 7.2,
+            "end": 8.488,
+            "speaker": "Man",
+            "text": "Man: That's what the map said."
+        },
+        {
+            "start": 9.4,
+            "end": 11.519,
+            "speaker": "Woman",
+            "text": "Woman: You've been saying that for the past twenty minutes."
+        },
+        {
+            "start": 13,
+            "end": 14.809,
+            "speaker": "Man",
+            "text": "Man: Unless you've got a better idea."
+        },
+        {
+            "start": 15.5,
+            "end": 15.973,
+            "speaker": "Woman",
+            "text": "Woman: Wait."
+        },
+        {
+            "start": 16.4,
+            "end": 16.93,
+            "speaker": "Man",
+            "text": "Man: What?"
+        },
+        {
+            "start": 17.3,
+            "end": 18.115,
+            "speaker": "Woman",
+            "text": "Woman: Did you hear that?"
+        },
+        {
+            "start": 19.8,
+            "end": 21.21,
+            "speaker": "Woman",
+            "text": "Woman: What... is that?"
+        },
+        {
+            "start": 24.05,
+            "end": 24.424,
+            "speaker": "Woman",
+            "text": "[Wings erupt from the trees. The woman cries out.]"
+        },
+        {
+            "start": 25.8,
+            "end": 27.333,
+            "speaker": "Man",
+            "text": "Man: Jesus! They're just bats!"
+        },
+        {
+            "start": 28.5,
+            "end": 29.272,
+            "speaker": "Woman",
+            "text": "Woman: Just bats?"
+        },
+        {
+            "start": 30.5,
+            "end": 32.332,
+            "speaker": "Man",
+            "text": "Man: Come on. Let's get out of here."
+        }
+    ],
+    "voices": [
+        {
+            "role": "Woman",
+            "voice": "af_bella",
+            "gender": "female"
+        },
+        {
+            "role": "Man",
+            "voice": "am_michael",
+            "gender": "male"
+        }
+    ],
+    "model": {
+        "name": "kokoro-v1.0.int8.onnx",
+        "license": "Apache-2.0",
+        "sha256": "ae315a79b623f244700e4afb9246c46a26066782e049ba174bf3ba433970ee9c",
+        "voicesSha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d"
+    },
+    "scare": {
+        "start": 24,
+        "duration": 1.3,
+        "description": "Original layered impact, metallic transient, descending sting and spatial wing burst"
+    },
+    "bytes": 705558,
+    "sha256": "89de8aa1dde7f65fa2e7ba7c48d77b3433219b4bfae729118c4233b437558f06",
+    "tool": "kokoro-onnx 0.6.1 / Kokoro 1.0, MIT tool and Apache-2.0 weights; models are not deployed; speech is synthetic."
+}

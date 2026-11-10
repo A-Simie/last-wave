@@ -2,13 +2,15 @@
 
 A browser-based, stylized third-person social-discovery game built with **PlayCanvas Engine, TypeScript, Vite, and pnpm**, starting from the official PlayCanvas Third-Person Controller starter.
 
+Prepared runtime assets are versioned under `public/assets/`. Raw downloads and offline preparation materials in `asset-library/`, `New FIles/` and `Sign-login/` stay local and are excluded from Git. A fresh clone can build/test using the prepared assets; regeneration requires restoring the source library separately.
+
 ## Current playable milestone
 
-A playable **Tideline café → guided Seafront Avenue → beach exploration** story route: cinematic reporter, music, dialogue, belongings, control lessons, a solid accompanying friend, pedestrian directions, tickets, a queue, and a black loading handoff to a populated white-sand beach. Share a conversation, chilled drinks and a quiet shoreline moment in any order among umbrellas, loungers, beachgoers and swimmers. Pumpkin-and-bat branding introduces the Halloween setting. Third-person movement, collision, reusable quests, inventory/journal, and local checkpoints support the experience. [Project checklist and verification](docs/TASKS.md) · [Architecture and project structure](docs/ARCHITECTURE.md) · [Contributor handoff](docs/AGENT_CONTEXT.md).
+A playable **Tideline café → guided Seafront Avenue → beach exploration → wave evacuation → blackout** story route. Meet your friend, collect belongings, learn the controls, follow directions and enter the populated beach together. Share a conversation, chilled drinks and a quiet shoreline moment, then continue into the retreating-water warning and playable evacuation. Expanded streets feature Porsche traffic; rigged characters use relaxed, speed-matched everyday locomotion. Quests, inventory/journal and recoverable local checkpoints support the experience. [Project checklist and verification](docs/TASKS.md) · [Architecture and project structure](docs/ARCHITECTURE.md) · [Contributor handoff](docs/AGENT_CONTEXT.md).
 
-### Play from the café to the beach
+### Play from the café to the blackout
 
-1. Click or tap **Launch game** to load the furnished café, then **Play story** to start music and television playback. The initial launcher loads no 3D scene, audio, or video.
+1. The forest opens automatically. If the browser blocks sound, choose **Play with sound** inside the forest, or **Watch muted**. Watch the 44-second voiced entrance or **Skip intro**, then choose **Continue locally** to load the café and **Play story** to start the report. Accounts are not connected yet. Returning/reduced-motion visits show the board directly; **Replay the entrance** is available when motion is enabled. City/beach assets load only on local entry.
 2. Watch the 15.4-second climate report presented by **Elizabeth Lee / Voice of America**. It advances to the conversation automatically; **Skip bulletin** advances immediately. Read the four friend replies using **Next**, then **Let’s go**. **Skip intro** or Esc also hands over to gameplay.
 3. **CC** starts enabled. **Sound** mutes both tracks and keeps subtitles readable; **Retry playback** recovers failed media. **Steady camera** removes camera motion and defaults to your system's reduced-motion preference.
 4. Your friend stands and walks outside. Approach the table until **Collect belongings** appears, then press E or tap it to take your bag and phone.
@@ -18,32 +20,35 @@ A playable **Tideline café → guided Seafront Avenue → beach exploration** s
 8. Join the marked queue on the right. Continue the friend/officer exchange, then **Enter together**. A black Last Wave loading screen leads to the boardwalk and white sand with your friend. A failed handoff offers **Retry entry** or **Back to the queue**.
 9. Explore at your own pace. Talk with your friend, accept two included citrus waters from the cart, and look out at the shoreline in any order. The HUD lists the remaining moments and the nearest stop; your friend follows around furniture and passing walkers. **Sound: On / Off** controls the surf/gull ambience; **Enable beach sound** retries unavailable playback.
 10. Use **J → Bag / journal** to read your belongings, passes, and clues. **P → Save checkpoint** retains the current area and progress, including each beach discovery. In Tideline, **Replay intro** preserves objectives, items, position, and companion route progress.
+11. After all three discoveries, choose **Continue story**. Read the retreating-water, fleeing-birds, pointing-crowd and wave-reveal beats. **Run for higher ground** or **Skip to evacuation** returns movement controls; turn inland and follow the green arrows along the boardwalk and up the dune ramp. The crowd separates you from your friend before a falling sign triggers the fall and blinking blackout.
+12. The black ending offers **Save blackout checkpoint**, **Replay wave & evacuation**, **Return to the calm beach**, and **Save / load menu**. Replay and calm-beach recovery keep your discoveries; only an explicit save replaces your checkpoint. **Retry wave** is also available during evacuation.
 
-The environment uses **28 prop GLBs and 13 rigged character GLBs**, including four fitted swimwear variants. Each of the café's four tables has a rotating ceiling fan. Outside are 15 neighboring buildings, eight walking pedestrians, three sun umbrellas, two briefcases, four moving cars, and two animated drivers. The beach adds six striped umbrellas, seven loungers, five standing beachgoers, an attendant, two walkers and four swimmers around the two friends. Runtime models live in `public/assets/props/tideline/` and `public/assets/characters/`; preparation records and supplied originals live in `asset-library/`. **Save / load → Art & audio credits** lists the creators and licenses.
+The **320×240 m city** has 39 neighboring buildings, 20 pedestrians, carried umbrellas/briefcases, eight Porsche cars and four animated drivers. The **96×48 m beach** has 18 umbrellas, 31 loungers, 17 stationary beachgoers, an attendant, eight walkers and eight swimmers around the two friends. The entrance cross-gate/rear barrier and shoreline fence are open; shallow water has ground support. Runtime assets comprise **28 prop GLBs, 13 rigged character GLBs and one Porsche GLB** under `public/assets/`. The Porsche adapts Lionsharp Studios' model from the supplied PlayCanvas reference under **CC BY-SA 4.0**. Source records and originals live in `asset-library/`; **Save / load → Art & audio credits** lists attribution.
 
-The TV uses credited VOA newsroom footage with the reporter's original voice and six matching caption cues. The source story's fictional coastal bulletin remains available through the optional TV interaction. After the bulletin, the screen loops silently beneath the music. [LW-S003](docs/TASKS.md#lw-s003--beach-exploration) ends with a relaxed, freely explorable beach; completing all three moments keeps it playable. The wave/disaster continuation is the next story milestone, LW-S004. The friend is a fictional NPC; the design introduces the real-player meeting in Episode 2.
+The TV uses credited VOA newsroom footage with the reporter's original voice and six matching caption cues. The source story's fictional coastal bulletin remains available through the optional TV interaction. After the bulletin, the screen loops silently beneath the music. [LW-S004](docs/TASKS.md#lw-s004--wave-panic-and-blackout) completes the warning, evacuation and recoverable blackout. The warning begins only on **Continue story**. The friend is a fictional NPC; the design introduces the real-player meeting in Episode 2.
 
-Switching tabs or focusing another window pauses sound, video, gameplay, and rendering. Returning resumes the same state, including any open menu or developer pause. Reload returns to the launcher; an unplayed checkpoint still waits for **Play story**.
+Switching tabs or focusing another window pauses sound, video, gameplay, and rendering. Returning resumes the same state, including any open menu or developer pause. Reload opens the forest board after a completed entrance; an unplayed checkpoint still waits for **Play story**.
 
 ### Controls
 
 Click the scene to capture the mouse. Press **Esc** to release it.
 
-| Input                     | Action                                        |
-| ------------------------- | --------------------------------------------- |
-| WASD / arrow keys         | Move relative to camera direction             |
-| Shift                     | Sprint                                        |
-| Space                     | Jump                                          |
-| Mouse                     | Orbit camera                                  |
-| Mouse wheel               | Zoom                                          |
-| E                         | Interact while the prompt is visible          |
-| J / Journal               | Open or close the inventory and clue journal  |
-| P / Save / load           | Open or close checkpoint controls             |
-| Tab / Enter               | Navigate and activate modal controls          |
-| Esc                       | Close the active modal or release the mouse   |
-| Controls → Restart café   | Start fresh and retain the checkpoint         |
-| Play story / Replay intro | Read or replay the opening story sequence     |
-| Sound: On / Off           | Toggle the shared café/beach sound preference |
+| Input                       | Action                                             |
+| --------------------------- | -------------------------------------------------- |
+| WASD / arrow keys           | Move relative to camera direction                  |
+| Shift                       | Sprint                                             |
+| Space                       | Jump                                               |
+| Mouse                       | Orbit camera                                       |
+| Mouse wheel                 | Zoom                                               |
+| E                           | Interact while the prompt is visible               |
+| J / Journal                 | Open or close the inventory and clue journal       |
+| P / Save / load             | Open or close checkpoint controls                  |
+| Tab / Enter                 | Navigate and activate modal controls               |
+| Esc                         | Close the active modal or release the mouse        |
+| Controls → Restart café     | Start fresh and retain the checkpoint              |
+| Play story / Replay intro   | Read or replay the opening story sequence          |
+| Sound: On / Off             | Toggle the shared café/beach/wave sound preference |
+| Continue story / Retry wave | Start or replay the wave warning and evacuation    |
 
 After the opening, click the scene to resume desktop input. Interactions appear near their objects when you are in range. On touch devices, the starter uses left drag to move, right drag to look, a farther left drag to sprint, and a right-side double-tap to jump; tap the interaction button when it appears.
 
@@ -55,7 +60,7 @@ The optional foundation guide and amber signal box remain in the courtyard west 
 2. Close the acknowledgement with **On my way.** and inspect the amber signal box using E or the touch button.
 3. Return to the guide and choose **I checked the signal box.** to finish.
 
-The HUD tracks the opening, beach-entry objectives, then three free-order beach moments. Once accepted, **Signal check** appears as a secondary objective in Tideline. Early or repeated actions do not skip ordered objectives. The guide offers reminders while its quest is active and acknowledges completion afterward. **Restart café** or reloading starts fresh progress; **Load checkpoint** restores an explicit save.
+The HUD tracks the opening, beach-entry objectives, three free-order beach moments, then the evacuation route. Once accepted, **Signal check** appears as a secondary objective in Tideline. Early or repeated actions do not skip ordered objectives. The guide offers reminders while its quest is active and acknowledges completion afterward. **Restart café** or reloading starts fresh progress; **Load checkpoint** restores an explicit save.
 
 ### Inventory and clue journal
 
@@ -67,14 +72,14 @@ The note can be collected before accepting the quest. Repeated inspections keep 
 
 Press **P** or click/tap **Save / load** after closing any conversation or journal. The menu suspends player controls and releases the mouse.
 
-- **Save checkpoint** records the current area (Tideline or beach exploration), player position, all four quest states, and collected item IDs. Each save replaces the one local checkpoint.
+- **Save checkpoint** records the current area, safe player position, all four quests, collected item IDs and the before-wave/after-blackout boundary. Saving during evacuation restarts before the warning; offshore positions project to safe beach ground. Each save replaces the one local checkpoint.
 - **Load checkpoint** rebuilds the area at the saved position and restores progress. Close the menu to resume; desktop players click the scene to capture the mouse.
 - **Controls → Restart café** and page reload start fresh gameplay while keeping the checkpoint available for explicit loading.
 - **Delete checkpoint** removes the stored checkpoint while retaining the current playable progress.
 
 The checkpoint belongs to this browser and site origin, including its port. Save manually before leaving. The menu reports missing, damaged, unsupported, or unavailable storage; failed reads or writes retain the current game and any existing checkpoint. Positions must be inside the foundation area and clear of solid geometry. Camera orientation returns to its default and movement starts at rest after loading.
 
-New checkpoints use **version 4**. Valid version-1/version-2/version-3 saves migrate in memory; only an explicit save rewrites the slot. Version 1 starts an unplayed opening; version 2 retains opening progress, and completed departures receive the three control objectives. Earlier saves begin with no beach discoveries. Older positions newly occupied by the entrance move safely beside the approach; version-3 beach positions occupied by new furniture or stationary people move to the clear boardwalk spawn. Other valid positions and paid admission are retained. The friend restores clear of the player near the relevant route, and unfinished lessons resume. Animation, cinematic, and media playback time are not saved. Beach entry never writes the manual checkpoint automatically.
+New checkpoints use **version 5**. Valid versions 1–4 migrate in memory; only an explicit save rewrites the slot. Version 1 starts an unplayed opening; completed version-2 departures receive the three control objectives. Versions 1–3 start with no beach discoveries; version 4 retains every discovery. All older saves begin before the wave. Historical geometry is validated first; valid positions newly obstructed by expanded buildings, entrance or beach dressing relocate safely. Paid admission and other progress are retained. Loading an **after-blackout** save returns to the ending/recovery panel. Animation, evacuation route phase and media playback time are not saved. Beach entry and wave completion never automatically write the manual checkpoint.
 
 ## Prerequisites
 

@@ -1,6 +1,7 @@
 import { Entity, Script, Vec3, math } from 'playcanvas';
 
 import type { GameAssets } from '../core/AssetManager';
+import { COMPANION_SPRINT_HEIGHT } from '../data/characterModels';
 import { CHARACTER_COLLISION } from '../data/foundation';
 import type { Vector3Tuple } from '../data/foundation';
 
@@ -120,7 +121,7 @@ export class CompanionController extends Script {
             projectCompanionRoute(this.route, player).progress - projectCompanionRoute(this.route, position).progress;
         const velocity = this.player.rigidbody?.linearVelocity;
         const playerSpeed = velocity ? Math.hypot(velocity.x, velocity.z) : 0;
-        const speed = gap > 3 && ahead > 0.5 ? Math.min(9, Math.max(3.6, playerSpeed + (gap - 3) * 1.2)) : 1.65;
+        const speed = gap > 3 && ahead > 0.5 ? Math.min(9, Math.max(1.35, playerSpeed + (gap - 3) * 1.2)) : 1.3;
         let travel = gap > 5.5 && ahead < 0.5 ? 0 : Math.min(distance, speed * step);
         const yieldTo = (other: Vec3, radius: number) => {
             const x = other.x - position.x;
@@ -145,10 +146,7 @@ export class CompanionController extends Script {
         for (const obstacle of this.obstacles) {
             if (obstacle.enabled) yieldTo(obstacle.getPosition(), 0.72);
         }
-        const pace = travel / step;
-        const pose = pace < 0.01 ? 'idle' : pace > 6 ? 'sprint' : pace > 2 ? 'jog' : 'walk';
-        this.character.play(pose);
-        this.character.anim.speed = pose === 'jog' ? Math.max(0.75, Math.min(1.4, pace / 4)) : 1;
+        this.character.move(travel / step);
         if (travel < 0.001) return;
         this.heading = math.lerpAngle(
             this.heading,
@@ -163,6 +161,15 @@ export class CompanionController extends Script {
         } else {
             this.entity.setPosition(this.direction.mulScalar(travel).add(position));
         }
+    }
+
+    postUpdate(dt: number) {
+        if (dt <= 0 || !this.character.anim.playing) return;
+        const pose = this.character.anim.baseLayer!.activeState;
+        if (!['idle', 'talk', 'walk', 'jog', 'sprint'].includes(pose)) return;
+        const target = -1 + (pose === 'sprint' ? COMPANION_SPRINT_HEIGHT : 0);
+        const height = math.lerp(this.character.root.getLocalPosition().y, target, 1 - Math.exp(-dt * 14));
+        this.character.root.setLocalPosition(0, height, 0);
     }
 }
 

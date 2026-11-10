@@ -1,0 +1,460 @@
+.forest-active .hud {
+    display: none;
+}
+.forest-sound-invite {
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    width: min(360px, calc(100% - 48px));
+    text-align: center;
+    padding: 28px 24px;
+    border: 1px solid #8d806350;
+    background: #061017d9;
+    box-shadow: 0 20px 90px #0008;
+    backdrop-filter: blur(4px);
+}
+.forest-sound-invite h1 {
+    font:
+        normal 37px/1.15 Georgia,
+        serif;
+    margin: 17px 0;
+    color: #f0dfbf;
+}
+.forest-sound-invite > p:not(.forest-eyebrow) {
+    font:
+        12px/1.7 Arial,
+        sans-serif;
+    color: #c9c9b7;
+    min-height: 40px;
+}
+.forest-watch-muted {
+    background: none;
+    border: 0;
+    min-height: 44px;
+    color: #c9bea4;
+    font-size: 12px !important;
+}
+#forest-entry[data-audio='blocked'][data-phase='darkness'] .forest-darkness,
+#forest-entry[data-audio='loading'][data-phase='darkness'] .forest-darkness,
+#forest-entry[data-audio='failed'][data-phase='darkness'] .forest-darkness {
+    opacity: 0.1;
+}
+.forest-sound-invite[hidden] {
+    display: none;
+}
+.forest-fallback {
+    background: radial-gradient(ellipse at 50% 60%, #263329, #061018 70%) !important;
+}
+#forest-entry {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    overflow: auto;
+    color: #e9ddc5;
+    font-family: Georgia, 'Times New Roman', serif;
+    --forest-darkness: 1;
+    background: transparent;
+}
+#forest-entry button,
+#forest-entry input {
+    font: inherit;
+}
+#forest-entry button {
+    cursor: pointer;
+}
+#forest-entry button:disabled {
+    cursor: wait;
+    opacity: 0.5;
+}
+#forest-entry button:focus-visible,
+#forest-entry a:focus-visible,
+#forest-entry input:focus-visible {
+    outline: 2px solid #f4ae65;
+    outline-offset: 4px;
+}
+.forest-vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 50% 45%, transparent 28%, #02080e90 75%, #010407dd 100%),
+        linear-gradient(0deg, #02060bd9, transparent 20%, transparent 80%, #02060bc9);
+}
+.forest-darkness {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: #000;
+    opacity: var(--forest-darkness);
+}
+.forest-topline,
+.forest-footer {
+    position: fixed;
+    z-index: 3;
+    left: 3.2vw;
+    right: 3.2vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #b5bdb6;
+}
+.forest-topline {
+    top: 19px;
+}
+.forest-topline i {
+    color: #c0844d;
+    margin: 0 10px;
+    font-style: normal;
+}
+.forest-topline > div {
+    display: flex;
+    gap: 14px;
+}
+.forest-topline button {
+    border: 1px solid #74807844;
+    color: #d4d5c5;
+    background: #071017bb;
+    min-height: 44px;
+    padding: 0 14px;
+    font-family: Arial, sans-serif !important;
+    font-size: 11px !important;
+    letter-spacing: 0.07em;
+}
+.forest-footer {
+    bottom: 18px;
+    font-size: 9px;
+}
+.forest-footer a {
+    color: #c6c4ae;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+.forest-board {
+    position: relative;
+    width: min(430px, calc(100% - 36px));
+    margin: max(87px, calc((100svh - 620px) / 2)) auto 76px;
+    transform-origin: 50% -130px;
+    z-index: 2;
+}
+.forest-wood {
+    position: relative;
+    padding: 27px 38px 20px;
+    border: 1px solid #89613c;
+    border-radius: 3px 7px 5px 2px;
+    box-shadow:
+        0 0 0 5px #20170f,
+        0 0 0 6px #755231,
+        0 25px 75px #000c,
+        inset 0 0 65px #000a;
+    text-align: center;
+    background:
+        repeating-linear-gradient(1deg, #0000 0 7px, #c4873a09 8px, #0003 9px, #0000 10px 25px),
+        repeating-linear-gradient(
+            178deg,
+            transparent 0 48px,
+            #080503a0 49px 51px,
+            #c1914733 52px,
+            transparent 53px 97px
+        ),
+        linear-gradient(100deg, #332415, #473220 32%, #352719 60%, #261c13);
+}
+.forest-chain {
+    position: absolute;
+    z-index: -1;
+    bottom: calc(100% - 15px);
+    height: max(170px, 40vh);
+    width: 12px;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0 2px,
+        #8d7953 3px 5px,
+        #1e211f 6px 12px,
+        #75664d 13px 15px,
+        transparent 16px 19px
+    );
+    border-left: 2px solid #413d32;
+    border-right: 2px solid #3e3d33;
+    box-shadow: 3px 0 6px #0009;
+    border-radius: 5px;
+}
+.forest-chain-left {
+    left: 37px;
+}
+.forest-chain-right {
+    right: 37px;
+}
+.forest-nail {
+    position: absolute;
+    top: 14px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 20%, #a29579, #342e24 60%);
+    box-shadow: 1px 2px 2px #000;
+}
+.forest-nail-left {
+    left: 14px;
+}
+.forest-nail-right {
+    right: 14px;
+}
+.forest-eyebrow {
+    font:
+        9px Arial,
+        sans-serif;
+    letter-spacing: 0.32em;
+    color: #b4a17e;
+    margin: 0 0 14px;
+}
+.forest-logo {
+    width: min(260px, 100%);
+    height: auto;
+    filter: drop-shadow(0 3px 5px #0009);
+}
+.forest-tagline {
+    font-style: italic;
+    color: #bca480;
+    font-size: 13px;
+    margin: 5px 0 14px;
+}
+.forest-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #967043, transparent);
+    margin: 18px 0;
+    position: relative;
+}
+.forest-divider span {
+    position: relative;
+    top: -8px;
+    background: #3a2a1b;
+    padding: 0 12px;
+    color: #c18c4a;
+    font-size: 13px;
+}
+.forest-wood h1 {
+    font-size: 21px;
+    font-weight: normal;
+    letter-spacing: -0.025em;
+    margin: 0 0 6px;
+}
+.forest-intro {
+    font-size: 12px;
+    color: #b1a18a;
+    margin: 0 0 21px;
+}
+.forest-wood form {
+    text-align: left;
+}
+.forest-wood label {
+    display: block;
+    font:
+        10px Arial,
+        sans-serif;
+    letter-spacing: 0.08em;
+    color: #d2bea0;
+    margin: 14px 0 7px;
+}
+.forest-wood input {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid #8b70494f;
+    border-radius: 3px;
+    background: #100e0b9c;
+    box-shadow: inset 0 1px 5px #0005;
+    color: #f0e0c3;
+    font:
+        13px Arial,
+        sans-serif !important;
+    height: 45px;
+    padding: 0 13px;
+}
+.forest-wood input::placeholder {
+    color: #938774;
+}
+.forest-password {
+    position: relative;
+}
+.forest-password input {
+    padding-right: 58px;
+}
+.forest-password button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 45px;
+    width: 53px;
+    background: transparent;
+    border: 0;
+    color: #c2aa84;
+    font-size: 11px !important;
+}
+.forest-feedback {
+    font:
+        11px/1.5 Arial,
+        sans-serif;
+    color: #d3ba95;
+    min-height: 33px;
+    margin: 12px 0 10px;
+}
+.forest-enter {
+    height: 47px;
+    width: 100%;
+    border: 1px solid #cf8e46;
+    border-radius: 2px;
+    background: linear-gradient(#b86e2c, #87471e);
+    color: #fff0d0;
+    box-shadow:
+        inset 0 1px #f5c17655,
+        0 2px 8px #0006;
+    font:
+        bold 11px Arial,
+        sans-serif !important;
+    letter-spacing: 0.15em;
+}
+.forest-enter span {
+    float: right;
+    margin-right: 11px;
+}
+.forest-enter:hover {
+    filter: brightness(1.15);
+}
+.forest-local {
+    width: 100%;
+    min-height: 44px;
+    margin: 9px 0 0;
+    border: 1px solid #8d754638;
+    background: #120e0950;
+    color: #dec8a5;
+    font-size: 12px !important;
+}
+.forest-account {
+    font:
+        11px Arial,
+        sans-serif;
+    color: #ad9a7c;
+    margin: 8px 0 0;
+}
+.forest-account button {
+    background: transparent;
+    border: none;
+    color: #e2bd85;
+    padding: 8px 2px;
+    min-height: 38px;
+    font-size: 11px !important;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.forest-replay {
+    border: 0;
+    background: none;
+    color: #b3a185;
+    font:
+        10px Arial,
+        sans-serif !important;
+    min-height: 35px;
+    letter-spacing: 0.04em;
+}
+.forest-caption {
+    position: fixed;
+    z-index: 4;
+    bottom: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 52px);
+    text-align: center;
+    font:
+        16px/1.5 Georgia,
+        serif;
+    color: #f0e8d8;
+    text-shadow: 0 2px 4px #000;
+    padding: 10px 22px;
+    background: #03080ce0;
+    border-radius: 3px;
+}
+.forest-caption:empty {
+    display: none;
+}
+@media (max-width: 600px) {
+    .forest-topline {
+        top: 10px;
+        left: 16px;
+        right: 16px;
+    }
+    .forest-topline > span {
+        font-size: 9px;
+        max-width: 120px;
+        line-height: 1.7;
+    }
+    .forest-topline i {
+        display: none;
+    }
+    .forest-topline > div {
+        gap: 6px;
+    }
+    .forest-topline button {
+        padding: 0 10px;
+    }
+    .forest-board {
+        margin-top: 92px;
+    }
+    .forest-wood {
+        padding: 25px 26px 17px;
+    }
+    .forest-footer {
+        position: absolute;
+        font-size: 8px;
+        letter-spacing: 0.1em;
+        bottom: 14px;
+    }
+    .forest-footer > span {
+        max-width: 180px;
+        line-height: 1.7;
+    }
+    .forest-caption {
+        font-size: 14px;
+    }
+}
+@media (max-height: 720px) {
+    .forest-board {
+        margin-top: 82px;
+    }
+    .forest-wood {
+        padding-top: 19px;
+        padding-bottom: 12px;
+    }
+    .forest-logo {
+        width: 215px;
+    }
+    .forest-eyebrow {
+        margin-bottom: 8px;
+    }
+    .forest-intro {
+        margin-bottom: 10px;
+    }
+    .forest-divider {
+        margin: 13px 0;
+    }
+    .forest-wood label {
+        margin-top: 9px;
+    }
+    .forest-caption {
+        bottom: 43px;
+    }
+    .forest-footer {
+        position: absolute;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .forest-board {
+        transform: none !important;
+    }
+}

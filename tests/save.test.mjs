@@ -32,7 +32,8 @@ const snapshot = (count = 0, clue = count >= 2) => ({
     inventory: { itemIds: clue ? [SIGNAL_BOX_NOTE.id] : [] },
     opening: { questId: OPENING_QUEST.id, completedObjectiveIds: [] },
     entry: { questId: ENTRY_QUEST.id, completedObjectiveIds: [] },
-    beach: { questId: BEACH_QUEST.id, completedObjectiveIds: [] }
+    beach: { questId: BEACH_QUEST.id, completedObjectiveIds: [] },
+    wave: 'before-wave'
 });
 const envelope = (state = snapshot()) => ({ version: SAVE_VERSION, savedAt: now, state });
 const storage = () => {

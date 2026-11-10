@@ -11,12 +11,14 @@ export const OPENING_COUNTER: BoxDefinition = {
     size: [6.05, 1.08, 0.54]
 };
 export const OPENING_SOLIDS = [OPENING_TABLE, OPENING_TV, OPENING_COUNTER, ...CAFE_SOLIDS];
+export const CAFE_OUTSIDE_WAIT: Vector3Tuple = [10.2, 1.014, 6.65];
 export const FRIEND_ROUTE: Vector3Tuple[] = [
     [7.7, 1.026, 0.843],
     [6.25, 1.014, 1.85],
     [6.25, 1.014, 4.6],
     [8.1, 1.014, 4.6],
-    [8.1, 1.014, 6.65]
+    [8.1, 1.014, 6.65],
+    CAFE_OUTSIDE_WAIT
 ];
 export const OPENING_EXIT: Vector3Tuple = [8.1, 1, 5.7];
 export const OPENING_SEATS: { position: Vector3Tuple; yaw: number }[] = [

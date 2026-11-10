@@ -18,7 +18,9 @@ export const createBeachEntrance = (parent: Entity, app: AppBase) => {
     };
     root.once('destroy', () => Object.values(materials).forEach((material) => material.destroy()));
     box(root, 'beach-plaza-paving', [83, 0.015, -7.5], [28, 0.03, 31], materials.cream);
-    box(root, 'beach-entry-sand', [83, 0.016, -19], [26, 0.032, 7], materials.sand);
+    box(root, 'beach-entry-sand', [83, 0.016, -25], [46, 0.032, 20], materials.sand);
+    for (let z = -12.5; z > -32; z -= 0.5)
+        box(root, `beach-entry-board-${z}`, [86.3, 0.04, z], [5, 0.03, 0.46], materials.wood);
     for (const definition of ENTRY_SOLIDS) {
         if (definition.name.includes('fence') || definition.name.includes('gate') || definition.name.includes('rail')) {
             const body = createStaticBody(root, definition);

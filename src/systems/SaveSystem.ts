@@ -8,13 +8,15 @@ import {
     isFoundationSnapshot,
     isFoundationPosition,
     isLegacyFoundationPosition,
+    isV4FoundationPosition,
     isBeachArrivalPosition,
-    isLegacyBeachArrivalPosition
+    isLegacyBeachArrivalPosition,
+    isV4BeachArrivalPosition
 } from '../scenes/FoundationState.ts';
 import type { FoundationSnapshot } from '../scenes/FoundationState.ts';
 
 export const SAVE_STORAGE_KEY = 'last-wave.checkpoint';
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export type SaveState = {
     readonly version: typeof SAVE_VERSION;
@@ -55,13 +57,25 @@ export const validateSaveState = (value: unknown): SaveResult => {
             }
         };
     }
-    if (save.version! < SAVE_VERSION && state && typeof state === 'object') {
+    if (save.version! < 4 && state && typeof state === 'object') {
         if (state.area === 'beach-arrival') {
             if (!isLegacyBeachArrivalPosition(state.playerPosition)) return { status: 'invalid' };
             if (!isBeachArrivalPosition(state.playerPosition))
                 state = { ...state, playerPosition: [...BEACH_ARRIVAL_SPAWN] };
         }
         state = { ...state, beach: { questId: BEACH_QUEST.id, completedObjectiveIds: [] } };
+    }
+    if (save.version! < 5 && state && typeof state === 'object') {
+        if (save.version! >= 3 && state.area === 'tideline') {
+            if (!isV4FoundationPosition(state.playerPosition)) return { status: 'invalid' };
+            if (!isFoundationPosition(state.playerPosition)) state = { ...state, playerPosition: [70.5, 1.04, 6.4] };
+        }
+        if (save.version === 4 && state.area === 'beach-arrival') {
+            if (!isV4BeachArrivalPosition(state.playerPosition)) return { status: 'invalid' };
+            if (!isBeachArrivalPosition(state.playerPosition))
+                state = { ...state, playerPosition: [...BEACH_ARRIVAL_SPAWN] };
+        }
+        state = { ...state, wave: 'before-wave' };
     }
     if (
         save.version! >= 3 &&

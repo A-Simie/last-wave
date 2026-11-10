@@ -89,8 +89,7 @@ export const BEACH_QUEST: QuestDefinition = {
             event: { type: 'dialogue-choice', dialogueId: BEACH_SHORE_DIALOGUE.id, nodeId: 'look', choiceId: 'notice' }
         }
     ],
-    completionMessage:
-        'A moment shared. Keep enjoying the beach, or save here. The next story chapter is still to come.'
+    completionMessage: 'A moment shared. Save your beach checkpoint, or continue the story.'
 };
 
 export const BEACH_LOCAL_DIALOGUE: DialogueDefinition = {

@@ -158,7 +158,7 @@ export const ENTRY_LESSONS: readonly EntryLesson[] = [
     }
 ];
 
-export const directionsDialogue = (speaker: string): DialogueDefinition => ({
+export const directionsDialogue = (speaker: string, x = 0, z = 7): DialogueDefinition => ({
     id: 'e1-beach-directions',
     speaker,
     start: 'greeting',
@@ -171,8 +171,19 @@ export const directionsDialogue = (speaker: string): DialogueDefinition => ({
             ]
         },
         directions: {
-            text: 'Head east along this pavement, past the pharmacy and Lemon Market. Follow the green BEACH signs across the quiet side street. Turn left into the entrance plaza—you cannot miss the big arch. The officer will show you where to get tickets.',
-            choices: [{ id: 'thanks', label: 'East, then the big arch. Thank you!', next: null }]
+            text:
+                z > 35
+                    ? 'This is Market Street. Take the side street toward Seafront Avenue, then follow the green BEACH signs to the big arch just east of the crossing. The officer in the entrance plaza will show you where to get tickets.'
+                    : x > 98
+                      ? 'Head west along Seafront Avenue toward the big sea-green arch. The entrance plaza is on the ocean side, just before the quiet side street. The officer there will show you where to get tickets.'
+                      : 'Head east along this pavement, past the pharmacy and Lemon Market. Follow the green BEACH signs across the quiet side street. Turn left into the entrance plaza—you cannot miss the big arch. The officer will show you where to get tickets.',
+            choices: [
+                {
+                    id: 'thanks',
+                    label: z > 35 || x > 98 ? 'The big arch. Thank you!' : 'East, then the big arch. Thank you!',
+                    next: null
+                }
+            ]
         }
     }
 });

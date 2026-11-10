@@ -1,4 +1,6 @@
 import type { BeachAudioState } from '../episodes/episode-01/BeachAudio';
+import { EVACUATION_CALL, SEPARATION_CALL } from '../episodes/episode-01/wave';
+import type { WaveState } from '../episodes/episode-01/WaveProgress';
 import type { ScreenPoint } from '../scenes/ScreenProjection';
 import type { InteractionState } from '../systems/InteractionSystem';
 import type { InventoryState } from '../systems/InventorySystem';
@@ -24,6 +26,8 @@ export class GameHud {
     private readonly eyebrow: HTMLElement;
     private readonly clueNotice: HTMLElement;
     private readonly navigation: HTMLElement;
+    private readonly waveCaption: HTMLElement;
+    private waveKey = '';
     private hasTarget = false;
     private readonly onInteract: () => void;
     private readonly onReset: () => void;
@@ -92,6 +96,7 @@ export class GameHud {
                 </button>
             </div>
             <p class="interaction-message" data-message role="status" aria-live="polite" hidden></p>
+            <p class="wave-caption" data-wave-caption role="status" aria-live="polite" hidden></p>
         `;
         this.prompt = this.root.querySelector<HTMLElement>('[data-prompt]')!;
         this.target = this.root.querySelector<HTMLElement>('[data-target]')!;
@@ -111,6 +116,7 @@ export class GameHud {
         this.eyebrow = this.root.querySelector<HTMLElement>('[data-mode]')!;
         this.clueNotice = this.root.querySelector<HTMLElement>('[data-clue-notice]')!;
         this.navigation = this.root.querySelector<HTMLElement>('[data-navigation]')!;
+        this.waveCaption = this.root.querySelector<HTMLElement>('[data-wave-caption]')!;
         this.interactButton.addEventListener('click', onInteract);
         this.resetButton.addEventListener('click', onReset);
         this.journalButton.addEventListener('click', onJournal);
@@ -198,6 +204,7 @@ export class GameHud {
     }
 
     renderStory(state: QuestState | null, area: 'tideline' | 'beach-arrival') {
+        this.waveKey = '';
         const started = state?.status !== 'inactive';
         this.root.dataset.area = area;
         this.root.dataset.ready = String(!started);
@@ -211,6 +218,34 @@ export class GameHud {
                   : started
                     ? 'Episode 01 · Tideline café'
                     : 'Tideline café · Late afternoon';
+    }
+
+    renderWave(state: WaveState | null, ready: boolean, captions: boolean) {
+        const phase = state?.phase ?? '';
+        const running = phase === 'evacuating' || phase === 'separated';
+        const key = `${phase}:${state?.gate}:${ready}`;
+        this.root.dataset.wave = phase;
+        if (key !== this.waveKey) {
+            this.waveKey = key;
+            if (state) {
+                this.storyButton.hidden = !ready || (!running && phase !== 'calm');
+                this.storyButton.textContent = running ? 'Retry wave' : 'Continue story';
+            }
+            if (running) {
+                this.quest.dataset.order = 'sequence';
+                this.questTitle.textContent = 'Get to higher ground';
+                this.questStatus.textContent = phase === 'separated' ? 'Separated · keep climbing' : 'Evacuate inland';
+                this.questObjective.textContent = 'Follow the green arrows along the boardwalk and up the dune path.';
+                this.questProgress.innerHTML =
+                    '<span class="desktop-controls">Click to play · WASD to move · Shift to sprint</span><span class="touch-controls">Drag left to move. Drag farther to sprint.</span>';
+            }
+        }
+        this.waveCaption.hidden = !running || !captions;
+        const text =
+            phase === 'separated'
+                ? `${SEPARATION_CALL}\nThe crowd has come between you. Keep climbing!`
+                : `Lifeguard: “${EVACUATION_CALL}”`;
+        if (this.waveCaption.textContent !== text) this.waveCaption.textContent = text;
     }
 
     renderNavigation(hint: { label: string; distance: number } | null) {

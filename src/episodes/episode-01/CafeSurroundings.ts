@@ -1,7 +1,7 @@
 import { Entity } from 'playcanvas';
 import type { AppBase, StandardMaterial } from 'playcanvas';
 
-import { GROUND, NEIGHBOR_BUILDINGS, STREET_PLANTERS } from '../../data/foundation';
+import { GROUND, NEIGHBOR_BUILDINGS, STREET_EXTENTS, STREET_PLANTERS } from '../../data/foundation';
 import { createTextSign } from '../../scenes/createTextSign';
 import { createBoxVisual as box, createMaterial, createStaticBox } from '../../scenes/primitives';
 
@@ -12,7 +12,14 @@ const SHOP_SIGNS: Record<string, readonly string[]> = {
     'lemon-grocer': ['LEMON MARKET', 'FRESH FRUIT & COLD DRINKS'],
     'paper-and-post': ['PAPER & POST', 'BOOKS · STATIONERY'],
     'citrus-corner': ['CITRUS CORNER', 'JUICE · ICE · TAKEAWAY'],
-    'harbor-outfitters': ['HARBOR OUTFITTERS', 'A DAY BY THE SEA']
+    'harbor-outfitters': ['HARBOR OUTFITTERS', 'A DAY BY THE SEA'],
+    'west-seafront-shop-0': ['SEA SALT', 'ICE CREAM & SORBET'],
+    'west-seafront-shop-2': ['THE LITTLE LANTERN', 'GIFTS · BOOKS · ODDITIES'],
+    'ocean-bicycle-shop': ['OCEAN CYCLES', 'RENTALS · REPAIRS'],
+    'east-flower-shop': ['PETALS BY THE SEA', 'FLOWERS · PLANTS'],
+    'coastal-market': ['COASTAL MARKET', 'FRUIT · BREAD · LOCAL GOODS'],
+    'market-street-building-3': ['MARIGOLD', 'NEIGHBORHOOD KITCHEN'],
+    'market-street-building-8': ['HARBOR COFFEE', 'MARKET STREET']
 };
 
 export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
@@ -34,20 +41,43 @@ export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
     };
     root.once('destroy', () => Object.values(materials).forEach((material) => material.destroy()));
     createStaticBox(root, GROUND, materials.paving);
-    box(root, 'seafront-road', [5, 0.003, 13.2], [200, 0.006, 8], materials.asphalt);
-    box(root, 'east-side-street', [63, 0.004, 14], [8, 0.006, 180], materials.asphalt);
-    for (const z of [7.4, 19.4]) {
-        box(root, `sidewalk-${z}`, [3, 0.012, z], [112, 0.024, 3.6], materials.trim);
+    const { west, east, marketZ } = STREET_EXTENTS;
+    const middle = (west + east) / 2;
+    const length = east - west;
+    for (const [name, z] of [
+        ['seafront-road', 13.2],
+        ['market-street-road', marketZ]
+    ] as const) {
+        box(root, name, [middle, 0.003, z], [length, 0.006, 8], materials.asphalt);
+        for (const side of [-1, 1]) {
+            box(root, `sidewalk-${name}-${side}`, [middle, 0.012, z + side * 6], [length, 0.024, 3.6], materials.trim);
+            box(
+                root,
+                `street-gutter-${name}-${side}`,
+                [middle, 0.019, z + side * 4.05],
+                [length, 0.015, 0.18],
+                materials.white
+            );
+        }
+        for (let x = west + 6; x < east; x += 7) {
+            if (Math.abs(x - 63) < 8 || Math.abs(x + 55) < 8) continue;
+            box(root, `lane-divider-${name}-${x}`, [x, 0.008, z], [3.4, 0.006, 0.12], materials.white);
+        }
     }
-    for (let x = -87; x < 100; x += 7) {
-        if (x > 55 && x < 70) continue;
-        box(root, `lane-divider-${x}`, [x, 0.008, 13.2], [3.4, 0.006, 0.12], materials.white);
+    box(root, 'east-side-street', [63, 0.004, 14], [8, 0.006, 240], materials.asphalt);
+    box(root, 'west-side-street', [-55, 0.004, 28], [8, 0.006, 84], materials.asphalt);
+    for (const x of [-61, -49, 57, 69]) {
+        box(root, `cross-street-walk-${x}`, [x, 0.012, 44], [3.6, 0.024, 20], materials.trim);
     }
-    for (const z of [9.15, 17.25]) {
-        box(root, `street-gutter-${z}`, [3, 0.019, z], [112, 0.015, 0.18], materials.white);
-    }
-    for (let z = 9.7; z < 17; z += 0.94) {
-        box(root, `crosswalk-${z}`, [10.3, 0.013, z], [3, 0.009, 0.48], materials.white);
+    for (const [x, centerZ] of [
+        [10.3, 13.2],
+        [-96, 13.2],
+        [116, 13.2],
+        [-28, marketZ],
+        [104, marketZ]
+    ]) {
+        for (let z = centerZ - 3.5; z < centerZ + 3.8; z += 0.94)
+            box(root, `crosswalk-${x}-${z}`, [x, 0.013, z], [3, 0.009, 0.48], materials.white);
     }
     const paints = [materials.coral, materials.blue, materials.cream];
     for (const [index, definition] of NEIGHBOR_BUILDINGS.entries()) {
@@ -136,12 +166,15 @@ export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
             frond.setLocalEulerAngles(18, i * 60, 0);
         }
     }
-    for (const x of [-39, -18, 1, 25, 48]) {
-        const post = round(root, `street-lamp-${x}`, 'cylinder', materials.metal);
-        post.setLocalPosition(x, 2.35, 18.1);
+    for (const [x, z] of [
+        ...[-136, -110, -80, -39, -18, 1, 25, 48, 79, 104, 133, 151].map((x) => [x, 18.1]),
+        ...[-132, -96, -38, 4, 41, 82, 123, 151].map((x) => [x, marketZ + 4.9])
+    ]) {
+        const post = round(root, `street-lamp-${x}-${z}`, 'cylinder', materials.metal);
+        post.setLocalPosition(x, 2.35, z);
         post.setLocalScale(0.09, 4.7, 0.09);
-        box(root, `lamp-arm-${x}`, [x, 4.63, 17.6], [0.08, 0.08, 1.05], materials.metal);
-        box(root, `lamp-shade-${x}`, [x, 4.59, 17.1], [0.38, 0.09, 0.64], materials.trim);
+        box(root, `lamp-arm-${x}-${z}`, [x, 4.63, z - 0.5], [0.08, 0.08, 1.05], materials.metal);
+        box(root, `lamp-shade-${x}-${z}`, [x, 4.59, z - 1], [0.38, 0.09, 0.64], materials.trim);
     }
     const directions = createTextSign(
         root,
