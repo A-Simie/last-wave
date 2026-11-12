@@ -3,7 +3,6 @@ import {
     GROUND,
     NPC_POSITION,
     SIGNAL_BOX,
-    NEIGHBOR_BUILDINGS,
     STREET_PLANTERS,
     TIDELINE_V4_BUILDINGS,
     TIDELINE_V4_GROUND,
@@ -13,6 +12,7 @@ import type { BoxDefinition } from '../data/foundation.ts';
 import { SIGNAL_BOX_NOTE } from '../data/items.ts';
 import { SIGNAL_CHECK_QUEST } from '../data/quests.ts';
 import { BEACH_QUEST } from '../episodes/episode-01/beach.ts';
+import { BEACH_CROWD_SOLIDS } from '../episodes/episode-01/beachCrowdLayout.ts';
 import { BEACH_SOLIDS, BEACH_V4_SOLIDS } from '../episodes/episode-01/beachLayout.ts';
 import { BEACH_PASSES, ENTRY_QUEST } from '../episodes/episode-01/entry.ts';
 import {
@@ -25,6 +25,8 @@ import {
 } from '../episodes/episode-01/entryLayout.ts';
 import { OPENING_QUEST, STARTER_BAG } from '../episodes/episode-01/opening.ts';
 import { OPENING_SOLIDS } from '../episodes/episode-01/openingLayout.ts';
+import { STREET_BUILDING_SOLIDS } from '../episodes/episode-01/restaurantLayout.ts';
+import { STREET_EXTRA_SOLIDS } from '../episodes/episode-01/streetLayout.ts';
 import type { WaveCheckpoint } from '../episodes/episode-01/WaveProgress.ts';
 import { isInventorySnapshot } from '../systems/InventorySystem.ts';
 import type { InventorySnapshot } from '../systems/InventorySystem.ts';
@@ -59,7 +61,15 @@ const CAFE_SOLIDS: readonly BoxDefinition[] = [
     }
 ];
 const LEGACY_SOLIDS = [TIDELINE_V4_GROUND, ...TIDELINE_V4_BUILDINGS, ...TIDELINE_V4_PLANTERS, ...CAFE_SOLIDS];
-const SOLIDS = [GROUND, ...NEIGHBOR_BUILDINGS, ...STREET_PLANTERS, ...CAFE_SOLIDS, ...ENTRY_SOLIDS];
+const CURRENT_BEACH_SOLIDS = [...BEACH_SOLIDS, ...BEACH_CROWD_SOLIDS];
+const SOLIDS = [
+    GROUND,
+    ...STREET_BUILDING_SOLIDS,
+    ...STREET_PLANTERS,
+    ...CAFE_SOLIDS,
+    ...ENTRY_SOLIDS,
+    ...STREET_EXTRA_SOLIDS
+];
 
 const overlapsSolid = ([x, y, z]: readonly number[], box: BoxDefinition): boolean => {
     // Allow the small contact penetration produced by Ammo while standing against geometry.
@@ -117,7 +127,7 @@ export const isLegacyFoundationPosition = (value: unknown): value is FoundationS
 export const isV4FoundationPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
     isAreaPosition(value, TIDELINE_V4_GROUND, [...LEGACY_SOLIDS, ...ENTRY_V4_SOLIDS]);
 export const isBeachArrivalPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
-    isAreaPosition(value, BEACH_ARRIVAL_GROUND, BEACH_SOLIDS);
+    isAreaPosition(value, BEACH_ARRIVAL_GROUND, CURRENT_BEACH_SOLIDS);
 export const isLegacyBeachArrivalPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>
     isAreaPosition(value, BEACH_V3_GROUND, BEACH_V3_SOLIDS);
 export const isV4BeachArrivalPosition = (value: unknown): value is FoundationSnapshot['playerPosition'] =>

@@ -5,6 +5,7 @@ import { BEACH_ARRIVAL_GROUND } from './entryLayout.ts';
 type Point = readonly [number, number, number];
 const gap = (a: Point, b: Point) => Math.hypot(a[0] - b[0], a[2] - b[2]);
 const WALKER_CLEARANCE = 1.15;
+const NAVIGATION_HALF_WIDTH = 58;
 
 export class BeachNavigation {
     private readonly points: Vector3Tuple[] = [];
@@ -16,7 +17,9 @@ export class BeachNavigation {
         this.canStand = canStand;
         const grid = new Map<string, number>();
         const { position, size } = BEACH_ARRIVAL_GROUND;
-        for (let x = position[0] - size[0] / 2 + 2; x <= position[0] + size[0] / 2 - 2; x++) {
+        // The companion follows within the central beach; the far wings are open sand it walks straight across.
+        const halfWidth = Math.min(size[0] / 2 - 2, NAVIGATION_HALF_WIDTH);
+        for (let x = position[0] - halfWidth; x <= position[0] + halfWidth; x++) {
             for (let z = position[2] - size[2] / 2 + 2; z <= position[2] + size[2] / 2 - 2; z++) {
                 const point: Vector3Tuple = [x, 1.04, z];
                 if (!canStand(point)) continue;

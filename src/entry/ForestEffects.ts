@@ -39,7 +39,7 @@ export const createForestEffects = (root: Entity, device: GraphicsDevice, mobile
         }
     }
     const mistMaterial = createMaterial('forest-low-mist', 0.13, 0.21, 0.24);
-    mistMaterial.opacity = 0.055;
+    mistMaterial.opacity = 0.08;
     mistMaterial.blendType = BLEND_NORMAL;
     mistMaterial.depthWrite = false;
     mistMaterial.update();
@@ -78,7 +78,11 @@ export const createForestEffects = (root: Entity, device: GraphicsDevice, mobile
     webMesh.update(PRIMITIVE_LINES);
     for (const [x, y, z] of [
         [-4, 2, 0],
-        [5, 1.3, -3]
+        [5, 1.3, -3],
+        [-5.4, 3.4, 3.5],
+        [4.2, 3.2, 3.4],
+        [-7.6, 2.8, 0.4],
+        [7.1, 3.6, -0.3]
     ]) {
         const web = new Entity('forest-cobweb');
         root.addChild(web);
@@ -93,10 +97,15 @@ export const createForestEffects = (root: Entity, device: GraphicsDevice, mobile
         mistMaterial.destroy();
         webMaterial.destroy();
     });
+    // The low-poly flock is the fallback until the supplied animated bat model has loaded.
+    let procedural = true;
     return {
+        useModelBats: () => {
+            procedural = false;
+        },
         update: (time: number, reduced: boolean, ambienceTime: number) => {
             const flight = time - FOREST_SCARE_START;
-            batRoot.enabled = flight >= 0 && flight < 5.5 && !reduced;
+            batRoot.enabled = procedural && flight >= 0 && flight < 5.5 && !reduced;
             eyes.children.forEach((eye, i) => {
                 eye.enabled = time >= 18.6 && time < FOREST_SCARE_START && (time < 20.2 ? i === 0 : time > 21.1);
             });

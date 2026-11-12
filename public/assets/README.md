@@ -100,3 +100,15 @@ Prefer one coherent environment kit and matching character proportions. Marketpl
 7. Arrange the café, add materials and lighting, connect the existing interaction/quest IDs, and verify camera clearance, pickup visibility, animation, loading/reset cleanup, and browser performance. Preload assets before committing scene replacement; the current scene builder is synchronous.
 
 See [the source-library notes](../../asset-library/README.md) for offline preparation commands. LW-S002 supplies the recoverable café/street-to-beach handoff, LW-S003 supplies exploration, and LW-S004 continues through evacuation to a recoverable blackout. Hardware performance and physical-device acceptance remain under LW-F002.
+
+## Supplied models - LW-A004
+
+`models/` adds **37 self-contained GLBs / 41,764,596 bytes**. All 38 supplied filenames (including one byte-identical chair duplicate) are recorded in [ASSET_LICENSES](../../docs/ASSET_LICENSES.md). The generated catalogue is `src/data/newModels.ts`; preparation metadata/hashes are in `scripts/new-assets.prepared.json`. Tooling remains outside the project under `%TEMP%/lw-tools`; rebuild instructions are in `docs/LW-A004-HANDOFF.md`.
+
+Full builds include every model. In PowerShell, set `$env:VITE_ASSET_POLICY='commercial'` before `pnpm build` to use licence-safe substitutes and automatically remove `vampireBat.glb`, `bus.glb`, `pickup.glb`, `yellowUmbrella.glb` and `goblet.glb` from output. Clear the environment variable before a full build. Source files remain untouched. The commercial output retains 32 models; credits retain the complete supplied-source attribution record.
+
+Current population: 45 street walkers plus 10 crossers, six kiosks, 14 moving vehicles; beach 240 x 48 m with 561 additional people. Earlier section counts describe the original sets before LW-A004.
+
+## Neighborhood and Halloween reuse - LW-A005
+
+No new external asset files are introduced. All eleven supplied house/shop designs are reused at 24 mapped blocks, including six additional near-route placements. The original house/shop licence metadata and source hashes were rechecked under ASSET_LICENSES section 5. Four restaurant interiors reuse the cafe tables, chairs, cups, plants, pendants and coffee machines; the architecture/signs/lights are project-created. Pumpkin/skeleton/cobweb repetitions reuse existing forest/login resources. Umbrella holders reuse the right-arm portion of the shared driving grip clip on a masked animation layer; imported GLBs remain byte-identical to their prepared versions.

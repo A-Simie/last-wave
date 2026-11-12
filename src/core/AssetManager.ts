@@ -1,17 +1,27 @@
 import { Asset, AssetListLoader, WasmModule } from 'playcanvas';
 import type { AppBase, ContainerResource } from 'playcanvas';
 
+import { allowedModels } from '../data/assetPolicy';
 import { CAFE_MODELS } from '../data/cafeModels';
 import type { CafeModelId } from '../data/cafeModels';
 import { CHARACTER_MODELS } from '../data/characterModels';
 import type { CharacterModelId } from '../data/characterModels';
+import { PREPARED_MODELS } from '../data/newModels';
+import type { PreparedModelId } from '../data/newModels';
 import { VEHICLE_MODELS } from '../data/vehicleModels';
 import type { VehicleModelId } from '../data/vehicleModels';
 
 export type CafeAssets = Record<CafeModelId, ContainerResource>;
 export type CharacterAssets = Record<CharacterModelId, ContainerResource>;
 export type VehicleAssets = Record<VehicleModelId, ContainerResource>;
-export type GameAssets = { cafe: CafeAssets; characters: CharacterAssets; vehicles: VehicleAssets };
+/** Supplied Sketchfab models; entries are absent when the asset policy excludes them. */
+export type ModelAssets = Partial<Record<PreparedModelId, ContainerResource>>;
+export type GameAssets = {
+    cafe: CafeAssets;
+    characters: CharacterAssets;
+    vehicles: VehicleAssets;
+    models: ModelAssets;
+};
 export type ForestCharacters = Pick<CharacterAssets, 'patronBeard' | 'patronLong'>;
 
 const modelAssets = (app: AppBase, prefix: string, folder: string, models: Record<string, { file: string }>) =>
@@ -50,7 +60,17 @@ export const loadGameAssets = async (app: AppBase): Promise<GameAssets> => {
     const cafe = create('cafe', 'props/tideline', CAFE_MODELS);
     const characters = create('character', 'characters', CHARACTER_MODELS);
     const vehicles = create('vehicle', 'vehicles', VEHICLE_MODELS);
-    const entries = [...cafe, ...characters, ...vehicles];
+    const models = create(
+        'model',
+        'models',
+        Object.fromEntries(
+            allowedModels(['street', 'beach', 'umbrella', 'vehicle', 'character']).map((id) => [
+                id,
+                PREPARED_MODELS[id]
+            ])
+        )
+    );
+    const entries = [...cafe, ...characters, ...vehicles, ...models];
     const loader = new AssetListLoader(
         entries.map(([, asset]) => asset),
         app.assets
@@ -66,7 +86,8 @@ export const loadGameAssets = async (app: AppBase): Promise<GameAssets> => {
         return {
             cafe: Object.fromEntries(cafe.map(([id, asset]) => [id, asset.resource])) as CafeAssets,
             characters: Object.fromEntries(characters.map(([id, asset]) => [id, asset.resource])) as CharacterAssets,
-            vehicles: Object.fromEntries(vehicles.map(([id, asset]) => [id, asset.resource])) as VehicleAssets
+            vehicles: Object.fromEntries(vehicles.map(([id, asset]) => [id, asset.resource])) as VehicleAssets,
+            models: Object.fromEntries(models.map(([id, asset]) => [id, asset.resource])) as ModelAssets
         };
     } finally {
         loader.destroy();

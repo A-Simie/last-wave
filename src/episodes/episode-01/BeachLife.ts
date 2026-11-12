@@ -7,6 +7,7 @@ import { createAnimatedCharacter } from '../../player/AnimatedCharacter';
 import type { AnimatedCharacter } from '../../player/AnimatedCharacter';
 import { createStaticBody } from '../../scenes/primitives';
 
+import type { BeachCrowd } from './BeachCrowd';
 import { BEACH_DRESSING_SOLIDS, BEACH_STANDING_PEOPLE, BEACH_WALKER_ROUTES } from './beachLayout';
 import { beachWaterHeight } from './BeachWater';
 import { BEACH_SHORE_Z } from './entryLayout';
@@ -37,6 +38,8 @@ export class BeachLife extends Script {
     swimmers: Swimmer[] = [];
     standing: { entity: Entity; character: AnimatedCharacter; model: BeachCharacterId }[] = [];
     obstacles: Entity[] = [];
+    /** The expanded 480-person crowd; created alongside the original cast. */
+    crowd: BeachCrowd | null = null;
     private suspended = false;
     private time = 0;
     private readonly direction = new Vec3();
@@ -46,6 +49,7 @@ export class BeachLife extends Script {
         this.characters.forEach((character) => {
             character.anim.playing = !value;
         });
+        this.crowd?.setPausedFor('calm', value);
     }
 
     update(dt: number) {

@@ -4,14 +4,25 @@ import type { AppBase } from 'playcanvas';
 import type { GameAssets } from '../../core/AssetManager';
 import { CAFE_MODELS } from '../../data/cafeModels';
 import type { BoxDefinition } from '../../data/foundation';
+import type { PreparedModelId } from '../../data/newModels';
 import { createModelInstance } from '../../scenes/createModelInstance';
+import { createPreparedModel } from '../../scenes/createPreparedModel';
 import { createTextSign } from '../../scenes/createTextSign';
 import { createBoxVisual as box, createMaterial, createStaticBody, createStaticBox } from '../../scenes/primitives';
 
-import { BEACH_DRINK_CART, BEACH_DRESSING_SOLIDS, BEACH_LOUNGERS, BEACH_UMBRELLAS } from './beachLayout';
+import {
+    BEACH_DRINK_CART,
+    BEACH_DRESSING_SOLIDS,
+    BEACH_LOUNGERS,
+    BEACH_POLICE_OFFICER,
+    BEACH_UMBRELLAS
+} from './beachLayout';
 import { BEACH_ARRIVAL_GROUND, BEACH_ARRIVAL_SOLIDS, BEACH_SHORE_Z } from './entryLayout';
 
+const SHADE_DESIGNS: readonly PreparedModelId[] = ['umbrellaA', 'elegantUmbrella', 'umbrellaB', 'yellowUmbrella'];
+
 export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAssets) => {
+    const imported: Entity[] = [];
     const root = new Entity('beach-dressing');
     parent.addChild(root);
     const materials = {
@@ -31,24 +42,36 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
         material.update();
     }
     createStaticBox(root, BEACH_ARRIVAL_GROUND, materials.sand);
-    box(root, 'beach-distant-sand', [0, -0.12, -12], [180, 0.2, 48], materials.sand);
+    box(root, 'beach-distant-sand', [0, -0.12, -12], [420, 0.2, 48], materials.sand);
     createStaticBox(
         root,
         {
             name: 'beach-submerged-sand',
             position: [0, -0.41, -107],
-            size: [240, 0.2, 142]
+            size: [420, 0.2, 142]
         },
         materials.sand
     );
     for (let z = BEACH_SHORE_Z + 1; z < 11.5; z += 0.45)
         box(root, `arrival-board-${z}`, [0, 0.014, z], [5.5, 0.028, 0.42], materials.wood);
     let gate: Entity | undefined;
+    // Rear rope rail either side of the 7 m evacuation gate, spanning the full width of the sand.
+    const rearSegment = BEACH_ARRIVAL_GROUND.size[0] / 2 - 0.3 - 3.5;
     const rails: BoxDefinition[] = BEACH_ARRIVAL_SOLIDS.slice(1).flatMap((definition) =>
         definition.name === 'arrival-rear-rail'
             ? [
-                  { ...definition, name: 'arrival-rear-west', position: [-25.6, 0.7, 11.7], size: [44.2, 1.4, 0.16] },
-                  { ...definition, name: 'arrival-rear-east', position: [25.6, 0.7, 11.7], size: [44.2, 1.4, 0.16] },
+                  {
+                      ...definition,
+                      name: 'arrival-rear-west',
+                      position: [-(3.5 + rearSegment / 2), 0.7, 11.7],
+                      size: [rearSegment, 1.4, 0.16]
+                  },
+                  {
+                      ...definition,
+                      name: 'arrival-rear-east',
+                      position: [3.5 + rearSegment / 2, 0.7, 11.7],
+                      size: [rearSegment, 1.4, 0.16]
+                  },
                   { ...definition, name: 'arrival-evacuation-gate', size: [7, 1.4, 0.16] }
               ]
             : [definition]
@@ -112,6 +135,21 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
     BEACH_UMBRELLAS.forEach((_, index) => {
         const definition = BEACH_DRESSING_SOLIDS.find(({ name }) => name === `beach-umbrella-${index}`)!;
         const umbrella = createStaticBody(root, definition);
+        // The original shade posts now carry the supplied umbrella designs where available.
+        const design = Array.from(
+            { length: SHADE_DESIGNS.length },
+            (_, offset) => SHADE_DESIGNS[(index + offset) % SHADE_DESIGNS.length]
+        ).find((id) => assets.models[id]);
+        if (design) {
+            const model = createPreparedModel(assets.models[design]!, design, `beach-shade-${index}`, {
+                footprint: [3.6, 3.6]
+            });
+            umbrella.addChild(model.root);
+            model.root.setLocalPosition(0, -definition.position[1], 0);
+            model.root.setLocalEulerAngles(0, index * 47, 0);
+            imported.push(model.root);
+            return;
+        }
         box(umbrella, 'umbrella-pole', [0, 0, 0], [0.1, 3, 0.1], materials.wood);
         const canopy = new Entity('striped-canopy');
         umbrella.addChild(canopy);
@@ -175,7 +213,7 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
         post.addChild(sign);
         sign.setLocalPosition(0, definition.size[1] / 2, 0.07);
     }
-    for (const [index, x] of [-42, -31.5, -21, -10.5, 0, 10.5, 21, 31.5, 42].entries()) {
+    for (const [index, x] of Array.from({ length: 23 }, (_, i) => -115.5 + i * 10.5).entries()) {
         const buoy = new Entity(`beach-swim-marker-${index}`);
         root.addChild(buoy);
         buoy.setLocalPosition(x, 0.27, BEACH_SHORE_Z - 18);
@@ -196,10 +234,22 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
         box(root, `beach-towel-${index}`, [x, 0.015, z], [1.2, 0.025, 2], colors[index % colors.length]);
         box(root, `beach-towel-stripe-${index}`, [x, 0.031, z + 0.65], [1.2, 0.012, 0.15], materials.cream);
     }
+    if (assets.models.police) {
+        const post = createStaticBody(root, BEACH_POLICE_OFFICER);
+        const officer = createPreparedModel(assets.models.police, 'police', 'beach-police-officer-model', {
+            height: 1.84
+        });
+        post.addChild(officer.root);
+        officer.root.setLocalPosition(0, -BEACH_POLICE_OFFICER.position[1], 0);
+        officer.root.setLocalEulerAngles(0, 200, 0);
+        imported.push(officer.root);
+    }
     const group = app.batcher!.addGroup('beach-static', false, 28);
     root.once('destroy', () => app.batcher?.removeGroup(group.id));
     root.findComponents('render').forEach((render) => {
-        if (!render.entity.isDescendantOf(gate!)) render.batchGroupId = group.id;
+        if (render.entity.isDescendantOf(gate!)) return;
+        if (imported.some((model) => render.entity === model || render.entity.isDescendantOf(model))) return;
+        render.batchGroupId = group.id;
     });
     return {
         cart,

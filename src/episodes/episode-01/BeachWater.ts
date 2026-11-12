@@ -26,7 +26,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         foam.destroy();
     });
 
-    const columns = 64;
+    const columns = 128;
     const rows = 64;
     const positions = new Float32Array((columns + 1) * (rows + 1) * 3);
     const normals = new Float32Array(positions.length);
@@ -35,7 +35,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     for (let row = 0; row <= rows; row++) {
         for (let column = 0; column <= columns; column++) {
             const i = row * (columns + 1) + column;
-            positions[i * 3] = -120 + (column * 240) / columns;
+            positions[i * 3] = -200 + (column * 400) / columns;
             positions[i * 3 + 2] = BEACH_SHORE_Z - row * 2;
             const deep = Math.min(1, row / 10);
             colors.set([0.26 - deep * 0.14, 0.68 - deep * 0.28, 0.67 - deep * 0.14, 1], i * 4);
@@ -94,7 +94,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         mesh.update();
         for (let band = 0; band < 3; band++) {
             for (let column = 0; column < 65; column++) {
-                const x = -80 + column * 2.5;
+                const x = -128 + column * 4;
                 const z = BEACH_SHORE_Z - 0.4 - retreat - band * 2.8 + Math.sin(time * 0.6 + band + x * 0.17) * 0.24;
                 for (let edge = 0; edge < 2; edge++) {
                     const index = ((band * 65 + column) * 2 + edge) * 3;

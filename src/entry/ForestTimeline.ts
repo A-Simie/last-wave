@@ -73,3 +73,25 @@ export const rememberForest = (storage: () => Pick<Storage, 'setItem'>) => {
         // Presentation preferences must never block entry or touch the checkpoint slot.
     }
 };
+
+/** Non-sensitive presentation preference: `always` skips the intro on every load until cleared. */
+export const INTRO_SKIP_KEY = 'last-wave.intro-skip.v1';
+
+export const prefersSkippingIntro = (storage: () => Pick<Storage, 'getItem'>) => {
+    try {
+        return storage().getItem(INTRO_SKIP_KEY) === 'always';
+    } catch {
+        return false;
+    }
+};
+
+export const rememberIntroSkip = (storage: () => Pick<Storage, 'setItem' | 'removeItem'>, always: boolean) => {
+    try {
+        if (always) storage().setItem(INTRO_SKIP_KEY, 'always');
+        else storage().removeItem(INTRO_SKIP_KEY);
+        return true;
+    } catch {
+        // Blocked storage only means the choice lasts for this visit.
+        return false;
+    }
+};

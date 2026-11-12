@@ -6,6 +6,14 @@ The planned sequence is coffee shop → beach/evacuation → hospital → Kirowe
 
 ## Implemented opening — LW-S001 / LW-A003
 
+### Entrance presentation — LW-UI001
+
+Before the canonical café opening, a 44-second forest/login presentation opens automatically. Two unidentified figures follow a phone map through the woods, disagree about the route, stop at a sound, and notice watching eyes. At 24 seconds, bats burst from those eye positions with a synchronized impact, wings and a cry; the figures duck/startle, recover and leave. A wider forest reveal leads to the chain-hung login board. This is atmospheric entry material: it establishes no canonical identities, relationship, location in the episode timeline or answer to the mystery.
+
+The woman and man have distinct bundled neural voices, with matching captions. If autoplay is blocked, **Play with sound / Watch muted** appears inside the forest. Skip/replay, returning visits and reduced motion retain access to the board. **Continue locally** loads the existing café; accounts are not connected. This presentation neither advances quests nor overwrites checkpoints. Authored dialogue/timings live in `src/entry/forestDialogue.ts`; ownership, evidence and remaining audible/acting/device acceptance are recorded in ARCHITECTURE and TASKS.
+
+### Canonical café opening
+
 **Play story** starts §1A, **The Last Normal Day**, inside `src/scenes/FoundationScene.ts`:
 
 - The complete fictional bulletin and four friend-exchange lines are authored in `src/episodes/episode-01/opening.ts`. Friend A is **You** and Friend B is **Friend**.
@@ -15,6 +23,7 @@ The planned sequence is coffee shop → beach/evacuation → hospital → Kirowe
 - Proximity-only bag/phone pickup, a readable protected inventory item, optional TV/attendant conversations, and a guarded **Head outside** interaction complete the flow.
 - Ordered opening → belongings → exit progress; early departure prompts a reminder. Replay never resets progress. Version-5 manual checkpoints retain opening, guided-entry, beach discoveries, area and before-wave/after-blackout progress, migrating versions 1–4 on read.
 - After belongings pickup, movement/look lessons lead to the doorway interaction. The doorway completes the opening objectives and hands off to pedestrian directions along the surrounding avenue.
+- Doorway correction: the solid friend passes through the door and waits beside it at `CAFE_OUTSIDE_WAIT`; the street route continues from that mark. **Head outside** leaves the passage open for normal player movement. Production-browser acceptance verified actual keyboard traversal to the street.
 
 `OpeningPrototype.ts` builds the stage with the Tideline area; `OpeningActors.ts` owns seated presentation and the handoff to the solid `CompanionController`. `OpeningCamera.ts` owns framing, `OpeningMedia.ts` owns playback, and `CafeTelevision.ts` renders the footage. `openingLayout.ts` and `cafeLayout.ts` share colliders with checkpoint validation. Optional attendant/reminder text is draft flavor; the original DOCX files remain the narrative source.
 

@@ -10,6 +10,12 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+/dist-*/
+/verification.local/
+/items/
+/downloads/
+/tmp/
+/temp/
 *.local
 /asset-library/
 /New [Ff][Ii][Ll][Ee][Ss]/

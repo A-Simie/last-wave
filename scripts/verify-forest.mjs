@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
+import { allowedModels } from '../src/data/assetPolicy.ts';
 import { SIGNAL_CHECK_QUEST } from '../src/data/quests.ts';
 import { BEACH_QUEST } from '../src/episodes/episode-01/beach.ts';
 import { BEACH_PASSES, ENTRY_QUEST } from '../src/episodes/episode-01/entry.ts';
@@ -57,6 +58,9 @@ const wait = (condition) =>
         `new Promise((resolve,reject)=>{const start=performance.now();const step=()=>{if(${condition})return resolve(true);if(performance.now()-start>55000)return reject(new Error('Condition timed out'));setTimeout(step,40);};step();})`
     );
 const click = async (selector) => {
+    await evaluate(
+        `(async()=>{const e=document.querySelector(${JSON.stringify(selector)});const dialog=e.closest('dialog');if(dialog)await Promise.all(dialog.getAnimations().map(a=>a.finished));})()`
+    );
     const r = await evaluate(
         `(()=>{const e=document.querySelector(${JSON.stringify(selector)}); e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`
     );
@@ -106,7 +110,7 @@ try {
     })()`
     });
     const clearSeen = await send('Page.addScriptToEvaluateOnNewDocument', {
-        source: `localStorage.removeItem('last-wave.forest-seen.v2');sessionStorage.setItem('forest-checkpoint-before',localStorage.getItem('last-wave.checkpoint')??'');`
+        source: `localStorage.removeItem('last-wave.intro-skip.v1');sessionStorage.setItem('forest-checkpoint-before',localStorage.getItem('last-wave.checkpoint')??'');`
     });
     await send('Page.navigate', { url });
     await wait(`document.querySelector('#startup-status')?.hidden && document.querySelector('#forest-entry')`);
@@ -148,7 +152,7 @@ try {
     await evaluate(`document.querySelector('#forest-dialogue-track').currentTime=24.01;true`);
     await wait(`document.querySelector('#forest-dialogue-track').currentTime>24.08`);
     const impact = await evaluate(
-        `(()=>{const a=globalThis.__forestAnalysers[0],d=new Float32Array(a.fftSize);a.getFloatTimeDomainData(d);return Math.sqrt(d.reduce((s,x)=>s+x*x,0)/d.length);})()`
+        `(async()=>{const a=globalThis.__forestAnalysers[0],d=new Float32Array(a.fftSize);let peak=0;for(let i=0;i<12;i++){await new Promise(r=>requestAnimationFrame(r));a.getFloatTimeDomainData(d);peak=Math.max(peak,Math.sqrt(d.reduce((s,x)=>s+x*x,0)/d.length));}return peak;})()`
     );
     assert.ok(impact > 0.025, 'Scare soundtrack is silent: ' + impact);
     record('The bat burst produces a synchronized nonzero scare impact');
@@ -168,6 +172,8 @@ try {
     await click('[data-forest-sound]');
     assert.equal(await evaluate(`document.querySelector('#forest-dialogue-track').paused`), true);
     await click('[data-forest-skip]');
+    await click('[data-forest-skip-once]');
+    assert.equal(await evaluate("localStorage.getItem('last-wave.intro-skip.v1')"), null);
     await click('[data-forest-replay]');
     await evaluate(`${app}.timeScale=0;true`);
     await shot('01-dark-opening');
@@ -226,6 +232,8 @@ try {
     assert.equal(await evaluate('document.querySelector("#forest-entry").dataset.phase'), 'darkness');
     await advance(24.5);
     await click('[data-forest-skip]');
+    await click('[data-forest-skip-always]');
+    assert.equal(await evaluate("localStorage.getItem('last-wave.intro-skip.v1')"), 'always');
     await advance(0);
     assert.equal(await evaluate(`!!${app}.root.findByName('forest-bat-flock').enabled`), false);
     assert.equal(await evaluate(`!!${app}.root.findByName('forest-unidentified-man').enabled`), false);
@@ -253,7 +261,9 @@ try {
         0
     );
     assert.equal(await evaluate(`!!document.querySelector('[data-story]')`), true);
-    assert.equal(await evaluate(`${app}.assets.list().filter(a=>a.type==='container').length`), 42);
+    const policy = process.env.VITE_ASSET_POLICY === 'commercial' ? 'commercial' : 'full';
+    const suppliedCount = allowedModels(['street', 'beach', 'umbrella', 'vehicle', 'character'], policy).length;
+    assert.equal(await evaluate(`${app}.assets.list().filter(a=>a.type==='container').length`), 42 + suppliedCount);
     await shot('12-cafe-handoff');
     record('Local entry constructs cafe; forest entities, UI and containers released');
     const progress = (definition, count = definition.objectives.length) => ({
@@ -315,7 +325,7 @@ try {
                 quest: progress(SIGNAL_CHECK_QUEST, 0),
                 opening: progress(OPENING_QUEST),
                 entry: progress(ENTRY_QUEST, beach ? 8 : 3),
-                beach: progress(BEACH_QUEST, beach ? 3 : 0),
+                beach: progress(BEACH_QUEST, 0),
                 inventory: { itemIds: [STARTER_BAG.id, ...(beach ? [BEACH_PASSES.id] : [])] },
                 wave: 'before-wave'
             }
@@ -330,12 +340,65 @@ try {
         assert.equal(await evaluate(`!!${app}.root.findByName('beach-arrival')`), beach);
         await shot(beach ? '16-beach-checkpoint' : '15-street-checkpoint');
         record(`Existing ${area} checkpoint loads after forest entry`);
+        if (beach) {
+            await wait(
+                `${app}.root.findByName('beach-crowd').script.get('beachCrowd').spawned===${app}.root.findByName('beach-crowd').script.get('beachCrowd').count`
+            );
+            const performanceSample = await evaluate(
+                `(async()=>{const a=${app},crowd=a.root.findByName('beach-crowd').script.get('beachCrowd');const times=[];let previous=performance.now();for(let i=0;i<180;i++){await new Promise(r=>requestAnimationFrame(r));const now=performance.now();times.push(now-previous);previous=now;}times.sort((a,b)=>a-b);return {count:crowd.count,spawned:crowd.spawned,visible:crowd.people.filter(p=>p.holder.enabled).length,animated:crowd.people.filter(p=>p.character?.anim.playing).length,meanMs:times.reduce((a,b)=>a+b,0)/times.length,p95Ms:times[Math.floor(times.length*.95)],drawCalls:a.stats.drawCalls.total};})()`
+            );
+            await writeFile(new URL('beach-performance.json', output), JSON.stringify(performanceSample, null, 2));
+            assert.ok(performanceSample.spawned >= 500);
+            record(
+                `Beach crowd fully spawns: ${performanceSample.spawned}; mean frame ${performanceSample.meanMs.toFixed(1)} ms (headless host only)`
+            );
+            await shot('18-beach-populated');
+            fixture.state.beach = progress(BEACH_QUEST);
+            await evaluate(
+                `localStorage.setItem('last-wave.checkpoint',${JSON.stringify(JSON.stringify(fixture))});true`
+            );
+            await send('Input.dispatchKeyEvent', {
+                type: 'keyDown',
+                key: 'p',
+                code: 'KeyP',
+                windowsVirtualKeyCode: 80
+            });
+            await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'p', code: 'KeyP', windowsVirtualKeyCode: 80 });
+            await click('[data-load]');
+            await wait(`document.querySelector('[data-checkpoint-feedback]').textContent.includes('loaded')`);
+            await evaluate(`${app}.timeScale=0;true`);
+            await click('[data-checkpoint-close]');
+            const waveRoot = `${app}.root.findByName('beach-wave').script.get('beachWave')`;
+            await evaluate(`(()=>{const a=${app};for(let i=0;i<65;i++)a.fire('update',.1);return true;})()`);
+            assert.equal(await evaluate(`${waveRoot}.progress.state.phase`), 'warning');
+            await shot('19-auto-warning');
+            record('Completed discoveries automatically start the warning without Continue story');
+            await evaluate(
+                `(()=>{const a=${app},w=${waveRoot};for(let i=0;i<650&&w.progress.state.phase==='warning';i++){w.update(.1);a.fire('update',.1);}return true;})()`
+            );
+            assert.equal(await evaluate(`${waveRoot}.progress.state.phase`), 'evacuating');
+            assert.equal(
+                await evaluate(`${app}.root.findByName('beach-crowd').script.get('beachCrowd').mode`),
+                'running'
+            );
+            await shot('20-auto-evacuation');
+            record('Warning beats advance automatically and the expanded crowd enters evacuation');
+            await evaluate(
+                `(()=>{const a=${app},w=${waveRoot};for(const p of [[0,1.04,0],[0,1.16,12.5],[0,4.04,24]]){w.player.rigidbody.teleport(...p);w.update(.1);a.fire('update',.1);}for(let i=0;i<120;i++){w.update(.1);a.fire('update',.1);}return true;})()`
+            );
+            assert.equal(await evaluate(`${waveRoot}.progress.state.phase`), 'complete');
+            assert.equal(await evaluate(`document.querySelector('#wave-ending').open`), true);
+            await shot('21-expanded-blackout');
+            record('Expanded-crowd state smoke reaches the recoverable ending through teleported gates');
+            await evaluate(`${app}.timeScale=1;true`);
+        }
     }
     await evaluate(
         `(()=>{const value=sessionStorage.getItem('forest-checkpoint-before');if(value)localStorage.setItem('last-wave.checkpoint',value);else localStorage.removeItem('last-wave.checkpoint');return true;})()`
     );
     assert.equal(issues.length, 0, JSON.stringify(issues));
     record('No unexpected console, shader or network issues through cafe/street/beach entry');
+    await wait(`!${app}.assets.list().some(asset=>asset.loading)`);
     await evaluate(`${app}.destroy();true`);
     assert.equal(await evaluate('globalThis.__playcanvasApps.size'), 0);
     record('Application teardown unregisters Engine');
@@ -348,8 +411,9 @@ try {
     await send('Page.navigate', { url });
     await wait(`document.querySelector('#startup-status')?.hidden`);
     assert.equal(await evaluate('document.querySelector("#forest-entry").dataset.phase'), 'ready');
-    record('Returning visit bypasses cinematic');
-    await evaluate(`${app}.destroy();localStorage.removeItem('last-wave.forest-seen.v2');true`);
+    record('Always skip persists across visits');
+    await wait(`!${app}.assets.list().some(asset=>asset.loading)`);
+    await evaluate(`${app}.destroy();localStorage.removeItem('last-wave.intro-skip.v1');true`);
     await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
     await send('Page.navigate', { url });
     await wait(`document.querySelector('#startup-status')?.hidden`);
@@ -358,6 +422,7 @@ try {
     await shot('13-reduced-motion');
     record('Reduced motion goes directly to static final form');
     assert.equal(issues.length, 0, JSON.stringify(issues));
+    await wait(`!${app}.assets.list().some(asset=>asset.loading)`);
     await evaluate(`${app}.destroy();true`);
     faultInjectionStart = issues.length;
     await send('Network.setBlockedURLs', { urls: ['*assets/forest/*.glb'] });

@@ -224,7 +224,8 @@ test('entry invariants reject skipped lessons, forged tickets, missing funds pre
         { ...state, inventory: { itemIds: [...state.inventory.itemIds, BEACH_PASSES.id] } },
         { ...snapshot(7), area: 'beach-arrival', playerPosition: BEACH_ARRIVAL_SPAWN },
         { ...snapshot(8), area: 'tideline', playerPosition: QUEUE_MARK },
-        { ...snapshot(8), playerPosition: QUEUE_MARK },
+        // The beach now runs 240 m wide, so the street queue's x lies on sand; beyond the east rail does not.
+        { ...snapshot(8), playerPosition: [QUEUE_MARK[0] + 40, QUEUE_MARK[1], QUEUE_MARK[2]] },
         { ...snapshot(8), playerPosition: [0, 1, -36] }
     ])
         assert.equal(validateSaveState(envelope(invalid)).status, 'invalid', JSON.stringify(invalid));

@@ -458,3 +458,44 @@
         transform: none !important;
     }
 }
+.forest-skip-dialog {
+    width: min(400px, calc(100% - 36px));
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #e9ddc5;
+    font-family: Georgia, 'Times New Roman', serif;
+    overflow: visible;
+}
+.forest-skip-dialog::backdrop {
+    background: radial-gradient(ellipse at 50% 50%, #02080ea8, #010407e8);
+    backdrop-filter: blur(2px);
+}
+.forest-skip-dialog[open] {
+    animation: forest-skip-drop 0.42s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.forest-skip-dialog h2 {
+    font-size: 22px;
+    font-weight: normal;
+    margin: 0 0 8px;
+    color: #f0dfbf;
+}
+.forest-skip-choices {
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+}
+.forest-skip-choices .forest-local {
+    margin: 0;
+}
+@keyframes forest-skip-drop {
+    from {
+        transform: translateY(-28px) rotate(-1.5deg);
+        opacity: 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .forest-skip-dialog[open] {
+        animation: none;
+    }
+}

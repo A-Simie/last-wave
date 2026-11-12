@@ -73,14 +73,15 @@ export const BEACH_V3_SOLIDS: readonly BoxDefinition[] = [
 ];
 
 export const BEACH_SHORE_Z = -30;
+/** The sand runs 240 m along the shore (widened from 96 m); depth and shoreline are unchanged. */
 export const BEACH_ARRIVAL_GROUND: BoxDefinition = {
     name: 'beach-arrival-ground',
     position: [0, -0.1, -12],
-    size: [96, 0.2, 48]
+    size: [240, 0.2, 48]
 };
 export const BEACH_ARRIVAL_SOLIDS: readonly BoxDefinition[] = [
     BEACH_ARRIVAL_GROUND,
-    { name: 'arrival-west-rail', position: [-47.7, 0.7, -12], size: [0.16, 1.4, 48] },
-    { name: 'arrival-east-rail', position: [47.7, 0.7, -12], size: [0.16, 1.4, 48] },
-    { name: 'arrival-rear-rail', position: [0, 0.7, 11.7], size: [95.4, 1.4, 0.16] }
+    { name: 'arrival-west-rail', position: [-119.7, 0.7, -12], size: [0.16, 1.4, 48] },
+    { name: 'arrival-east-rail', position: [119.7, 0.7, -12], size: [0.16, 1.4, 48] },
+    { name: 'arrival-rear-rail', position: [0, 0.7, 11.7], size: [239.4, 1.4, 0.16] }
 ];

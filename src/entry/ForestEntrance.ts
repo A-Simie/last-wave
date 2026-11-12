@@ -1,12 +1,12 @@
-﻿import type { AppBase } from 'playcanvas';
+import type { AppBase } from 'playcanvas';
 
 import type { ForestCharacters } from '../core/AssetManager';
 
-import { loadForestAssets } from './ForestAssets';
+import { loadForestAssets, loadLoginModels } from './ForestAssets';
 import { ForestAudio } from './ForestAudio';
 import { ForestLogin } from './ForestLogin';
 import { createForestScene } from './ForestScene';
-import { ForestTimeline, hasSeenForest, rememberForest } from './ForestTimeline';
+import { ForestTimeline, prefersSkippingIntro, rememberIntroSkip } from './ForestTimeline';
 
 import './forest.css';
 
@@ -17,14 +17,18 @@ export const openForestEntrance = async (
     prepare: () => Promise<void>
 ) => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const timeline = new ForestTimeline(motion.matches || hasSeenForest(() => localStorage));
+    // The intro plays on every load unless the visitor chose Always skip (or the OS requests reduced motion).
+    const alwaysSkip = prefersSkippingIntro(() => localStorage);
+    const timeline = new ForestTimeline(motion.matches || alwaysSkip);
+    let dialogOpen = false;
     const events = new AbortController();
     const audio = new ForestAudio();
     let assets: Awaited<ReturnType<typeof loadForestAssets>> | undefined;
+    let loginModels: Awaited<ReturnType<typeof loadLoginModels>> | undefined;
+    let loginLoading: Promise<void> | undefined;
     let scene: ReturnType<typeof createForestScene> | undefined;
     let destroyed = false;
     let entering = false;
-    let remembered = false;
     let wasReady = false;
     let ambienceTime = 0;
     const ui = new ForestLogin(
@@ -35,7 +39,17 @@ export const openForestEntrance = async (
         () => {
             audio.toggle(timeline.state.time);
         },
-        () => audio.mute()
+        () => audio.mute(),
+        {
+            alwaysSkip,
+            onChoose: (always) => {
+                rememberIntroSkip(() => localStorage, always);
+            },
+            onDialog: (open) => {
+                dialogOpen = open;
+                audio.setPaused(open);
+            }
+        }
     );
     ui.root.append(audio.ambience, audio.dialogue);
     const beginEntry = async () => {
@@ -43,6 +57,8 @@ export const openForestEntrance = async (
         entering = true;
         ui.setEntering(true);
         try {
+            // AssetListLoader.destroy removes shared registry listeners; do not overlap the two loaders.
+            await loginLoading;
             await prepare();
             if (destroyed) return;
             scene?.destroy();
@@ -62,7 +78,8 @@ export const openForestEntrance = async (
     audio.onStateChange = (state, feedback) => ui.setSound(state, feedback);
     const update = (dt: number) => {
         if (destroyed || document.hidden || !document.hasFocus()) return;
-        audio.setPaused(dt <= 0);
+        audio.setPaused(dt <= 0 || dialogOpen);
+        if (dialogOpen) dt = 0;
         if (motion.matches && !timeline.state.ready) timeline.skip();
         if (!timeline.state.ready) {
             if (wasReady) audio.seek(0);
@@ -75,13 +92,10 @@ export const openForestEntrance = async (
         if (state.ready && !wasReady) audio.settle();
         audio.update(state.time);
         ui.render(motion.matches);
-        if (state.ready && !remembered) {
-            remembered = true;
-            rememberForest(() => localStorage);
-        }
         wasReady = state.ready;
     };
-    const syncActivity = () => audio.setPaused(document.hidden || !document.hasFocus() || app.timeScale === 0);
+    const syncActivity = () =>
+        audio.setPaused(document.hidden || !document.hasFocus() || app.timeScale === 0 || dialogOpen);
     const destroy = () => {
         if (destroyed) return;
         destroyed = true;
@@ -90,6 +104,7 @@ export const openForestEntrance = async (
         events.abort();
         scene?.destroy();
         assets?.release();
+        loginModels?.release();
         timeline.destroy();
         audio.destroy();
         ui.destroy();
@@ -115,6 +130,17 @@ export const openForestEntrance = async (
             return;
         }
         scene = createForestScene(app, assets, characters);
+        // The supplied bat, headstone and graveyard extras stream in without delaying the intro.
+        loginLoading = loadLoginModels(app)
+            .then((loaded) => {
+                if (destroyed) {
+                    loaded.release();
+                    return;
+                }
+                loginModels = loaded;
+                scene?.addLoginModels(loaded.models);
+            })
+            .catch((error: unknown) => console.warn('Optional login scenery unavailable.', error));
     } catch (error) {
         if (destroyed) return;
         console.warn('Forest scenery unavailable; local entry remains available.', error);

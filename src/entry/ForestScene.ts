@@ -9,6 +9,7 @@ import type { loadForestAssets } from './ForestAssets';
 import { createForestCamera } from './ForestCamera';
 import { createForestEffects } from './ForestEffects';
 import { textureForestGround } from './ForestGround';
+import { createLoginDressing } from './ForestLoginDressing';
 import { FOREST_MODELS } from './forestModels';
 import type { ForestModelId } from './forestModels';
 import { createForestPerformers } from './ForestPerformers';
@@ -153,10 +154,26 @@ export const createForestScene = (
             place('boulder', x! + 0.7, z! + 0.3, 27, 0.75);
         }
         const embers: Entity[] = [];
+        const pumpkinKinds: readonly ForestModelId[] = ['pumpkin', 'tallPumpkin', 'leanPumpkin', 'plainPumpkin'];
+        for (let cluster = 0; cluster < 8; cluster++) {
+            const side = cluster % 2 ? 1 : -1;
+            const x = side * (3.5 + Math.floor(cluster / 2) * 1.45);
+            const z = 4.6 - Math.floor(cluster / 2) * 1.5;
+            for (let i = 0; i < (mobile ? 2 : 3); i++)
+                place(
+                    pumpkinKinds[(cluster + i) % pumpkinKinds.length],
+                    x + side * i * 0.42,
+                    z - i * 0.3,
+                    -side * 12 + i * 23,
+                    0.8 + ((cluster + i) % 3) * 0.22
+                );
+        }
         for (const [x, z] of [
             [-4.5, 2.8],
             [4.8, 1.8],
-            [-7.5, -3]
+            [-7.5, -3],
+            [-3.9, 4.3],
+            [4.1, 4]
         ]) {
             place(x! < -6 ? 'leanPumpkin' : x! > 0 ? 'tallPumpkin' : 'pumpkin', x!, z!, 0);
             place('plainPumpkin', x! + 0.5, z! + 0.2, 35, 0.85);
@@ -257,6 +274,7 @@ export const createForestScene = (
             castShadows: false
         });
         const effects = createForestEffects(root, app.graphicsDevice, mobile);
+        let login: ReturnType<typeof createLoginDressing> | null = null;
         const update = (time: number, reduced: boolean, ambienceTime: number) => {
             const steady = reduced;
             camera.update(time, reduced);
@@ -281,6 +299,7 @@ export const createForestScene = (
                     : 1.9 + Math.sin(ambienceTime * 7 + i) * 0.22 + Math.sin(ambienceTime * 13 + i) * 0.08;
             });
             effects.update(time, steady, ambienceTime);
+            login?.update(time, steady, ambienceTime);
             for (const tree of trees)
                 tree.root.setLocalEulerAngles(
                     steady ? 0 : Math.sin(ambienceTime * 0.25 + tree.seed) * 0.12,
@@ -298,7 +317,12 @@ export const createForestScene = (
                 entity.setLocalEulerAngles(moving ? progress * 90 : 0, i * 72, moving ? progress * 50 : 0);
             });
         };
-        return { root, update, destroy: () => root.destroy() };
+        const addLoginModels = (models: Parameters<typeof createLoginDressing>[1]) => {
+            if (login || !root.parent) return;
+            login = createLoginDressing(root, models, mobile);
+            if (login.hasBats) effects.useModelBats();
+        };
+        return { root, update, addLoginModels, destroy: () => root.destroy() };
     } catch (error) {
         root.destroy();
         throw error;

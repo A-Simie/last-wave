@@ -13,6 +13,7 @@ import type { QuestSystem } from '../../systems/QuestSystem';
 
 import { BEACH_DRINKS_DIALOGUE, BEACH_FRIEND_DIALOGUE, BEACH_LOCAL_DIALOGUE, BEACH_SHORE_DIALOGUE } from './beach';
 import { BeachAudio } from './BeachAudio';
+import { createBeachCrowd } from './BeachCrowd';
 import { createBeachDressing } from './BeachDressing';
 import { BEACH_SHORE_MARK } from './beachLayout';
 import { createBeachLife } from './BeachLife';
@@ -46,6 +47,8 @@ export const createBeachArrival = (
     const dressing = createBeachDressing(root, app, assets);
     const water = createBeachWater(root, app.graphicsDevice);
     const life = createBeachLife(root, assets, player);
+    life.crowd = createBeachCrowd(app, root, assets, player);
+    life.crowd.setPausedFor('calm', true);
     const navigation = new BeachNavigation(isBeachArrivalPosition);
     const tuple = (entity: Entity): Vector3Tuple => {
         const p = entity.getPosition();

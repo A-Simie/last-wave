@@ -25,13 +25,19 @@ export class ForestLogin {
     private readonly onEnter: () => void;
     private readonly authentication?: ForestAuthentication;
 
+    private readonly skipDialog: HTMLDialogElement;
+    private readonly autoplay: HTMLButtonElement;
+    private readonly onDialog: (open: boolean) => void;
+
     constructor(
         timeline: ForestTimeline,
         onEnter: () => void,
         onSound: () => void,
         onMuted: () => void,
+        intro: { alwaysSkip: boolean; onChoose: (always: boolean) => void; onDialog: (open: boolean) => void },
         authentication?: ForestAuthentication
     ) {
+        this.onDialog = intro.onDialog;
         this.timeline = timeline;
         this.onEnter = onEnter;
         this.authentication = authentication;
@@ -69,13 +75,28 @@ export class ForestLogin {
                         <div class="forest-password"><input id="forest-password" name="password" type="password" autocomplete="current-password" required placeholder="Keep it close" />
                             <button type="button" data-forest-password aria-controls="forest-password" aria-pressed="false" aria-label="Show password">Show</button></div>
                         <p class="forest-feedback" data-forest-feedback role="status" aria-live="polite">${authentication ? 'Sign in to continue your story.' : 'Accounts are not connected yet. Continue locally to play.'}</p>
-                        <button class="forest-enter" type="submit">ENTER THE FOREST <span aria-hidden="true">→</span></button>
+                        <button class="forest-enter" type="submit">SIGN IN <span aria-hidden="true">→</span></button>
                     </form>
                     <button class="forest-local" type="button" data-forest-local>Continue locally <span aria-hidden="true">↗</span></button>
                     <p class="forest-account">New to the unknown? <button type="button" data-forest-account>Create an account</button></p>
                     <button class="forest-replay" type="button" data-forest-replay>↻ Replay the entrance</button>
+                    <button class="forest-replay" type="button" data-forest-autoplay hidden>▶ Play the intro on every visit</button>
                 </div>
             </div>
+            <dialog class="forest-skip-dialog" data-forest-skip-dialog aria-labelledby="forest-skip-title" aria-describedby="forest-skip-text">
+                <div class="forest-wood">
+                    <span class="forest-nail forest-nail-left" aria-hidden="true"></span>
+                    <span class="forest-nail forest-nail-right" aria-hidden="true"></span>
+                    <p class="forest-eyebrow">LEAVE THE DARK BEHIND?</p>
+                    <h2 id="forest-skip-title">Skip the intro</h2>
+                    <p id="forest-skip-text" class="forest-intro">Skip it just this once, or every time you return. You can turn the intro back on from the sign-in board.</p>
+                    <div class="forest-skip-choices">
+                        <button type="button" class="forest-enter" data-forest-skip-always>ALWAYS SKIP</button>
+                        <button type="button" class="forest-local" data-forest-skip-once>Just this time</button>
+                        <button type="button" class="forest-replay" data-forest-skip-cancel>Keep watching</button>
+                    </div>
+                </div>
+            </dialog>
             <p class="forest-caption" data-forest-caption role="status" aria-live="polite" aria-atomic="true"></p>
             <footer class="forest-footer"><span>STAY CLOSE. KEEP THE LIGHT ON.</span><a href="${import.meta.env.BASE_URL}assets/credits.html" target="_blank" rel="noopener">Asset credits ↗</a></footer>`;
         this.board = this.root.querySelector('[data-forest-board]')!;
@@ -88,9 +109,32 @@ export class ForestLogin {
         this.invitation = this.root.querySelector('[data-forest-audio-invite]')!;
         const listen = (selector: string, action: () => void) =>
             this.root.querySelector(selector)!.addEventListener('click', action, { signal: this.events.signal });
-        listen('[data-forest-skip]', () => {
+        this.skipDialog = this.root.querySelector<HTMLDialogElement>('[data-forest-skip-dialog]')!;
+        this.autoplay = this.root.querySelector<HTMLButtonElement>('[data-forest-autoplay]')!;
+        this.autoplay.hidden = !intro.alwaysSkip;
+        listen('[data-forest-skip]', () => this.askToSkip());
+        const skipNow = (always: boolean) => {
+            this.skipDialog.close();
+            intro.onChoose(always);
+            this.autoplay.hidden = !always;
             timeline.skip();
             this.render();
+        };
+        listen('[data-forest-skip-always]', () => skipNow(true));
+        listen('[data-forest-skip-once]', () => skipNow(false));
+        listen('[data-forest-skip-cancel]', () => this.skipDialog.close());
+        this.skipDialog.addEventListener(
+            'close',
+            () => {
+                intro.onDialog(false);
+                if (!this.timeline.state.ready) this.skip.focus({ preventScroll: true });
+            },
+            { signal: this.events.signal }
+        );
+        listen('[data-forest-autoplay]', () => {
+            intro.onChoose(false);
+            this.autoplay.hidden = true;
+            this.setFeedback('The intro will play every time you open Last Wave.');
         });
         listen('[data-forest-replay]', () => {
             if (this.busy) return;
@@ -143,10 +187,9 @@ export class ForestLogin {
         this.root.addEventListener(
             'keydown',
             (event) => {
-                if (event.key === 'Escape' && !this.timeline.state.ready) {
+                if (event.key === 'Escape' && !this.timeline.state.ready && !this.skipDialog.open) {
                     event.preventDefault();
-                    this.timeline.skip();
-                    this.render();
+                    this.askToSkip();
                 }
             },
             { signal: this.events.signal }
@@ -182,6 +225,17 @@ export class ForestLogin {
                 (this.form.elements.namedItem('password') as HTMLInputElement).value = '';
             }
         }
+    }
+
+    get skipDialogOpen() {
+        return this.skipDialog.open;
+    }
+
+    private askToSkip() {
+        if (this.timeline.state.ready || this.skipDialog.open || this.disposed) return;
+        this.onDialog(true);
+        this.skipDialog.showModal();
+        this.skipDialog.querySelector<HTMLButtonElement>('[data-forest-skip-once]')!.focus({ preventScroll: true });
     }
 
     setFeedback(message: string) {
@@ -225,6 +279,7 @@ export class ForestLogin {
 
     destroy() {
         this.disposed = true;
+        if (this.skipDialog.open) this.skipDialog.close();
         this.form.reset();
         this.events.abort();
         this.root.remove();

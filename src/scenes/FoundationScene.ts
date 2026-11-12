@@ -16,6 +16,7 @@ import { createOpeningPrototype } from '../episodes/episode-01/OpeningPrototype'
 import { createStreetEntry } from '../episodes/episode-01/StreetEntry';
 import { StreetEntryProgress } from '../episodes/episode-01/StreetEntryProgress';
 import { createStreetLife } from '../episodes/episode-01/StreetLife';
+import { createStreetRestaurants } from '../episodes/episode-01/StreetRestaurants';
 import { WAVE_PLAYER_MARK } from '../episodes/episode-01/waveLayout';
 import { createAnimatedCharacter } from '../player/AnimatedCharacter';
 import { createCamera } from '../player/CameraController';
@@ -170,7 +171,8 @@ export const createFoundationScene = (
                 }
             }
         ];
-        const surroundings = createCafeSurroundings(root, interactions.app);
+        const surroundings = createCafeSurroundings(root, interactions.app, assets.models);
+        createStreetRestaurants(surroundings, interactions.app, assets.cafe);
         street = createStreetLife(interactions.app, surroundings, assets, player);
         opening = createOpeningPrototype(
             root,

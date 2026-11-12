@@ -48,12 +48,14 @@ export class WaveCrowd {
         this.player = player;
         this.friend = companion.entity;
         this.water = water;
+        if (life.crowd) life.crowd.retreat = () => water.retreat;
     }
 
     watch() {
         if (this.mode !== 'calm') return;
         this.mode = 'watching';
         this.life.paused = true;
+        this.life.crowd?.watch();
         [...this.life.standing, ...this.life.walkers].forEach(({ entity, character, model }, i) => {
             const x = (i % 2 ? -1 : 1) * (4.5 + Math.floor(i / 2) * 3.1);
             const height = entity.getPosition().y;
@@ -68,6 +70,7 @@ export class WaveCrowd {
     point() {
         if (this.mode !== 'watching') return;
         this.mode = 'pointing';
+        this.life.crowd?.point();
         for (const { character } of [...this.life.standing, ...this.life.walkers]) character.play('point', 0.15);
     }
 
@@ -75,6 +78,7 @@ export class WaveCrowd {
         if (this.mode === 'running') return;
         this.watch();
         this.mode = 'running';
+        this.life.crowd?.evacuate();
         const people = [...this.life.standing, ...this.life.walkers];
         people.forEach(({ entity, character, model }, i) => {
             const p = entity.getPosition();
@@ -122,6 +126,7 @@ export class WaveCrowd {
         this.life.characters.forEach(({ anim }) => {
             anim.playing = !paused;
         });
+        this.life.crowd?.setPausedFor('wave', paused);
     }
 
     update(dt: number) {

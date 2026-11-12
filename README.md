@@ -10,7 +10,7 @@ A playable **Tideline café → guided Seafront Avenue → beach exploration →
 
 ### Play from the café to the blackout
 
-1. The forest opens automatically. If the browser blocks sound, choose **Play with sound** inside the forest, or **Watch muted**. Watch the 44-second voiced entrance or **Skip intro**, then choose **Continue locally** to load the café and **Play story** to start the report. Accounts are not connected yet. Returning/reduced-motion visits show the board directly; **Replay the entrance** is available when motion is enabled. City/beach assets load only on local entry.
+1. The forest opens automatically. If the browser blocks sound, choose **Play with sound** inside the forest, or **Watch muted**. Watch the 44-second voiced entrance or **Skip intro**, then choose **Continue locally** to load the café and **Play story** to start the report. Accounts are not connected yet. Reduced-motion visits and visitors who chose Always skip show the board directly; **Replay the entrance** is available when motion is enabled. City/beach assets load only on local entry.
 2. Watch the 15.4-second climate report presented by **Elizabeth Lee / Voice of America**. It advances to the conversation automatically; **Skip bulletin** advances immediately. Read the four friend replies using **Next**, then **Let’s go**. **Skip intro** or Esc also hands over to gameplay.
 3. **CC** starts enabled. **Sound** mutes both tracks and keeps subtitles readable; **Retry playback** recovers failed media. **Steady camera** removes camera motion and defaults to your system's reduced-motion preference.
 4. Your friend stands and walks outside. Approach the table until **Collect belongings** appears, then press E or tap it to take your bag and phone.
@@ -134,3 +134,11 @@ This project includes [`@playcanvas/skills`](https://github.com/playcanvas/skill
 - [PlayCanvas examples](https://playcanvas.github.io/)
 - [Vite documentation](https://vite.dev/)
 - [TypeScript documentation](https://www.typescriptlang.org/docs/)
+
+## Neighborhood exploration and GitHub
+
+After leaving Tideline, supplied houses now line the nearby street and beach approach. Four additional restaurants have open, walkable interiors: Sunrise Bakehouse, Salt & Citrus, Harbor Noodles and Marigold Kitchen. Walk through their doors and back out without a loading transition; exploration does not require a purchase or alter quest progress. The original story still ends at the blackout.
+
+The forest sign-in is dressed with more pumpkins, skeletons and cobwebs. Carried umbrellas use a held right-arm pose, finger anchor and a larger canopy so the walking character remains beneath it.
+
+See [GitHub preparation](docs/GITHUB_PUSH.md) for tracked/ignored files, size/history review and staging/push commands. Keep `public/assets/` versioned: raw source archives and build/evidence folders are excluded instead. [LW-A005 handoff](docs/LW-A005-HANDOFF.md) describes the changes, licence audit, reproduction and limitations.

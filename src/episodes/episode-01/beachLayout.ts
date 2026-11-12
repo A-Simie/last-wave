@@ -126,6 +126,12 @@ const SHORE_POST: BoxDefinition = {
     position: [5, 0.8, BEACH_SHORE_Z + 4],
     size: [0.12, 1.6, 0.12]
 };
+/** A uniformed officer keeps watch at the foot of the boardwalk. */
+export const BEACH_POLICE_OFFICER: BoxDefinition = {
+    name: 'beach-police-officer',
+    position: [4.6, 0.92, 9.4],
+    size: [0.64, 1.84, 0.64]
+};
 const VENDOR: BoxDefinition = {
     name: 'beach-vendor',
     position: [BEACH_VENDOR_MARK[0], 0.91, BEACH_VENDOR_MARK[2]],
@@ -150,6 +156,7 @@ export const BEACH_DRESSING_SOLIDS: readonly BoxDefinition[] = [
     WELCOME_POST,
     SHORE_POST,
     VENDOR,
+    BEACH_POLICE_OFFICER,
     ...peopleSolids(BEACH_STANDING_PEOPLE)
 ];
 export const BEACH_SOLIDS = [...BEACH_ARRIVAL_SOLIDS, ...BEACH_DRESSING_SOLIDS];

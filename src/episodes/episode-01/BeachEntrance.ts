@@ -1,12 +1,15 @@
 import { Entity } from 'playcanvas';
 import type { AppBase } from 'playcanvas';
 
+import type { ModelAssets } from '../../core/AssetManager';
+import { createPreparedModel } from '../../scenes/createPreparedModel';
 import { createTextSign } from '../../scenes/createTextSign';
 import { createBoxVisual as box, createMaterial, createStaticBody, createStaticBox } from '../../scenes/primitives';
 
-import { ENTRY_SOLIDS, QUEUE_MARK } from './entryLayout';
+import { ENTRY_SOLIDS, QUEUE_MARK, TICKET_COUNTER } from './entryLayout';
+import { ENTRANCE_POLICE_CAR } from './streetLayout';
 
-export const createBeachEntrance = (parent: Entity, app: AppBase) => {
+export const createBeachEntrance = (parent: Entity, app: AppBase, models: ModelAssets = {}) => {
     const root = new Entity('beach-entrance');
     parent.addChild(root);
     const materials = {
@@ -21,7 +24,14 @@ export const createBeachEntrance = (parent: Entity, app: AppBase) => {
     box(root, 'beach-entry-sand', [83, 0.016, -25], [46, 0.032, 20], materials.sand);
     for (let z = -12.5; z > -32; z -= 0.5)
         box(root, `beach-entry-board-${z}`, [86.3, 0.04, z], [5, 0.03, 0.46], materials.wood);
+    const imported: Entity[] = [];
+    const booth = models.ticketBooth;
     for (const definition of ENTRY_SOLIDS) {
+        if (booth && (definition.name.startsWith('ticket-booth-') || definition.name === TICKET_COUNTER.name)) {
+            // The supplied booth replaces the procedural kiosk; its collision volumes stay as authored.
+            createStaticBody(root, definition);
+            continue;
+        }
         if (definition.name.includes('fence') || definition.name.includes('gate') || definition.name.includes('rail')) {
             const body = createStaticBody(root, definition);
             const [width, height, depth] = definition.size;
@@ -40,6 +50,21 @@ export const createBeachEntrance = (parent: Entity, app: AppBase) => {
                 definition.name.includes('arch') || definition.name.includes('roof') ? materials.teal : materials.cream;
             createStaticBox(root, definition, paint);
         }
+    }
+    if (booth) {
+        // Authored with its serving window on +X; turn it to face the street (+Z).
+        const model = createPreparedModel(booth, 'ticketBooth', 'beach-ticket-booth-model', { footprint: [3.2, 3.6] });
+        root.addChild(model.root);
+        model.root.setLocalPosition(75.3, 0, -4.5);
+        model.root.setLocalEulerAngles(0, -90, 0);
+        imported.push(model.root);
+    }
+    if (models.policeCar) {
+        const car = createStaticBody(root, ENTRANCE_POLICE_CAR);
+        const model = createPreparedModel(models.policeCar, 'policeCar', 'entrance-police-car-model');
+        car.addChild(model.root);
+        model.root.setLocalPosition(0, -ENTRANCE_POLICE_CAR.position[1], 0);
+        imported.push(model.root);
     }
     box(root, 'arch-crown', [82.75, 5.72, -11.8], [22.7, 0.18, 2.2], materials.brass);
     box(root, 'arch-lintel-trim', [82.75, 4.58, -10.91], [21.6, 0.12, 0.1], materials.brass);
@@ -89,7 +114,8 @@ export const createBeachEntrance = (parent: Entity, app: AppBase) => {
     const group = app.batcher!.addGroup('beach-entrance-static', false, 24);
     root.once('destroy', () => app.batcher?.removeGroup(group.id));
     root.findComponents('render').forEach((render) => {
-        render.batchGroupId = group.id;
+        if (!imported.some((model) => render.entity === model || render.entity.isDescendantOf(model)))
+            render.batchGroupId = group.id;
     });
     return root;
 };

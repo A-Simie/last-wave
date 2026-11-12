@@ -14,6 +14,14 @@ Current UI task: **LW-UI001 — Cinematic Forest Login Experience**. Implementat
 
 Next action: commit the ignore rules and staged library removals together when ready. If removing already-pushed large files from Git history is wanted, scope that separately; this change affects future snapshots only. Continue LW-UI001 manual acceptance as recorded below.
 
+## Documentation consistency review — 2026-11-10
+
+- [x] Cross-checked the current fixes and implemented story against EPISODE_01, GAME_DESIGN, ARCHITECTURE, AGENT_CONTEXT and this tracker. Added the forest presentation's narrative beats and explicit noncanonical-identity/checkpoint boundaries to the story guide, plus the verified café doorway correction.
+- [x] Corrected stale Launch-button, full-preload-before-forest and 100-test descriptions in current design/architecture sections. Earlier dated acceptance records remain historical. The implemented canonical route still ends at recoverable blackout; hospital and Kiroween continuation remain planned.
+- [x] Documentation-only validation: scoped Prettier and `git diff --check` passed; no runtime checks were repeated. Existing 109-test/22-browser evidence and outstanding audible/acting/physical-device checks remain clearly distinguished.
+
+Next action: perform the outstanding manual LW-UI001/LW-F002 review; no additional story scene is authorized by this documentation review.
+
 ## Project checklist
 
 Checked items have working implementations and verification recorded below. Physical-device acceptance is tracked separately in LW-F002.
@@ -1162,3 +1170,61 @@ The runner clears only the forest-seen preference for its first-visit case, temp
 Current manual route: automatic forest → Play with sound or Watch muted → watch/Skip intro (or Escape) → Tab through labels/password toggle → confirm unavailable account feedback → Continue locally → Play story. Test P/Load for an existing checkpoint; return/reload should show the settled board, Replay should restart the prologue. Try reduced motion, denied storage, offline/missing forest models, portrait and short landscape, and blur/refocus with sound enabled. After belongings and movement/look practice, choose Head outside and walk through the doorway; the friend waits beside it. The canonical story still starts at the café and ends at the S004 blackout.
 
 **Next action:** complete the audible/acting review and physical-device acceptance described in the current revision above. Keep LW-UI001 open for those manual checks. Account/backend work remains a separate persistent-backend milestone; hospital continuation remains a separate story task.
+
+## LW-A004 — Supplied "New FIles" models, crowds, free flow and sign-in changes — 2026-11-10 (in progress)
+
+- [x] All 37 unique supplied GLBs prepared into `public/assets/models/` (~40 MB) and placed. Licences are in `docs/ASSET_LICENSES.md`; credits were regenerated in `public/assets/credits.html`.
+- [x] Street: 11 house/shop models, 45 walkers plus 10 road crossers, 6 refreshment kiosks, buses, pickups and patrol cars, carried model umbrellas, uniformed officer, patrol car and new ticket booth.
+- [x] Beach: 240 m wide, sushi booth, set pieces and 561 additional people. The wave starts by itself 6 s after the third discovery, and its warning beats auto-advance.
+- [x] Sign-in: **SIGN IN** button; the intro plays on every load, and skipping offers "Always skip / Just this time". The animated bat, headstone and graveyard extras are added.
+- [x] `npx tsc --noEmit` passed; `pnpm test` 116/116 passed (Node 22.20.0).
+- [ ] Lint/format, `pnpm build`, browser acceptance, performance, `verify-forest.mjs` update, commercial-build file exclusion and doc refreshes are still open.
+
+Next action: follow `docs/LW-A004-HANDOFF.md` §4, steps 1–11.
+
+### LW-A004 continuation review - 2026-11-12
+
+- [x] Reviewed handoff against actual code; corrected the submit button from ENTER THE FOREST to SIGN IN. Preserved all incoming worktree changes; no commit made.
+- [x] Node **22.23.4** / pnpm **10.32.1**: **116/116 tests**, TypeScript and ESLint passed. The initial sandbox EPERM failures were environment restrictions; the approved process-capable rerun passed.
+- [x] Full production and commercial production builds passed. Added manifest-driven NC output exclusion to Vite. Added `scripts/verify-model-output.mjs`; full **37/37** and commercial **32/32** sizes/SHA-256 passed, with no extra files. Final commercial build includes the sign-in and crowd changes. The source models remain intact.
+- [x] Updated forest runner for skip choice/persistence and catalogue-derived container count. Scare RMS samples multiple frames at the unchanged threshold; dialog clicks wait for their entrance animation. Performance capture leaves beach discoveries incomplete to prevent auto-wave interruption.
+- [x] Baseline full production browser acceptance: **23/23 groups**, zero unexpected issues; injected missing-scenery errors recorded separately. Real keyboard doorway movement, street/beach checkpoint loading, forest teardown and preferences passed. Browser ran muted and closed in finally. Baseline report and performance are under `verification.local/forest/baseline-*.json`.
+- [x] Baseline: all **561** additional rigs spawn, **350 visible / 54 animated**, **132.16 ms mean / 156.20 ms p95**, about **7.6 FPS**, **1,954 draw calls** at 1440 x 1000. Reduced visibility/animation ranges **92/34 -> 60/24 m**, retaining the full population. Repeat result follows below.
+- [x] Refreshed ARCHITECTURE, AGENT_CONTEXT, AGENTS, assets README and handoff section 5 with ownership, policy, counts, reproduction and limitations. Source/output metadata reports **41,764,596 bytes** for the 37 added GLBs.
+- [ ] Close-up moving calibration: bat heading, bus heading, seated/lying contact, carried umbrellas, vendor facing and lawns. Reviewed actual sign-in/arrival screenshots, which do not establish every calibration.
+- [ ] Expanded crowd automatic warning/evacuation through blackout, recovery and collision acceptance. The forest suite's incomplete beach fixture intentionally does not trigger danger. Older S004 results are historical.
+- [ ] Physical-device performance and lower-end browser memory. Headless frame measurements are observations, not target-device acceptance.
+- [ ] Older version-5 positions newly blocked by kiosks/camps remain rejected; versions 1-4 keep their existing migration. Far-wing companion navigation beyond |x|=58 remains unverified. Static officer/no new vehicle wheel spin or drivers/straight-line extra-crowd evacuation remain documented limitations.
+
+Reproduce with `docs/LW-A004-HANDOFF.md` section 5. **Next action:** finish targeted moving calibration and expanded-crowd wave acceptance, then decide the version-5 geometry migration and target-device population budget. Do not implement hospital scenes.
+
+Tuned population measurement (first complete tuned pass): **561 spawned / 165 visible / 15 animated**, **87.67 ms mean / 117.40 ms p95**, about **11.4 FPS**, **1,791 draw calls**. A subsequent wave-smoke run measured **78.80 ms mean / 89.90 ms p95**, about **12.7 FPS**, **1,801 draw calls**. The visibility reduction helps this host but does not meet a 30/60 FPS budget. Preserve both samples; do not interpret host variation as a guaranteed improvement.
+
+The expanded-crowd smoke passed automatic discovery-complete warning, automatic warning-to-evacuation, running crowd mode, and the recoverable blackout ending using teleported route gates. This is state integration evidence, not physical traversal/collision acceptance. A later teardown error in that run came from destroying the Engine during optional login GLB loading; the runner now drains registered pending assets before normal teardown. Destruction during in-flight loading remains uncertified. Full final rerun status follows below.
+
+Change explanations and the verified control/data flow are in `docs/LW-A004-CONTINUATION.md`.
+
+Final tuned full-build rerun: **26/26 browser groups passed**, **zero unexpected issues**, injected missing-scenery failures separated, isolated muted browser closed. Added state smoke verifies auto-warning, auto-evacuation and the recoverable ending with teleported gates. Latest measurement: **561 spawned / 165 visible / 15 animated**, **100.63 ms mean / 115.70 ms p95**, about **9.9 FPS**, **1,781 draw calls**. Final evidence: `verification.local/forest/report.json`, `beach-performance.json`, captures 18-21; preserved pre-smoke tuned evidence: `tuned-report.json` and `tuned-beach-performance.json`. The 79-101 ms tuned range confirms host variability; physical-device performance remains open.
+
+Final scoped Prettier passed across src/tests/scripts/docs, credits/assets README, AGENTS and both configuration files; ESLint and TypeScript passed. Repository-wide `pnpm fmt` initially hit sandbox EPERM in ignored source tools; the approved read-capable rerun found the edited docs plus the existing `pnpm-lock.yaml` formatting issue. Edited docs were formatted afterward; the lockfile is unchanged. `git diff --check` passed. No commit was made. LW-A004 remains in progress for the explicitly unchecked calibration, physical traversal, performance and save-position limitations above.
+
+## LW-A005 - Neighborhood, umbrella grip, Halloween and GitHub readiness - 2026-11-12
+
+- [x] Fixed carried umbrellas: masked right-arm/finger holding layer from the existing compatible driving clip, finger grip anchoring, upright heading, canopy footprint 1.15 -> 1.5 m and visual offset -0.12 -> -0.08 m. Briefcases retain wrist attachment. Actual four-design views were inspected.
+- [x] Added six near-route supplied-building placements (18 -> **24**). Modern/American houses immediately east of Tideline, Low-Poly Street House across the road, Small House at East Residences, House behind Tideline and Country/Old houses west of it make the supplied set visible during exploration. All nine house assets/two shop assets remain used. Lugin/Stoll is an authored cutaway pair, retained at Marina Homes rather than promoted onto the main approach.
+- [x] Added **four walk-in restaurants** with shared shell/furniture collision data, open 2.8 m doors, three tables/six chairs each, cups, plants, counters/coffee machines, pendant lights, exterior OPEN/title signs and interior menus. They replace existing solid facades; no new map loading, quest, transaction or story scene is introduced. The existing city footprint is sufficient; route/admission/beach coordinates are unchanged.
+- [x] Confirmed with the user: Halloween enhancement targets the **forest sign-in entrance**. Desktop now has **34 pumpkins / four skeletons / seven imported and six procedural cobwebs**, plus warmer glow pools/denser mist. Fewer extra pumpkins on mobile; existing reduced-motion controls remain. Actual sign-in capture was inspected.
+- [x] Fixed fast local entry: optional forest loading is sequenced before game asset loading, avoiding an installed Engine AssetListLoader shared-handler cleanup overlap observed during cold-entry verification. The cinematic remains non-blocking on optional scenery.
+- [x] Re-read **11/11 original house/shop GLBs**, verified original SHA-256 against the manifest and embedded **CC BY 4.0** author/title/source records. Existing credits are retained. Live Sketchfab model/API access was 403/inaccessible, so this is a preserved-download metadata/hash verification, not a fresh online ownership certification. Exact sources remain in ASSET_LICENSES.
+- [x] Expanded `.gitignore` for temporary builds, evidence and incoming/download/temp directories; kept prepared runtime public assets versioned. No currently tracked file matches the ignore list. Largest eligible file **8,768,292 bytes**; largest reachable historical blob **18,681,569 bytes**; none reach GitHub's 50 MiB warning or 100 MiB block threshold. Existing ignored originals remain on disk. No history rewrite/commit/push performed.
+- [x] Expanded formatting exclusions for preserved offline libraries/generated evidence. The pnpm-generated lockfile is excluded from Prettier to prevent a roughly 8,700-line formatting-only rewrite; an attempted format was semantically compared with PyYAML, then restored byte-for-byte. Dependency data/lockfile are unchanged.
+- [x] Supported **Node 22.23.4 / pnpm 10.32.1**: **117/117 tests passed**, including clear restaurant doorway/aisle and solid wall/furniture probes. ESLint and TypeScript passed. Full and commercial production builds passed; output filename/size/SHA-256 audits passed **37 full / 32 commercial** models.
+- [x] Furnished production neighborhood browser pass: **8/8 groups**, zero unexpected issues, muted isolated Chrome closed. Real W/S keyboard entry AND exit passed for Sunrise Bakehouse, Salt & Citrus, Harbor Noodles and Marigold Kitchen. Across **72 samples / 18 walking phases / four umbrella designs**, grip tracking error was zero and sampled canopy clearance above the estimated head crown was at least **0.192 m**; non-root leg joints moved. Near-route home instances and rendered captures were checked. Final placement-only rebuild refresh is recorded below.
+
+Evidence: `verification.local/neighborhood/report.json`, `measurements.json`, `walking-clearance.json`, entrance/grip/front/restaurant interior/house/route PNGs; `verification.local/house-license-audit.json`. Source walkthrough, changes and reproduction: `docs/LW-A005-HANDOFF.md`. GitHub staging/push instructions and size/history review: `docs/GITHUB_PUSH.md`. Architecture, agent context, root instructions, README and asset notes were refreshed.
+
+Limits: targeted browser testing uses staged pedestrian positions and hides traffic for controlled doorway/umbrella measurements; it does not certify every live traffic/NPC encounter, device or screen size. Restaurant door traversal uses real input/physics, with teleport only to each test's exterior starting point. Restaurants are furnished exploration spaces, with no new serving/purchase/NPC dialogue system. Existing beach performance/expanded-wave physical collision, static officer/supplied wheel-driver limits and prior A004 version-5 camp/kiosk conflicts remain open. Destruction during in-flight GLB parsing is not certified. No hospital content was added.
+
+Next action: review/stage the documented changes for GitHub, then continue LW-A004/LW-F002 performance and physical-device acceptance. Do not ignore required runtime GLBs or rewrite history merely to reduce local `.git` size.
+
+LW-A005 final release refresh: final Small House approach placement/sign attachment build passed **8/8 neighborhood browser groups** again, with zero unexpected issues and browser closure. Full and commercial builds/output audits passed **37/32** models. Final ESLint, TypeScript and **repository-wide `pnpm fmt` passed** (read-capable execution; pnpm-generated lockfile is intentionally excluded). `git -c core.autocrlf=false diff --check` passed; the lockfile has no diff. No tracked ignored files were found. Reviewed final forest, lit restaurant/menu/sign, umbrella and house-route captures. All verification servers started for this task were stopped after checking; the working tree is ready for user staging/review on branch `main`, with no commit or push performed.

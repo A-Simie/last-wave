@@ -1,9 +1,14 @@
 import { Entity } from 'playcanvas';
 import type { AppBase, StandardMaterial } from 'playcanvas';
 
+import type { ModelAssets } from '../../core/AssetManager';
 import { GROUND, NEIGHBOR_BUILDINGS, STREET_EXTENTS, STREET_PLANTERS } from '../../data/foundation';
+import { createPreparedModel } from '../../scenes/createPreparedModel';
 import { createTextSign } from '../../scenes/createTextSign';
-import { createBoxVisual as box, createMaterial, createStaticBox } from '../../scenes/primitives';
+import { createBoxVisual as box, createMaterial, createStaticBody, createStaticBox } from '../../scenes/primitives';
+
+import { RESTAURANT_BLOCKS } from './restaurantLayout';
+import { STREET_BUILDING_MODELS } from './streetLayout';
 
 const SHOP_SIGNS: Record<string, readonly string[]> = {
     'blue-corner-shop': ['SALT & SUN', 'NEIGHBORHOOD STORE'],
@@ -22,7 +27,7 @@ const SHOP_SIGNS: Record<string, readonly string[]> = {
     'market-street-building-8': ['HARBOR COFFEE', 'MARKET STREET']
 };
 
-export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
+export const createCafeSurroundings = (parent: Entity, app: AppBase, models: ModelAssets = {}) => {
     const root = new Entity('cafe-neighborhood');
     parent.addChild(root);
     const materials = {
@@ -37,8 +42,10 @@ export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
         metal: createMaterial('street-metal', 0.16, 0.23, 0.22),
         leaves: createMaterial('palm-leaves', 0.29, 0.43, 0.23),
         soil: createMaterial('planter-soil', 0.23, 0.17, 0.1),
-        white: createMaterial('street-markings', 0.9, 0.87, 0.74)
+        white: createMaterial('street-markings', 0.9, 0.87, 0.74),
+        lawn: createMaterial('front-lawn', 0.33, 0.47, 0.25)
     };
+    const imported: Entity[] = [];
     root.once('destroy', () => Object.values(materials).forEach((material) => material.destroy()));
     createStaticBox(root, GROUND, materials.paving);
     const { west, east, marketZ } = STREET_EXTENTS;
@@ -81,6 +88,22 @@ export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
     }
     const paints = [materials.coral, materials.blue, materials.cream];
     for (const [index, definition] of NEIGHBOR_BUILDINGS.entries()) {
+        if (RESTAURANT_BLOCKS.has(definition.name)) continue;
+        const modelId = STREET_BUILDING_MODELS[definition.name];
+        const resource = modelId ? models[modelId] : undefined;
+        if (modelId && resource) {
+            // Supplied building: keep the block's collision volume, fit the model inside it and face the road.
+            const body = createStaticBody(root, definition);
+            const [width, height, depth] = definition.size;
+            box(body, 'front-lawn', [0, 0.012 - height / 2, 0], [width, 0.024, depth], materials.lawn);
+            const model = createPreparedModel(resource, modelId, `${definition.name}-${modelId}`, {
+                footprint: [width - 0.4, depth - 0.4]
+            });
+            body.addChild(model.root);
+            model.root.setLocalPosition(0, 0.024 - height / 2, 0);
+            imported.push(model.root);
+            continue;
+        }
         const building = createStaticBox(root, definition, paints[index % paints.length]);
         const [width, height, depth] = definition.size;
         box(building, 'roof-cornice', [0, height / 2 - 0.1, 0], [width + 0.25, 0.24, depth + 0.25], materials.trim);
@@ -191,7 +214,9 @@ export const createCafeSurroundings = (parent: Entity, app: AppBase) => {
     const group = app.batcher!.addGroup('seafront-static', false, 28);
     root.once('destroy', () => app.batcher?.removeGroup(group.id));
     root.findComponents('render').forEach((render) => {
-        render.batchGroupId = group.id;
+        // Imported buildings keep their own materials/draws; only the procedural kit is batched.
+        if (!imported.some((model) => render.entity.isDescendantOf(model) || render.entity === model))
+            render.batchGroupId = group.id;
     });
     return root;
 };

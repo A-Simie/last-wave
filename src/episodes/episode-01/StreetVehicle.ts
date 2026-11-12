@@ -1,5 +1,5 @@
 import { Entity, Mesh, MeshInstance, TorusGeometry, Vec3 } from 'playcanvas';
-import type { AppBase, StandardMaterial } from 'playcanvas';
+import type { AppBase, ContainerResource, StandardMaterial } from 'playcanvas';
 
 import type { GameAssets } from '../../core/AssetManager';
 import type { Vector3Tuple } from '../../data/foundation';
@@ -7,6 +7,7 @@ import { PORSCHE_DRIVER_SEATS, PORSCHE_WHEELS, PORSCHE_WHEEL_RADIUS, VEHICLE_MOD
 import { createAnimatedCharacter } from '../../player/AnimatedCharacter';
 import type { AnimatedCharacter } from '../../player/AnimatedCharacter';
 import { createModelInstance } from '../../scenes/createModelInstance';
+import { createPreparedModel } from '../../scenes/createPreparedModel';
 import { createBoxVisual, createMaterial } from '../../scenes/primitives';
 
 export const createStreetVehicle = (
@@ -89,9 +90,54 @@ export const createStreetVehicle = (
                 material.destroy();
             });
         }
-        return { root, driver, wheels, wheelRadius: PORSCHE_WHEEL_RADIUS, wheelAngle: 0 };
+        return {
+            root,
+            driver,
+            wheels,
+            wheelRadius: PORSCHE_WHEEL_RADIUS,
+            wheelAngle: 0,
+            length: tuning.dims[2] * tuning.scale
+        };
     } catch (error) {
         root.destroy();
         throw error;
     }
+};
+
+/** Supplied vehicles travel along local +Z after this yaw (the bus is authored along X, nose at -X). */
+const VEHICLE_YAW: Partial<Record<StreetModelVehicle, number>> = { bus: 90 };
+export type StreetModelVehicle = 'bus' | 'pickup' | 'policeCar';
+
+/**
+ * A supplied vehicle model. These meshes have no separable wheels, so they glide without wheel spin.
+ * Returns the same shape as `createStreetVehicle` so the traffic loop treats both alike.
+ */
+export const createModelVehicle = (
+    parent: Entity,
+    resource: ContainerResource,
+    id: StreetModelVehicle,
+    name: string
+) => {
+    const root = new Entity(name);
+    parent.addChild(root);
+    const model = createPreparedModel(resource, id, `${name}-model`);
+    root.addChild(model.root);
+    const yaw = VEHICLE_YAW[id] ?? 0;
+    model.root.setLocalEulerAngles(0, yaw, 0);
+    const [width, height, depth] = model.dims;
+    const [sizeX, sizeZ] = yaw ? [depth, width] : [width, depth];
+    root.addComponent('collision', {
+        type: 'box',
+        halfExtents: new Vec3(sizeX / 2, height / 2, sizeZ / 2),
+        linearOffset: new Vec3(0, height / 2, 0)
+    });
+    root.addComponent('rigidbody', { type: 'kinematic' });
+    return {
+        root,
+        driver: null as AnimatedCharacter | null,
+        wheels: [] as Entity[],
+        wheelRadius: 1,
+        wheelAngle: 0,
+        length: sizeZ
+    };
 };

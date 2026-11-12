@@ -44,7 +44,7 @@ export const createWaveSurge = (parent: Entity, device: GraphicsDevice) => {
             const curve = Math.pow(Math.sin(v * Math.PI), 1.25);
             for (let column = 0; column <= columns; column++) {
                 const i = row * (columns + 1) + column;
-                const x = -90 + (column * 180) / columns;
+                const x = -150 + (column * 300) / columns;
                 const ripple =
                     (Math.sin(x * 0.3 + time * (steady ? 0.35 : 1.1)) * 0.26 + Math.sin(x * 0.91 - time) * 0.09) *
                     curve;

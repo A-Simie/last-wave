@@ -4,3 +4,10 @@ public/ammo
 asset-library/source-packs/
 asset-library/archives/
 asset-library/original-downloads/
+/asset-library/
+/New [Ff][Ii][Ll][Ee][Ss]/
+/items/
+/verification.local/
+/dist-*/
+# pnpm owns the generated lockfile format.
+pnpm-lock.yaml

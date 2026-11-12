@@ -26,6 +26,7 @@ import {
 
 import { openForestEntrance } from '../entry/ForestEntrance';
 import type { EntryLesson } from '../episodes/episode-01/entry';
+import { WAVE_AUTOSTART_DELAY, WAVE_WARNING, warningBeatDuration } from '../episodes/episode-01/wave';
 import { WAVE_PLAYER_MARK } from '../episodes/episode-01/waveLayout';
 import { createFoundationScene } from '../scenes/FoundationScene';
 import type { FoundationScene } from '../scenes/FoundationScene';
@@ -88,6 +89,10 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
     let tutorialOpen = false;
     let practisedLesson: EntryLesson['id'] | null = null;
     let arrival: { elapsed: number; ready: boolean; failed: boolean } | null = null;
+    // Free flow: the wave begins on its own once all three beach discoveries are made, and its warning
+    // narration advances by itself until the player has to run.
+    let waveCountdown = 0;
+    let warningBeat = { id: '', elapsed: 0 };
     const needsLesson = () => !!scene?.entry.lesson && scene.entry.lesson.id !== practisedLesson;
     const syncControls = () => {
         const paused =
@@ -570,6 +575,22 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             tutorialPanel.render(scene.entry.lesson);
         }
         scene.update(dt);
+        const beach = scene.beach;
+        const quiet = !journalOpen && !checkpointOpen && !tutorialOpen && !scene.dialogue.state;
+        if (beach?.wave.calm && beach.quest.state.status === 'completed' && quiet && !scene.cutscene.state) {
+            waveCountdown += Math.min(dt, 0.1);
+            if (waveCountdown >= WAVE_AUTOSTART_DELAY) {
+                waveCountdown = 0;
+                beach.wave.start();
+            }
+        } else waveCountdown = 0;
+        const playing = scene.cutscene.state;
+        if (playing?.cutsceneId === WAVE_WARNING.id && quiet) {
+            if (warningBeat.id !== playing.beat.id) warningBeat = { id: playing.beat.id, elapsed: 0 };
+            warningBeat.elapsed += Math.min(dt, 0.1);
+            if (warningBeat.elapsed >= warningBeatDuration(playing.beat.text))
+                scene.cutscene.advance(playing.cutsceneId, playing.beat.id);
+        } else if (!playing) warningBeat = { id: '', elapsed: 0 };
         const wave = scene.beach?.wave;
         cutscenePanel.renderWave(wave?.progress.state ?? null);
         if (wave)

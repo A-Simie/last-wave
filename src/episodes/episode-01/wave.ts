@@ -62,5 +62,12 @@ export const WAVE_BLACKOUT: CutsceneDefinition = {
     ]
 };
 
+/** Seconds of calm after the third beach discovery before the sea starts to retreat on its own. */
+export const WAVE_AUTOSTART_DELAY = 6;
+
+/** Reading-paced hold for each warning beat (about 3.6 words per second, never rushed below 4.5 s). */
+export const warningBeatDuration = (text: string) =>
+    Math.min(10, Math.max(4.5, 2.2 + text.trim().split(/\s+/).length / 3.6));
+
 export const EVACUATION_CALL = 'MOVE AWAY FROM THE SHORE! GET TO HIGHER GROUND!';
 export const SEPARATION_CALL = 'Friend, distant: “HEY! WAIT! DON’T LEAVE ME!”';

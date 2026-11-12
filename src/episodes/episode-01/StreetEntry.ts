@@ -7,6 +7,7 @@ import { createAnimatedCharacter } from '../../player/AnimatedCharacter';
 import type { AnimatedCharacter } from '../../player/AnimatedCharacter';
 import { createCamera } from '../../player/CameraController';
 import type { CompanionController } from '../../player/CompanionController';
+import { createPreparedModel } from '../../scenes/createPreparedModel';
 import { isFoundationPosition } from '../../scenes/FoundationState';
 import { createBoxVisual as box, createMaterial } from '../../scenes/primitives';
 import type { CutsceneState, CutsceneSystem } from '../../systems/CutsceneSystem';
@@ -43,7 +44,7 @@ export const createStreetEntry = (
     progress: StreetEntryProgress,
     restoring: boolean
 ) => {
-    const root = createBeachEntrance(parent, interactions.app);
+    const root = createBeachEntrance(parent, interactions.app, assets.models);
     const npc = (id: CharacterModelId, name: string, position: Vector3Tuple, yaw = 0) => {
         const character = createAnimatedCharacter(assets.characters[id], id, name);
         root.addChild(character.root);
@@ -98,6 +99,16 @@ export const createStreetEntry = (
     crown.setLocalScale(0.26, 0.09, 0.26);
     box(cap, 'cap-visor', [0, -0.045, 0.12], [0.23, 0.026, 0.19], navy);
     box(cap, 'officer-cap-badge', [0, 0, 0.135], [0.055, 0.045, 0.013], gold);
+    if (assets.models.police) {
+        // The supplied uniformed officer replaces the suited rig's visuals. The hidden rig keeps the head anchor,
+        // collision and speech position, so cutscenes and checkpoints are unchanged.
+        officer.root.findComponents('render').forEach((render) => {
+            render.enabled = false;
+        });
+        const uniform = createPreparedModel(assets.models.police, 'police', 'beach-officer-uniform', { height: 1.84 });
+        officer.root.addChild(uniform.root);
+        cap.enabled = false;
+    }
     const head = officer.root.findByName('Head');
     if (!head) throw new Error('The beach officer has no head joint.');
     const actors = root.addComponent('script')!.create(EntryActors, {
