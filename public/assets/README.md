@@ -112,3 +112,11 @@ Current population: 45 street walkers plus 10 crossers, six kiosks, 14 moving ve
 ## Neighborhood and Halloween reuse - LW-A005
 
 No new external asset files are introduced. All eleven supplied house/shop designs are reused at 24 mapped blocks, including six additional near-route placements. The original house/shop licence metadata and source hashes were rechecked under ASSET_LICENSES section 5. Four restaurant interiors reuse the cafe tables, chairs, cups, plants, pendants and coffee machines; the architecture/signs/lights are project-created. Pumpkin/skeleton/cobweb repetitions reuse existing forest/login resources. Umbrella holders reuse the right-arm portion of the shared driving grip clip on a masked animation layer; imported GLBs remain byte-identical to their prepared versions.
+
+## LW-S005 - Continuous evacuation and beach activities (2026-11-13)
+
+The warning starts automatically three unpaused seconds after the three beach discoveries. Warning and fall/blackout shots have no Next/Skip controls. The player retains control of evacuation running; focus/background and explicit pause safeguards remain.
+
+Calm beach water now combines smooth swells, smaller ripples, traveling foam and a gentle three-minute cosmetic tide. Swimmers and boats share its height sampler. Strollers use continuous curved circuits with acceleration and yielding; moving visible characters retain locomotion animation. Two animated horses with riders, two wheeled quad bikes with riders and two fast boats patrol separate shore/offshore routes and leave during the warning. Horse, boat, wheels and prepared riding animation add four CC0 assets (570,880 bytes), supported in both asset policies.
+
+See `LW-S005-HANDOFF.md` for ownership, source links, reproduction, verification and remaining limits. No hospital scene, checkpoint version change or Git push is included.

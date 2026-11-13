@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 import { allowedModels } from '../src/data/assetPolicy.ts';
+import { BEACH_ACTIVITY_ASSETS } from '../src/data/beachActivities.ts';
 import { SIGNAL_CHECK_QUEST } from '../src/data/quests.ts';
 import { BEACH_QUEST } from '../src/episodes/episode-01/beach.ts';
 import { BEACH_PASSES, ENTRY_QUEST } from '../src/episodes/episode-01/entry.ts';
@@ -263,7 +264,10 @@ try {
     assert.equal(await evaluate(`!!document.querySelector('[data-story]')`), true);
     const policy = process.env.VITE_ASSET_POLICY === 'commercial' ? 'commercial' : 'full';
     const suppliedCount = allowedModels(['street', 'beach', 'umbrella', 'vehicle', 'character'], policy).length;
-    assert.equal(await evaluate(`${app}.assets.list().filter(a=>a.type==='container').length`), 42 + suppliedCount);
+    assert.equal(
+        await evaluate(`${app}.assets.list().filter(a=>a.type==='container').length`),
+        42 + suppliedCount + Object.keys(BEACH_ACTIVITY_ASSETS).length
+    );
     await shot('12-cafe-handoff');
     record('Local entry constructs cafe; forest entities, UI and containers released');
     const progress = (definition, count = definition.objectives.length) => ({
@@ -369,14 +373,23 @@ try {
             await evaluate(`${app}.timeScale=0;true`);
             await click('[data-checkpoint-close]');
             const waveRoot = `${app}.root.findByName('beach-wave').script.get('beachWave')`;
-            await evaluate(`(()=>{const a=${app};for(let i=0;i<65;i++)a.fire('update',.1);return true;})()`);
+            assert.equal(await evaluate(`document.querySelector('[data-story]').hidden`), true);
+            await evaluate(`(()=>{const a=${app};for(let i=0;i<29;i++)a.fire('update',.1);return true;})()`);
+            assert.equal(await evaluate(`${waveRoot}.progress.state.phase`), 'calm');
+            await evaluate(`(()=>{const a=${app};for(let i=0;i<2;i++)a.fire('update',.1);return true;})()`);
             assert.equal(await evaluate(`${waveRoot}.progress.state.phase`), 'warning');
+            assert.equal(await evaluate(`document.querySelector('[data-cutscene-next]').hidden`), true);
+            assert.equal(await evaluate(`document.querySelector('[data-cutscene-skip]').hidden`), true);
             await shot('19-auto-warning');
             record('Completed discoveries automatically start the warning without Continue story');
             await evaluate(
                 `(()=>{const a=${app},w=${waveRoot};for(let i=0;i<650&&w.progress.state.phase==='warning';i++){w.update(.1);a.fire('update',.1);}return true;})()`
             );
             assert.equal(await evaluate(`${waveRoot}.progress.state.phase`), 'evacuating');
+            assert.equal(
+                await evaluate(`${app}.root.findByName('player').script.get('thirdPersonController').enabled`),
+                true
+            );
             assert.equal(
                 await evaluate(`${app}.root.findByName('beach-crowd').script.get('beachCrowd').mode`),
                 'running'

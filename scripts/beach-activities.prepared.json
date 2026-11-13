@@ -1,0 +1,53 @@
+[
+    {
+        "id": "horse",
+        "file": "Horse-source.gltf",
+        "author": "Quaternius",
+        "source": "https://quaternius.com/packs/farmanimal.html",
+        "download": "https://raw.githubusercontent.com/mrdoob/three.js/dev/manual/examples/resources/models/animals/Horse.gltf",
+        "license": "CC0-1.0",
+        "sourceSha256": "99bbc88d8334ac66f10f5ec02f6dc24c39eea1e12a9c6e62027c81d35b20f559",
+        "externalResources": {
+            "Horse.bin": "f62efcd14cc3793eb691aab976719d9bfffbe7a16b8379a72349e711e3e873c9"
+        },
+        "bytes": 289080,
+        "sha256": "f11810ed1cdea953b854dc36346d233056de73a594306ec44367bd409955dc61",
+        "animations": ["WalkSlow", "Walk", "Idle"]
+    },
+    {
+        "id": "speedboat",
+        "file": "watercraft/Models/GLB format/boat-speed-a.glb",
+        "author": "Kenney",
+        "source": "https://kenney.nl/assets/watercraft-kit",
+        "download": "https://opengameart.org/sites/default/files/kenney_watercraft_kit_0.zip",
+        "license": "CC0-1.0",
+        "sourceSha256": "d6d5605408e8be888551588b4c73d2953414250e2f29864ee133e9ba5ee2e8b2",
+        "bytes": 20412,
+        "sha256": "ef2abe9af446a85d45cea7eef14de5208c5336451185a5667c5cfc1c713883b8",
+        "animations": []
+    },
+    {
+        "id": "quadWheel",
+        "file": "car-kit/Models/GLB format/wheel-tractor-front.glb",
+        "author": "Kenney",
+        "source": "https://kenney.nl/assets/car-kit",
+        "download": "https://opengameart.org/sites/default/files/kenney_car-kit_3.1.zip",
+        "license": "CC0-1.0",
+        "sourceSha256": "427a632a5b930cdda9d55a63fba94f01f0c77e86face3878ce9fbc63e9879b2f",
+        "bytes": 32756,
+        "sha256": "2a4637a7f15657a6174750e0f6928c8ebc3cc1f6a3a085d315a8435347f4878a",
+        "animations": []
+    },
+    {
+        "id": "riderPose",
+        "file": "public/assets/characters/patronBuzz.glb",
+        "author": "Quaternius / Last Wave pose adaptation",
+        "source": "https://quaternius.com/packs/universalanimationlibrary.html",
+        "download": "Existing prepared CC0 character/animation source",
+        "license": "CC0-1.0",
+        "sourceSha256": "3e2b52872cf794604a1cdf498cb16674dfcc2cb30e4b1f0feb895e1361b6691e",
+        "bytes": 228632,
+        "sha256": "62ad5e5fdad381a6d4db3891561bbcfff7d3f0c5c346003d40e2a0616d9d9f72",
+        "animations": ["Beach_Riding_Loop"]
+    }
+]

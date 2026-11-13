@@ -20,12 +20,12 @@ A playable **Tideline café → guided Seafront Avenue → beach exploration →
 8. Join the marked queue on the right. Continue the friend/officer exchange, then **Enter together**. A black Last Wave loading screen leads to the boardwalk and white sand with your friend. A failed handoff offers **Retry entry** or **Back to the queue**.
 9. Explore at your own pace. Talk with your friend, accept two included citrus waters from the cart, and look out at the shoreline in any order. The HUD lists the remaining moments and the nearest stop; your friend follows around furniture and passing walkers. **Sound: On / Off** controls the surf/gull ambience; **Enable beach sound** retries unavailable playback.
 10. Use **J → Bag / journal** to read your belongings, passes, and clues. **P → Save checkpoint** retains the current area and progress, including each beach discovery. In Tideline, **Replay intro** preserves objectives, items, position, and companion route progress.
-11. After all three discoveries, choose **Continue story**. Read the retreating-water, fleeing-birds, pointing-crowd and wave-reveal beats. **Run for higher ground** or **Skip to evacuation** returns movement controls; turn inland and follow the green arrows along the boardwalk and up the dune ramp. The crowd separates you from your friend before a falling sign triggers the fall and blinking blackout.
+11. After all three discoveries, wait three unpaused seconds. The retreating-water, fleeing-birds, pointing-crowd and wave-reveal shots play automatically. Movement controls return for player-controlled evacuation; turn inland and follow the green arrows along the boardwalk and up the dune ramp. The crowd separates you from your friend before a falling sign triggers the fall and blinking blackout.
 12. The black ending offers **Save blackout checkpoint**, **Replay wave & evacuation**, **Return to the calm beach**, and **Save / load menu**. Replay and calm-beach recovery keep your discoveries; only an explicit save replaces your checkpoint. **Retry wave** is also available during evacuation.
 
 The **320×240 m city** has 39 neighboring buildings, 20 pedestrians, carried umbrellas/briefcases, eight Porsche cars and four animated drivers. The **96×48 m beach** has 18 umbrellas, 31 loungers, 17 stationary beachgoers, an attendant, eight walkers and eight swimmers around the two friends. The entrance cross-gate/rear barrier and shoreline fence are open; shallow water has ground support. Runtime assets comprise **28 prop GLBs, 13 rigged character GLBs and one Porsche GLB** under `public/assets/`. The Porsche adapts Lionsharp Studios' model from the supplied PlayCanvas reference under **CC BY-SA 4.0**. Source records and originals live in `asset-library/`; **Save / load → Art & audio credits** lists attribution.
 
-The TV uses credited VOA newsroom footage with the reporter's original voice and six matching caption cues. The source story's fictional coastal bulletin remains available through the optional TV interaction. After the bulletin, the screen loops silently beneath the music. [LW-S004](docs/TASKS.md#lw-s004--wave-panic-and-blackout) completes the warning, evacuation and recoverable blackout. The warning begins only on **Continue story**. The friend is a fictional NPC; the design introduces the real-player meeting in Episode 2.
+The TV uses credited VOA newsroom footage with the reporter's original voice and six matching caption cues. The source story's fictional coastal bulletin remains available through the optional TV interaction. After the bulletin, the screen loops silently beneath the music. [LW-S004](docs/TASKS.md#lw-s004--wave-panic-and-blackout) completes the warning, evacuation and recoverable blackout. The warning starts automatically three unpaused seconds after all three beach discoveries; warning and blackout shots advance without Next or Skip. The player controls the escape running. The friend is a fictional NPC; the design introduces the real-player meeting in Episode 2.
 
 Switching tabs or focusing another window pauses sound, video, gameplay, and rendering. Returning resumes the same state, including any open menu or developer pause. Reload opens the forest board after a completed entrance; an unplayed checkpoint still waits for **Play story**.
 
@@ -33,22 +33,22 @@ Switching tabs or focusing another window pauses sound, video, gameplay, and ren
 
 Click the scene to capture the mouse. Press **Esc** to release it.
 
-| Input                       | Action                                             |
-| --------------------------- | -------------------------------------------------- |
-| WASD / arrow keys           | Move relative to camera direction                  |
-| Shift                       | Sprint                                             |
-| Space                       | Jump                                               |
-| Mouse                       | Orbit camera                                       |
-| Mouse wheel                 | Zoom                                               |
-| E                           | Interact while the prompt is visible               |
-| J / Journal                 | Open or close the inventory and clue journal       |
-| P / Save / load             | Open or close checkpoint controls                  |
-| Tab / Enter                 | Navigate and activate modal controls               |
-| Esc                         | Close the active modal or release the mouse        |
-| Controls → Restart café     | Start fresh and retain the checkpoint              |
-| Play story / Replay intro   | Read or replay the opening story sequence          |
-| Sound: On / Off             | Toggle the shared café/beach/wave sound preference |
-| Continue story / Retry wave | Start or replay the wave warning and evacuation    |
+| Input                     | Action                                             |
+| ------------------------- | -------------------------------------------------- |
+| WASD / arrow keys         | Move relative to camera direction                  |
+| Shift                     | Sprint                                             |
+| Space                     | Jump                                               |
+| Mouse                     | Orbit camera                                       |
+| Mouse wheel               | Zoom                                               |
+| E                         | Interact while the prompt is visible               |
+| J / Journal               | Open or close the inventory and clue journal       |
+| P / Save / load           | Open or close checkpoint controls                  |
+| Tab / Enter               | Navigate and activate modal controls               |
+| Esc                       | Close the active modal or release the mouse        |
+| Controls → Restart café   | Start fresh and retain the checkpoint              |
+| Play story / Replay intro | Read or replay the opening story sequence          |
+| Sound: On / Off           | Toggle the shared café/beach/wave sound preference |
+| Retry wave                | Replay the wave warning and evacuation             |
 
 After the opening, click the scene to resume desktop input. Interactions appear near their objects when you are in range. On touch devices, the starter uses left drag to move, right drag to look, a farther left drag to sprint, and a right-side double-tap to jump; tap the interaction button when it appears.
 
@@ -142,3 +142,7 @@ After leaving Tideline, supplied houses now line the nearby street and beach app
 The forest sign-in is dressed with more pumpkins, skeletons and cobwebs. Carried umbrellas use a held right-arm pose, finger anchor and a larger canopy so the walking character remains beneath it.
 
 See [GitHub preparation](docs/GITHUB_PUSH.md) for tracked/ignored files, size/history review and staging/push commands. Keep `public/assets/` versioned: raw source archives and build/evidence folders are excluded instead. [LW-A005 handoff](docs/LW-A005-HANDOFF.md) describes the changes, licence audit, reproduction and limitations.
+
+## Living beach continuation
+
+[LW-S005](docs/LW-S005-HANDOFF.md) adds continuous stroller turns, shared waves/tide for swimmers and boats, two mounted horses, two quad bikes and two fast boats. These ambient rides use four CC0 prepared assets in both commercial and full builds. The beach remains 240 x 48 m with roughly 600 people; smooth target-device performance remains open. The warning and blackout play without Next/Skip, while the player controls running.

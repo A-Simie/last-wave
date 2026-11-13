@@ -4,9 +4,8 @@ import type { GraphicsDevice } from 'playcanvas';
 import { createMaterial } from '../../scenes/primitives';
 
 import { BEACH_SHORE_Z } from './entryLayout';
-
-export const beachWaterHeight = (x: number, z: number, time: number) =>
-    0.14 + 0.04 * Math.sin(z * 1.1 + x * 0.16 + time * 0.7) + 0.018 * Math.sin(x * 0.5 + z * 0.8 + time * 1.2);
+import { beachWaterHeight, calmShoreAdvance, sampleBeachWater } from './waterMotion';
+export { beachWaterHeight } from './waterMotion';
 
 export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     const root = new Entity('beach-water');
@@ -19,6 +18,8 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     const foam = createMaterial('beach-water-foam', 0.86, 0.96, 0.92);
     foam.blendType = BLEND_NORMAL;
     foam.opacity = 0.52;
+    foam.opacityVertexColor = true;
+    foam.diffuseVertexColor = true;
     foam.depthWrite = false;
     foam.update();
     root.once('destroy', () => {
@@ -53,6 +54,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
 
     const foamPositions = new Float32Array(3 * 65 * 2 * 3);
     const foamNormals = new Float32Array(foamPositions.length);
+    const foamColors = new Float32Array((foamPositions.length / 3) * 4);
     const foamIndices: number[] = [];
     for (let band = 0; band < 3; band++) {
         for (let column = 0; column < 65; column++) {
@@ -71,19 +73,19 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     root.addChild(wash);
     let time = 0;
     let retreat = 0;
+    const sample = { height: 0, dx: 0, dz: 0 };
     const update = (dt: number, retreatTarget = 0) => {
         time += Math.min(dt, 0.1);
         retreat += Math.max(-dt * 2.6, Math.min(dt * 2.6, retreatTarget - retreat));
         for (let i = 0; i < positions.length; i += 3) {
             const x = positions[i];
             const row = Math.floor(i / 3 / (columns + 1));
-            const z = BEACH_SHORE_Z - retreat - row * 2;
+            const z = BEACH_SHORE_Z + calmShoreAdvance(time) * Math.exp(-row / 2) - retreat - row * 2;
             positions[i + 2] = z;
-            positions[i + 1] = beachWaterHeight(x, z, time);
-            const a = Math.cos(z * 1.1 + x * 0.16 + time * 0.7) * 0.04;
-            const b = Math.cos(x * 0.5 + z * 0.8 + time * 1.2) * 0.018;
-            const nx = -(a * 0.16 + b * 0.5);
-            const nz = -(a * 1.1 + b * 0.8);
+            sampleBeachWater(x, z, time, sample);
+            positions[i + 1] = sample.height;
+            const nx = -sample.dx;
+            const nz = -sample.dz;
             const length = Math.hypot(nx, 1, nz);
             normals[i] = nx / length;
             normals[i + 1] = 1 / length;
@@ -93,12 +95,21 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
         mesh.setNormals(normals);
         mesh.update();
         for (let band = 0; band < 3; band++) {
+            const phase = (time / 7.5 + band / 3) % 1;
+            const alpha = Math.pow(Math.sin(phase * Math.PI), 1.4);
             for (let column = 0; column < 65; column++) {
                 const x = -128 + column * 4;
-                const z = BEACH_SHORE_Z - 0.4 - retreat - band * 2.8 + Math.sin(time * 0.6 + band + x * 0.17) * 0.24;
+                const z =
+                    BEACH_SHORE_Z -
+                    7 +
+                    phase * 7.8 +
+                    calmShoreAdvance(time) -
+                    retreat +
+                    Math.sin(x * 0.12 + band) * 0.18;
                 for (let edge = 0; edge < 2; edge++) {
                     const index = ((band * 65 + column) * 2 + edge) * 3;
-                    const depth = z - edge * (0.1 + 0.04 * Math.sin(x * 0.8 + time));
+                    const depth = z - edge * (0.12 + 0.4 * alpha);
+                    foamColors.set([1, 1, 1, alpha * (edge ? 0.1 : 1)], ((band * 65 + column) * 2 + edge) * 4);
                     foamPositions[index] = x;
                     foamPositions[index + 1] = beachWaterHeight(x, depth, time) + 0.06;
                     foamPositions[index + 2] = depth;
@@ -106,6 +117,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
             }
         }
         foamMesh.setPositions(foamPositions);
+        foamMesh.setColors(foamColors);
         foamMesh.update();
     };
     update(0);
@@ -114,6 +126,7 @@ export const createBeachWater = (parent: Entity, device: GraphicsDevice) => {
     return {
         update,
         heightAt: (x: number, z: number) => beachWaterHeight(x, z, time),
+        sampleAt: (x: number, z: number) => sampleBeachWater(x, z, time),
         get retreat() {
             return retreat;
         }

@@ -228,8 +228,8 @@ export class GameHud {
         if (key !== this.waveKey) {
             this.waveKey = key;
             if (state) {
-                this.storyButton.hidden = !ready || (!running && phase !== 'calm');
-                this.storyButton.textContent = running ? 'Retry wave' : 'Continue story';
+                this.storyButton.hidden = !ready || !running;
+                this.storyButton.textContent = 'Retry wave';
             }
             if (running) {
                 this.quest.dataset.order = 'sequence';

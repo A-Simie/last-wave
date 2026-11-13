@@ -72,12 +72,12 @@ export class CutscenePanel {
         this.nextButton.addEventListener(
             'click',
             () => {
-                if (this.state) onAdvance(this.state.cutsceneId, this.state.beat.id);
+                if (this.state && !this.state.automatic) onAdvance(this.state.cutsceneId, this.state.beat.id);
             },
             options
         );
         const skip = () => {
-            if (this.state) onSkip(this.state.cutsceneId);
+            if (this.state && !this.state.automatic) onSkip(this.state.cutsceneId);
         };
         this.root.querySelector('[data-cutscene-skip]')!.addEventListener('click', skip, options);
         this.root.addEventListener(
@@ -122,6 +122,10 @@ export class CutscenePanel {
             return;
         }
         const broadcast = state.beat.id === 'broadcast';
+        const automatic = state.automatic === true;
+        this.root.dataset.automatic = String(automatic);
+        this.nextButton.hidden = automatic;
+        this.root.querySelector<HTMLButtonElement>('[data-cutscene-skip]')!.hidden = automatic;
         this.root.setAttribute('aria-label', state.title);
         this.root.dataset.cutscene = state.cutsceneId;
         this.root.querySelector('[data-cutscene-title]')!.textContent = state.title;
@@ -136,8 +140,12 @@ export class CutscenePanel {
               ? (state.finishLabel ?? 'Continue')
               : 'Next';
         this.renderMedia(this.media);
-        if (!this.root.open) this.root.showModal();
-        this.nextButton.focus({ preventScroll: true });
+        if (!this.root.open) {
+            if (automatic) this.root.show();
+            else this.root.showModal();
+            if (automatic) this.soundInput.focus({ preventScroll: true });
+        }
+        if (!automatic) this.nextButton.focus({ preventScroll: true });
     }
 
     renderMedia(media: OpeningMediaState) {

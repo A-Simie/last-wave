@@ -2,6 +2,8 @@ import { Asset, AssetListLoader, WasmModule } from 'playcanvas';
 import type { AppBase, ContainerResource } from 'playcanvas';
 
 import { allowedModels } from '../data/assetPolicy';
+import { BEACH_ACTIVITY_ASSETS } from '../data/beachActivities';
+import type { BeachActivityAssetId } from '../data/beachActivities';
 import { CAFE_MODELS } from '../data/cafeModels';
 import type { CafeModelId } from '../data/cafeModels';
 import { CHARACTER_MODELS } from '../data/characterModels';
@@ -21,6 +23,7 @@ export type GameAssets = {
     characters: CharacterAssets;
     vehicles: VehicleAssets;
     models: ModelAssets;
+    activities: Record<BeachActivityAssetId, ContainerResource>;
 };
 export type ForestCharacters = Pick<CharacterAssets, 'patronBeard' | 'patronLong'>;
 
@@ -60,6 +63,7 @@ export const loadGameAssets = async (app: AppBase): Promise<GameAssets> => {
     const cafe = create('cafe', 'props/tideline', CAFE_MODELS);
     const characters = create('character', 'characters', CHARACTER_MODELS);
     const vehicles = create('vehicle', 'vehicles', VEHICLE_MODELS);
+    const activities = create('activity', 'activities', BEACH_ACTIVITY_ASSETS);
     const models = create(
         'model',
         'models',
@@ -70,7 +74,7 @@ export const loadGameAssets = async (app: AppBase): Promise<GameAssets> => {
             ])
         )
     );
-    const entries = [...cafe, ...characters, ...vehicles, ...models];
+    const entries = [...cafe, ...characters, ...vehicles, ...models, ...activities];
     const loader = new AssetListLoader(
         entries.map(([, asset]) => asset),
         app.assets
@@ -87,7 +91,10 @@ export const loadGameAssets = async (app: AppBase): Promise<GameAssets> => {
             cafe: Object.fromEntries(cafe.map(([id, asset]) => [id, asset.resource])) as CafeAssets,
             characters: Object.fromEntries(characters.map(([id, asset]) => [id, asset.resource])) as CharacterAssets,
             vehicles: Object.fromEntries(vehicles.map(([id, asset]) => [id, asset.resource])) as VehicleAssets,
-            models: Object.fromEntries(models.map(([id, asset]) => [id, asset.resource])) as ModelAssets
+            models: Object.fromEntries(models.map(([id, asset]) => [id, asset.resource])) as ModelAssets,
+            activities: Object.fromEntries(
+                activities.map(([id, asset]) => [id, asset.resource])
+            ) as GameAssets['activities']
         };
     } finally {
         loader.destroy();

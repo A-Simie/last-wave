@@ -110,7 +110,9 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
             !!scene?.cutscene.state;
         scene?.setControlsEnabled(!active, paused);
         scene?.interactions.setSuspended(active || (!!scene?.beach && !scene.beach.wave.calm));
-        if (active && document.pointerLockElement === canvas) document.exitPointerLock();
+        const wavePhase = scene?.beach?.wave.progress.state.phase;
+        const wavePlaying = wavePhase && wavePhase !== 'calm' && wavePhase !== 'complete';
+        if (active && !wavePlaying && document.pointerLockElement === canvas) document.exitPointerLock();
     };
     const closeJournal = () => {
         if (!journalOpen) return;
@@ -384,7 +386,6 @@ export const createGame = async (canvas: HTMLCanvasElement): Promise<AppBase> =>
         )
             return;
         if (scene.beach.wave.progress.running) replayWave(true);
-        else scene.beach.wave.start();
     };
     const hud = new GameHud(
         () => scene?.interactions.interact(),

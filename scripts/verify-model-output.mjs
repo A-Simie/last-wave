@@ -15,3 +15,15 @@ for (const model of expected) {
     assert.equal(createHash('sha256').update(bytes).digest('hex'), model.sha256, model.file);
 }
 console.log(`PASS ${policy}: ${expected.length} output models match manifest sizes and SHA-256; no extra files`);
+const activities = JSON.parse(await readFile(new URL('./beach-activities.prepared.json', import.meta.url), 'utf8'));
+const activityOutput = resolve(output, '../activities');
+assert.deepEqual(
+    (await readdir(activityOutput)).filter((file) => file.endsWith('.glb')).sort(),
+    activities.map((asset) => `${asset.id}.glb`).sort()
+);
+for (const asset of activities) {
+    const bytes = await readFile(resolve(activityOutput, `${asset.id}.glb`));
+    assert.equal(bytes.length, asset.bytes, asset.id);
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), asset.sha256, asset.id);
+}
+console.log(`PASS ${policy}: ${activities.length} CC0 activity assets match manifest sizes and SHA-256`);

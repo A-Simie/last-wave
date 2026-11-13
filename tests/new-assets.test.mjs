@@ -126,7 +126,7 @@ test('each restaurant has a walkable doorway and dining aisle but solid walls an
 });
 
 test('the wave starts by itself after the discoveries and paces every warning beat for reading', () => {
-    assert.ok(WAVE_AUTOSTART_DELAY >= 3 && WAVE_AUTOSTART_DELAY <= 10);
+    assert.equal(WAVE_AUTOSTART_DELAY, 3);
     for (const beat of WAVE_WARNING.beats) {
         const seconds = warningBeatDuration(beat.text);
         assert.ok(seconds >= 4.5 && seconds <= 10, beat.id);

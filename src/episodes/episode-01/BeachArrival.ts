@@ -12,6 +12,7 @@ import type { InteractionSystem } from '../../systems/InteractionSystem';
 import type { QuestSystem } from '../../systems/QuestSystem';
 
 import { BEACH_DRINKS_DIALOGUE, BEACH_FRIEND_DIALOGUE, BEACH_LOCAL_DIALOGUE, BEACH_SHORE_DIALOGUE } from './beach';
+import { createBeachActivities } from './BeachActivities';
 import { BeachAudio } from './BeachAudio';
 import { createBeachCrowd } from './BeachCrowd';
 import { createBeachDressing } from './BeachDressing';
@@ -49,6 +50,13 @@ export const createBeachArrival = (
     const life = createBeachLife(root, assets, player);
     life.crowd = createBeachCrowd(app, root, assets, player);
     life.crowd.setPausedFor('calm', true);
+    life.waterHeight = water.heightAt;
+    life.crowd.waterHeight = water.heightAt;
+    const activities = createBeachActivities(root, assets, player, water);
+    activities.obstacles = [
+        ...life.walkers.map(({ entity }) => entity),
+        ...life.crowd.strollers.map(({ person }) => person.holder)
+    ];
     const navigation = new BeachNavigation(isBeachArrivalPosition);
     const tuple = (entity: Entity): Vector3Tuple => {
         const p = entity.getPosition();
@@ -62,6 +70,7 @@ export const createBeachArrival = (
     if (!near) throw new Error('No clear place for the beach companion.');
     const companion = createCompanion(root, assets, player, near, isBeachArrivalPosition);
     companion.obstacles = life.walkers.map(({ entity }) => entity);
+    companion.obstacles.push(...activities.actors.filter((actor) => actor.kind !== 'boat').map((actor) => actor.root));
     life.obstacles = [companion.entity];
     const wave = createBeachWave(
         root,
@@ -146,6 +155,10 @@ export const createBeachArrival = (
             life.paused = paused;
             audio.setPaused(wave.calm ? paused : presentationPaused || wave.progress.checkpoint === 'after-blackout');
             wave.setPaused(wave.calm ? paused : presentationPaused);
+            activities.paused = wave.calm
+                ? paused
+                : presentationPaused || ['loading', 'complete'].includes(wave.progress.state.phase);
+            activities.phase = wave.progress.state.phase;
         },
         update: (dt: number) => {
             audio.update(dt);

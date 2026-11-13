@@ -38,6 +38,7 @@ export class BeachLife extends Script {
     swimmers: Swimmer[] = [];
     standing: { entity: Entity; character: AnimatedCharacter; model: BeachCharacterId }[] = [];
     obstacles: Entity[] = [];
+    waterHeight = (x: number, z: number) => beachWaterHeight(x, z, this.time);
     /** The expanded 480-person crowd; created alongside the original cast. */
     crowd: BeachCrowd | null = null;
     private suspended = false;
@@ -96,7 +97,7 @@ export class BeachLife extends Script {
             const angle = this.time * 0.14 + swimmer.phase;
             const x = swimmer.x + (swimmer.swimming ? Math.cos(angle) * 3.2 : 0);
             const z = swimmer.z + (swimmer.swimming ? Math.sin(angle) * 1.1 : 0);
-            swimmer.character.root.setPosition(x, beachWaterHeight(x, z, this.time) + swimmer.height, z);
+            swimmer.character.root.setPosition(x, this.waterHeight(x, z) + swimmer.height, z);
             if (swimmer.swimming)
                 swimmer.character.root.setEulerAngles(
                     0,

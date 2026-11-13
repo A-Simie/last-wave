@@ -10,16 +10,19 @@ import {
     BEACH_QUEST,
     BEACH_SHORE_DIALOGUE
 } from '../src/episodes/episode-01/beach.ts';
+import { BEACH_BOAT_ROUTES, BEACH_RIDING_ROUTES } from '../src/episodes/episode-01/beachActivityLayout.ts';
 import {
     BEACH_DRINK_CART,
     BEACH_STANDING_PEOPLE,
     BEACH_V4_DRESSING_SOLIDS,
     BEACH_WALKER_ROUTES
 } from '../src/episodes/episode-01/beachLayout.ts';
+import { beachCircuitLength, sampleBeachCircuit, approachBeachSpeed } from '../src/episodes/episode-01/beachMotion.ts';
 import { BeachNavigation } from '../src/episodes/episode-01/BeachNavigation.ts';
 import { BEACH_PASSES, ENTRY_QUEST } from '../src/episodes/episode-01/entry.ts';
 import { BEACH_ARRIVAL_SPAWN } from '../src/episodes/episode-01/entryLayout.ts';
 import { OPENING_QUEST, STARTER_BAG } from '../src/episodes/episode-01/opening.ts';
+import { calmTideHeight, sampleBeachWater } from '../src/episodes/episode-01/waterMotion.ts';
 import {
     copyFoundationSnapshot,
     isBeachArrivalPosition,
@@ -320,4 +323,51 @@ test('a companion already yielding inside the walking margin can escape without 
         previous = point;
     }
     assert.deepEqual(previous, to);
+});
+
+test('calm water has bounded slow tides and smooth wave slopes matching its rendered normals', () => {
+    assert.ok(Math.abs(calmTideHeight(45) - 0.08) < 1e-9);
+    assert.ok(Math.abs(calmTideHeight(135) + 0.08) < 1e-9);
+    for (const time of [0, 2.5, 45, 135, 180])
+        for (const z of [-29, -34, -48, -90]) {
+            const water = sampleBeachWater(23, z, time),
+                epsilon = 0.0001;
+            assert.ok(water.height >= -0.18 && water.height <= 0.46);
+            const dx =
+                (sampleBeachWater(23 + epsilon, z, time).height - sampleBeachWater(23 - epsilon, z, time).height) /
+                (2 * epsilon);
+            const dz =
+                (sampleBeachWater(23, z + epsilon, time).height - sampleBeachWater(23, z - epsilon, time).height) /
+                (2 * epsilon);
+            assert.ok(Math.abs(dx - water.dx) < 1e-6);
+            assert.ok(Math.abs(dz - water.dz) < 1e-6);
+        }
+});
+
+test('activity circuits turn continuously, keep riders off the boardwalk and boats beyond swimmers', () => {
+    for (const route of [...BEACH_RIDING_ROUTES, ...BEACH_BOAT_ROUTES]) {
+        const length = beachCircuitLength(route.from, route.to, route.radius);
+        for (let distance = 0; distance < length; distance += 0.7) {
+            const a = sampleBeachCircuit(distance, route.from, route.to, route.z, route.radius);
+            const b = sampleBeachCircuit(distance + 0.01, route.from, route.to, route.z, route.radius);
+            assert.ok(Math.hypot(a.x - b.x, a.z - b.z) <= 0.010001);
+            if (BEACH_RIDING_ROUTES.includes(route)) {
+                assert.ok(Math.abs(a.x) > 50);
+                for (const [dx, dz] of [
+                    [0, 0],
+                    [0.65, 0],
+                    [-0.65, 0],
+                    [0, 0.65],
+                    [0, -0.65]
+                ])
+                    assert.equal(isBeachArrivalPosition([a.x + dx, 1.04, a.z + dz]), true);
+            } else assert.ok(a.z <= -60);
+        }
+        assert.deepEqual(
+            sampleBeachCircuit(0, route.from, route.to, route.z, route.radius),
+            sampleBeachCircuit(length, route.from, route.to, route.z, route.radius)
+        );
+    }
+    assert.equal(approachBeachSpeed(0, 1, 0.1), 0.13);
+    assert.equal(approachBeachSpeed(1, 0, 0), 1);
 });

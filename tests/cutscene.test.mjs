@@ -7,6 +7,7 @@ import {
     TV_DIALOGUE,
     ATTENDANT_DIALOGUE
 } from '../src/episodes/episode-01/opening.ts';
+import { WAVE_BLACKOUT, WAVE_WARNING } from '../src/episodes/episode-01/wave.ts';
 import { CutsceneSystem } from '../src/systems/CutsceneSystem.ts';
 import { DialogueSystem } from '../src/systems/DialogueSystem.ts';
 import { QuestSystem } from '../src/systems/QuestSystem.ts';
@@ -24,6 +25,22 @@ test('the authored opening preserves speakers and only completes after the final
     assert.equal(cutscene.state, null);
     assert.deepEqual(finished, [[OPENING_CUTSCENE.id, false]]);
     assert.equal(cutscene.skip(OPENING_CUTSCENE.id), false);
+});
+
+test('wave cinematics preserve automatic playback through every beat and restore manual opening playback', () => {
+    const cutscene = new CutsceneSystem();
+    for (const definition of [WAVE_WARNING, WAVE_BLACKOUT]) {
+        cutscene.play(definition);
+        for (const beat of definition.beats) {
+            assert.equal(cutscene.state.automatic, true);
+            cutscene.state.automatic = false;
+            assert.equal(cutscene.state.automatic, true);
+            assert.equal(cutscene.advance(definition.id, beat.id), true);
+        }
+        assert.equal(cutscene.state, null);
+    }
+    cutscene.play(OPENING_CUTSCENE);
+    assert.notEqual(cutscene.state.automatic, true);
 });
 
 test('stale beat IDs, another sequence and concurrent playback cannot skip dialogue', () => {

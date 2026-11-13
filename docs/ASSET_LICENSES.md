@@ -130,3 +130,16 @@ Re-read all **eleven original street-building files** in the preserved supplied 
 This confirms the original download records, not a new online ownership review. Sketchfab model/API pages returned 403/inaccessible during the fresh online attempt. The existing register above provides each title, author, source and modification note; generated in-game credits retain them. CC BY 4.0 permits adaptation and commercial reuse subject to attribution, licence links and change notices: [official licence deed](https://creativecommons.org/licenses/by/4.0/).
 
 Local audit evidence: `verification.local/house-license-audit.json`. Original models were not modified during this recheck. Restaurant furniture/lighting uses the already licensed cafe kit plus original procedural geometry, not newly downloaded models.
+
+## LW-S005 beach activity assets (2026-11-13)
+
+Four prepared GLBs under `public/assets/activities/` total 570,880 bytes and ship in both full and commercial builds. All sources permit commercial use under CC0 1.0:
+
+| Runtime asset | Author and source                                                                                                | Preparation and use                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| horse.glb     | [Quaternius Farm Animals](https://quaternius.com/packs/farmanimal.html)                                          | Embedded source glTF/buffer, retained Idle/WalkSlow/Walk; two mounted horses |
+| speedboat.glb | [Kenney Watercraft Kit](https://kenney.nl/assets/watercraft-kit)                                                 | Self-contained boat-speed-a model; two offshore boats                        |
+| quadWheel.glb | [Kenney Car Kit](https://kenney.nl/assets/car-kit)                                                               | Self-contained tractor front wheel; eight wheels on original quad bodies     |
+| riderPose.glb | [Quaternius Universal Animation Library](https://quaternius.com/packs/universalanimationlibrary.html), Last Wave | Existing CC0 patronBuzz source; animation-only baked riding adaptation       |
+
+Primary creator license pages and downloaded Kenney license notices were checked during preparation. Horse source comes from the official three.js example mirror linked in the preparation manifest. `scripts/beach-activities.prepared.json` records source/output SHA-256, the external Horse.bin hash, sizes, authors, download URLs and retained clips. In-game credits include all three packs. Raw downloads and preparation tools remain ignored; shipped GLBs and manifests stay in Git. Rebuild with `node scripts/prepare-beach-activities.mjs <offline-tools-directory>`; tools require @gltf-transform/core/extensions/functions 4.5.1.

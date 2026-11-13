@@ -14,6 +14,7 @@ import { createBoxVisual as box, createMaterial, createStaticBody } from '../../
 
 import { BEACH_CROWD_SPOTS, BEACH_CROWD_STROLLERS, BEACH_CROWD_SWIMMERS } from './beachCrowdLayout';
 import type { CrowdMember, CrowdPose } from './beachCrowdLayout';
+import { approachBeachSpeed, sampleBeachCircuit } from './beachMotion';
 import { beachWaterHeight } from './BeachWater';
 import { BEACH_SHORE_Z } from './entryLayout';
 
@@ -33,9 +34,26 @@ type Person = {
     pose: CrowdPose | 'walk' | 'swim' | 'float' | 'run';
     run?: { delay: number; speed: number; heading: number };
 };
-type Game = { ball: Entity; players: Person[]; from: number; to: number; time: number; duration: number };
+type Game = {
+    ball: Entity;
+    players: Person[];
+    from: number;
+    to: number;
+    time: number;
+    duration: number;
+    thrower?: AnimatedCharacter;
+    releaseAt?: number;
+};
 type Swimmer = { person: Person; x: number; z: number; phase: number; swimming: boolean };
-type Stroller = { person: Person; from: number; to: number; z: number; forward: boolean; heading: number };
+type Stroller = {
+    person: Person;
+    from: number;
+    to: number;
+    z: number;
+    distance: number;
+    speed: number;
+    heading: number;
+};
 
 export class BeachCrowd extends Script {
     static scriptName = 'beachCrowd';
@@ -50,6 +68,7 @@ export class BeachCrowd extends Script {
     wavePaused = false;
     mode: 'calm' | 'watching' | 'pointing' | 'running' = 'calm';
     retreat = () => 0;
+    waterHeight = (x: number, z: number) => beachWaterHeight(x, z, this.time);
     private pending: Person[] = [];
     private time = 0;
     private lodTime = 0;
@@ -126,7 +145,9 @@ export class BeachCrowd extends Script {
             // Runners stay visible until they leave the beach; everyone else is culled beyond the haze.
             if (this.mode === 'running') person.holder.enabled = !!person.run;
             else person.holder.enabled = distance < VISIBLE_RANGE;
-            person.character.anim.playing = !paused && distance < ANIMATED_RANGE * (this.mode === 'running' ? 2 : 1);
+            const moving =
+                person.pose === 'walk' || person.pose === 'swim' || person.pose === 'float' || person.pose === 'run';
+            person.character.anim.playing = !paused && distance < (moving ? VISIBLE_RANGE : ANIMATED_RANGE);
         }
     }
 
@@ -219,6 +240,11 @@ export class BeachCrowd extends Script {
 
     private updateCalm(step: number) {
         for (const game of this.games) {
+            if (game.releaseAt !== undefined && this.time >= game.releaseAt) {
+                game.thrower?.play('idle', 0.3);
+                game.releaseAt = undefined;
+                game.thrower = undefined;
+            }
             game.time += step;
             const from = game.players[game.from].holder.getPosition();
             const to = game.players[game.to].holder.getPosition();
@@ -236,9 +262,8 @@ export class BeachCrowd extends Script {
             const thrower = game.players[game.from].character;
             if (thrower?.anim.playing) {
                 thrower.play('point', 0.08);
-                window.setTimeout(() => {
-                    if (this.mode === 'calm') thrower.play('idle', 0.3);
-                }, 650);
+                game.thrower = thrower;
+                game.releaseAt = this.time + 0.65;
             }
         }
         for (const swimmer of this.swimmers) {
@@ -246,7 +271,7 @@ export class BeachCrowd extends Script {
             const x = swimmer.x + (swimmer.swimming ? Math.cos(angle) * 3 : 0);
             const z = swimmer.z + (swimmer.swimming ? Math.sin(angle) * 1.2 : 0);
             const lift = BEACH_POSE_HEIGHTS[swimmer.person.model][swimmer.swimming ? 'swim' : 'float'];
-            swimmer.person.holder.setPosition(x, beachWaterHeight(x, z, this.time) + lift, z);
+            swimmer.person.holder.setPosition(x, this.waterHeight(x, z) + lift, z);
             if (swimmer.swimming)
                 swimmer.person.holder.setEulerAngles(
                     0,
@@ -255,17 +280,21 @@ export class BeachCrowd extends Script {
                 );
         }
         const player = this.player.getPosition();
-        for (const stroller of this.strollers) {
+        for (const [index, stroller] of this.strollers.entries()) {
             const p = stroller.person.holder.getPosition();
-            const target = stroller.forward ? stroller.to : stroller.from;
-            const direction = Math.sign(target - p.x);
-            const blocked = Math.hypot(player.x - p.x, player.z - p.z) < 1.2 && (player.x - p.x) * direction > 0;
-            stroller.person.character?.move(blocked ? 0 : 1);
-            if (blocked) continue;
-            const x = Math.abs(target - p.x) < step ? target : p.x + direction * step;
-            if (x === target) stroller.forward = !stroller.forward;
-            stroller.heading = math.lerpAngle(stroller.heading, direction > 0 ? 90 : -90, Math.min(1, step * 6));
-            stroller.person.holder.setPosition(x, 0, stroller.z);
+            const ahead = sampleBeachCircuit(stroller.distance + 0.7, stroller.from, stroller.to, stroller.z, 0.35);
+            const blocked =
+                Math.hypot(player.x - ahead.x, player.z - ahead.z) < 1.25 ||
+                this.strollers.slice(0, index).some((other) => {
+                    const q = other.person.holder.getPosition();
+                    return Math.hypot(q.x - ahead.x, q.z - ahead.z) < 0.85;
+                });
+            stroller.speed = approachBeachSpeed(stroller.speed, blocked ? 0 : 0.82 + (index % 4) * 0.07, step);
+            stroller.distance += stroller.speed * step;
+            const next = sampleBeachCircuit(stroller.distance, stroller.from, stroller.to, stroller.z, 0.35);
+            stroller.person.character?.move(Math.hypot(next.x - p.x, next.z - p.z) / step);
+            stroller.heading = math.lerpAngle(stroller.heading, next.heading, Math.min(1, step * 9));
+            stroller.person.holder.setPosition(next.x, 0, next.z);
             stroller.person.holder.setEulerAngles(0, stroller.heading, 0);
         }
     }
@@ -390,15 +419,17 @@ export const createBeachCrowd = (app: AppBase, parent: Entity, assets: GameAsset
     const strollers: Stroller[] = BEACH_CROWD_STROLLERS.map((definition, index) => {
         const person = add(null, definition.model, `beach-crowd-stroller-${index}`);
         person.pose = 'walk';
-        const start = definition.from + (definition.to - definition.from) * ((index * 0.37) % 1);
-        person.holder.setPosition(start, 0, definition.z);
+        const distance = index * 9.3;
+        const start = sampleBeachCircuit(distance, definition.from, definition.to, definition.z, 0.35);
+        person.holder.setPosition(start.x, 0, start.z);
         return {
             person,
             from: definition.from,
             to: definition.to,
             z: definition.z,
-            forward: index % 2 === 0,
-            heading: 90
+            distance,
+            speed: 0,
+            heading: start.heading
         };
     });
     const crowd = root.addComponent('script')!.create(BeachCrowd, {

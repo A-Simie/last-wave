@@ -4,6 +4,7 @@ export const WAVE_WARNING: CutsceneDefinition = {
     id: 'e1-wave-warning',
     title: 'The changing tide',
     setting: 'Seafront Beach',
+    automatic: true,
     finishLabel: 'Run for higher ground',
     skipLabel: 'Skip to evacuation',
     beats: [
@@ -42,6 +43,7 @@ export const WAVE_BLACKOUT: CutsceneDefinition = {
     id: 'e1-wave-blackout',
     title: 'The day the ocean disappeared',
     setting: 'The evacuation path',
+    automatic: true,
     finishLabel: 'Fade to black',
     skipLabel: 'Skip to blackout',
     beats: [
@@ -63,7 +65,7 @@ export const WAVE_BLACKOUT: CutsceneDefinition = {
 };
 
 /** Seconds of calm after the third beach discovery before the sea starts to retreat on its own. */
-export const WAVE_AUTOSTART_DELAY = 6;
+export const WAVE_AUTOSTART_DELAY = 3;
 
 /** Reading-paced hold for each warning beat (about 3.6 words per second, never rushed below 4.5 s). */
 export const warningBeatDuration = (text: string) =>

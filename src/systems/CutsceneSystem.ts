@@ -12,6 +12,7 @@ export type CutsceneDefinition = {
     readonly setting: string;
     readonly finishLabel?: string;
     readonly skipLabel?: string;
+    readonly automatic?: boolean;
     readonly beats: readonly CutsceneBeat[];
 };
 
@@ -21,6 +22,7 @@ export type CutsceneState = {
     readonly setting: string;
     readonly finishLabel?: string;
     readonly skipLabel?: string;
+    readonly automatic?: boolean;
     readonly beat: CutsceneBeat;
     readonly index: number;
     readonly totalCount: number;
@@ -42,6 +44,7 @@ export class CutsceneSystem {
             setting: this.definition.setting,
             finishLabel: this.definition.finishLabel,
             skipLabel: this.definition.skipLabel,
+            automatic: this.definition.automatic,
             beat: { ...this.definition.beats[this.index] },
             index: this.index,
             totalCount: this.definition.beats.length
