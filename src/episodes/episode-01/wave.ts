@@ -11,28 +11,28 @@ export const WAVE_WARNING: CutsceneDefinition = {
         {
             id: 'retreat',
             speaker: 'Friend',
-            text: 'The water… it’s pulling away. That isn’t a normal tide. Stay back from the shore.',
+            text: 'The water’s pulling away. Stay back!',
             shot: 'retreat',
             dialoguePlacement: 'top-left'
         },
         {
             id: 'birds',
             speaker: 'Above the beach',
-            text: 'The gulls lift all at once, wheeling inland. The soft wash of the sea gives way to a low, unfamiliar rumble.',
+            text: 'Gulls scatter inland. A deep rumble rises.',
             shot: 'birds',
             dialoguePlacement: 'top-left'
         },
         {
             id: 'crowd',
             speaker: 'A child in the crowd',
-            text: '“Where did all the water go?”\n\nPeople turn and point. A lifeguard’s whistle cuts through the beach.',
+            text: '“Where did the sea go?” A whistle sounds.',
             shot: 'crowd',
             dialoguePlacement: 'top-left'
         },
         {
             id: 'wave',
             speaker: 'Lifeguard',
-            text: 'MOVE AWAY FROM THE SHORE! GET TO HIGHER GROUND!\n\nTurn inland. Follow the green arrows along the boardwalk and up the dune path. Go now!',
+            text: 'GET TO HIGHER GROUND! Follow the green arrows inland. RUN!',
             shot: 'wave',
             dialoguePlacement: 'top-left'
         }
@@ -67,9 +67,9 @@ export const WAVE_BLACKOUT: CutsceneDefinition = {
 /** Seconds of calm after the third beach discovery before the sea starts to retreat on its own. */
 export const WAVE_AUTOSTART_DELAY = 3;
 
-/** Reading-paced hold for each warning beat (about 3.6 words per second, never rushed below 4.5 s). */
+/** Short captions overlap the continuous warning action. */
 export const warningBeatDuration = (text: string) =>
-    Math.min(10, Math.max(4.5, 2.2 + text.trim().split(/\s+/).length / 3.6));
+    Math.min(4, Math.max(2.4, 0.8 + text.trim().split(/\s+/).length / 3.6));
 
 export const EVACUATION_CALL = 'MOVE AWAY FROM THE SHORE! GET TO HIGHER GROUND!';
 export const SEPARATION_CALL = 'Friend, distant: “HEY! WAIT! DON’T LEAVE ME!”';

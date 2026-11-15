@@ -4,6 +4,15 @@ import { FOREST_DETAILS } from './forestDetails';
 
 export const FOREST_MODELS = {
     ...FOREST_DETAILS,
+    bridge: modelTuning(
+        'wooden-bridge.glb',
+        [11.7337, 3.4226, 3.1799],
+        [0.3488, 0.7155, 0.0032],
+        0.9957,
+        11.7337,
+        'width'
+    ),
+    woodSigns: modelTuning('wood-signs.glb', [4.0621, 1.7161, 0.1344], [0.0007, 0.833, 0.0126], 0.0251, 3.2, 'width'),
     bare: modelTuning('Tree_Bare_1_A.glb', [1.1286, 2.8569, 1.0341], [0.0521, 1.1671, -0.0773], 0.2613, 7.8),
     twisted: modelTuning('Tree_Bare_2_B.glb', [1.7878, 5.5417, 0.6639], [-0.0617, 2.412, 0.0982], 0.3588, 9.5),
     leafy: modelTuning('Tree_1_A.glb', [3.181, 4.1607, 3.2511], [-0.3441, 1.819, 0], 0.2613, 8.2),

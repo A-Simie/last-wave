@@ -5,6 +5,7 @@ import type { PreparedModelId } from '../data/newModels';
 import { createPreparedModel } from '../scenes/createPreparedModel';
 import type { ModelFit } from '../scenes/createPreparedModel';
 
+import { FOREST_PIT } from './forestBridgeLayout';
 import { FOREST_SCARE_START, forestBatFlight } from './forestScare';
 
 type LoginModels = Partial<Record<PreparedModelId, ContainerResource>>;
@@ -31,7 +32,14 @@ export const createLoginDressing = (parent: Entity, models: LoginModels, mobile:
         if (!resource) return null;
         const model = createPreparedModel(resource, id, `forest-${id}`, fit, { animate, castShadows: !mobile });
         root.addChild(model.root);
-        model.root.setLocalPosition(...position);
+        const [x, y, z] = position;
+        const besidePit =
+            y > -1 &&
+            x > FOREST_PIT.west - 1.5 &&
+            x < FOREST_PIT.east + 1.5 &&
+            z > FOREST_PIT.back - 1 &&
+            z < FOREST_PIT.front;
+        model.root.setLocalPosition(besidePit ? FOREST_PIT.east + 2.5 + x * 0.3 : x, y, z);
         model.root.setLocalEulerAngles(0, yaw, 0);
         model.root.tags.add('forest-scenery', `forest-model-${id}`);
         return model;
@@ -44,6 +52,9 @@ export const createLoginDressing = (parent: Entity, models: LoginModels, mobile:
     place('skeletonB', [-2.5, -0.02, -8.2], 12, { height: 1.95 });
     place('skeletonA', [-4, 0, 3.2], 18, { height: 1.8 });
     place('skeletonB', [4.1, 0, 2.6], -24, { height: 1.85 });
+    place('skeletonA', [2.2, -13.2, 0.8], 15, { height: 2.3 });
+    place('skeletonB', [7.8, -13.2, 0.8], -20, { height: 2.4 });
+    place('cobwebs', [3, -7, 0.6], 0, { scale: 1 });
     for (const [x, y, z, yaw, scale] of [
         [-9.2, 2.15, -1.1, 30, 0.55],
         [7.8, 2.1, -1.4, -40, 0.55],

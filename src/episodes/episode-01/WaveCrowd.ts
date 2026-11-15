@@ -144,7 +144,8 @@ export class WaveCrowd {
         }
         if (this.mode === 'pointing') {
             for (const { character } of [...this.life.standing, ...this.life.walkers]) {
-                if (character.anim.baseLayer!.activeStateCurrentTime >= 0.85) character.anim.speed = 0;
+                const layer = character.anim.baseLayer!;
+                if (layer.activeState === 'point' && layer.activeStateCurrentTime >= 0.85) character.play('talk', 0.25);
             }
         }
         if (this.mode !== 'running') return;

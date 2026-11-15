@@ -36,3 +36,10 @@ git push
 Run the last command only after confirming the intended GitHub remote and branch. For a first push, use your normal `git push -u origin main` after configuring the repository remote. Never add tokens to source/config or publish the ignored raw source library as a substitute for the prepared runtime folder.
 
 Commercial deployment remains separate from GitHub source hosting. Build with `VITE_ASSET_POLICY=commercial` to substitute and exclude the five NC models; retain source attribution and licence records. The house/shop set's recorded licences are CC BY 4.0, as detailed in ASSET_LICENSES.
+
+
+## Forest bridge entrance preparation (2026-11-15)
+
+The two supplied root GLBs have been moved into ignored `asset-library/original-downloads/forest-bridge/`. Ship the two prepared runtime GLBs in `public/assets/forest/`, the preparation script/manifest, deck profile, source credits, forest source and verification scripts. Keep DESIGN.md and the updated task/architecture/handoff documents. The existing forest voice script and verification script are reproducibility sources, not temporary screenshots.
+
+`verification.local/` contains browser profiles, screenshots, temporary inspection textures and reports, and remains ignored. No raw model blanket ignore was added: prepared public assets must remain eligible. Existing beach/street and forest-scare work was preserved. No commit, push or history rewrite is part of this request.

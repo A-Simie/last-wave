@@ -96,7 +96,16 @@ try {
     await send('Page.addScriptToEvaluateOnNewDocument', {
         source: "localStorage.setItem('last-wave.intro-skip.v1','always');"
     });
+    const loaded = new Promise((resolve) => {
+        const onLoad = ({ data }) => {
+            if (JSON.parse(data).method !== 'Page.loadEventFired') return;
+            socket.removeEventListener('message', onLoad);
+            resolve();
+        };
+        socket.addEventListener('message', onLoad);
+    });
     await send('Page.navigate', { url });
+    await loaded;
     await wait(`document.querySelector('#startup-status')?.hidden`);
     await click('[data-forest-local]');
     await wait(`!!${app}.root.findByName('foundation-scene')`);
@@ -131,7 +140,49 @@ try {
         await evaluate(`${app}.timeScale=0;true`);
         await click('[data-checkpoint-close]');
     };
+    const beachState = fixture.state;
+    fixture.state = {
+        ...beachState,
+        area: 'tideline',
+        playerPosition: [0, 1.04, 7.25],
+        entry: progress(ENTRY_QUEST, 5),
+        inventory: { itemIds: [STARTER_BAG.id] }
+    };
     await load();
+    const streetMotion = await evaluate(
+        `(()=>{const a=${app},s=a.root.findByName('seafront-life').script.get('streetLife');s.paused=false;const ordinary=s.walkers.filter(w=>!w.crossing),windows=[],totals=ordinary.map(()=>0);for(let window=0;window<10;window++){const travel=ordinary.map(()=>0);for(let frame=0;frame<300;frame++){const before=ordinary.map(w=>w.character.root.getPosition().clone());s.update(.1);ordinary.forEach((w,i)=>{const p=w.character.root.getPosition();travel[i]+=Math.hypot(p.x-before[i].x,p.z-before[i].z);});}travel.forEach((n,i)=>totals[i]+=n);windows.push({travel,positions:ordinary.map(w=>({name:w.character.root.name,position:w.character.root.getPosition().toArray(),waypoint:w.waypoint}))});}s.paused=true;const before=ordinary.map(w=>w.character.root.getPosition().toArray());s.update(1);return {windows,totals,paused:JSON.stringify(before)===JSON.stringify(ordinary.map(w=>w.character.root.getPosition().toArray()))};})()`
+    );
+    await writeFile(new URL('street-motion.json', output), JSON.stringify(streetMotion, null, 2));
+    assert.equal(streetMotion.totals.length, 45);
+    assert.equal(streetMotion.paused, true);
+    for (const [index, window] of streetMotion.windows.entries()) {
+        if (index === 0) continue;
+        for (const [i, travel] of window.travel.entries())
+            assert.ok(travel > 4, `Street walker ${i} stuck in 30-second window ${index}: ${travel}m`);
+    }
+    await evaluate(
+        `(()=>{const a=${app},c=a.root.findByName('camera');a.root.findByName('player').script.get('thirdPersonController').enabled=false;c.setPosition(3,7,16);c.lookAt(0,0,7.5);return true;})()`
+    );
+    await shot('street-passing');
+    record('All 45 sidewalk walkers keep moving over five minutes with a stationary player; pause freezes motion');
+    fixture.state = beachState;
+    await load();
+    const supports = await evaluate(
+        `(()=>{const a=${app},root=a.root.findByName('beach-dressing');return root.findComponents('render').filter(r=>r.entity.name==='umbrella-weighted-base').map(r=>({position:r.entity.getPosition().toArray(),size:r.entity.getLocalScale().toArray(),pole:r.entity.parent.findByName('umbrella-support-pole')?.getPosition().toArray()}));})()`
+    );
+    assert.equal(supports.length, 18);
+    for (const support of supports) {
+        assert.ok(Math.abs(support.position[1] - support.size[1] / 2) <= 0.02);
+        assert.ok(support.pole, 'Imported shade has a continuous support pole');
+    }
+    await writeFile(new URL('umbrella-supports.json', output), JSON.stringify(supports, null, 2));
+    for (const side of [1, -1]) {
+        await evaluate(
+            `(()=>{const a=${app},c=a.root.findByName('camera');a.root.findByName('player').script.get('thirdPersonController').enabled=false;c.setPosition(-10.7+${side}*4,2.2,7.8);c.lookAt(-10.7,1.3,3.8);return true;})()`
+        );
+        await shot(`umbrella-support-${side}`);
+    }
+    record('All 18 imported beach shades have a grounded weighted base and support pole');
     const activity = `${app}.root.findByName('beach-activities').script.get('beachActivities')`;
     const wave = `${app}.root.findByName('beach-wave').script.get('beachWave')`;
     const movement = await evaluate(
@@ -195,8 +246,16 @@ try {
     await shot('automatic-warning');
     record('Warning starts at three seconds, has no manual controls and cannot be clicked forward');
     const beats = await evaluate(
-        `(()=>{const a=${app},w=${wave},seen=[];for(let i=0;i<650&&w.progress.state.phase==='warning';i++){const id=document.querySelector('#story-opening').dataset.beat;if(seen.at(-1)!==id)seen.push(id);w.update(.1);a.fire('update',.1);}return seen;})()`
+        `(()=>{const a=${app},w=${wave},seen=[],motion=[];for(let i=0;i<650&&w.progress.state.phase==='warning';i++){const id=document.querySelector('#story-opening').dataset.beat;if(seen.at(-1)!==id)seen.push(id);w.update(.1);a.fire('update',.1);if(w.progress.state.phase==='warning'){motion.push(w.camera.getPosition().toArray());if(id==='crowd'&&w.crowd.life.standing.some(p=>p.character.anim.speed===0))throw new Error('Frozen pointing reaction');if(id==='wave'&&w.crowd.mode!=='running')throw new Error('Crowd waits until player control');}}globalThis.__warningMotion=motion;return seen;})()`
     );
+    const motion = await evaluate('globalThis.__warningMotion');
+    for (let i = 1; i < motion.length; i++)
+        assert.ok(
+            Math.hypot(...motion[i].map((n, axis) => n - motion[i - 1][axis])) > 0.00001,
+            `Camera holds at warning frame ${i}`
+        );
+    await writeFile(new URL('warning-motion.json', output), JSON.stringify(motion, null, 2));
+    record('Warning camera moves every sampled frame; pointing stays animated and evacuation overlaps the reveal');
     assert.deepEqual(beats, ['retreat', 'birds', 'crowd', 'wave']);
     assert.equal(await evaluate(`${wave}.progress.state.phase`), 'evacuating');
     assert.equal(await evaluate(`${app}.root.findByName('player').script.get('thirdPersonController').enabled`), true);

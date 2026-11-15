@@ -1,0 +1,22 @@
+{
+    "duration": 44,
+    "lines": [
+        { "start": 4, "speaker": "Woman", "text": "Are you sure this is the right way?" },
+        { "start": 7.2, "speaker": "Man", "text": "That's what the map said." },
+        { "start": 9.4, "speaker": "Woman", "text": "You've been saying that for the past twenty minutes." },
+        { "start": 13, "speaker": "Man", "text": "Unless you've got a better idea." },
+        { "start": 15.5, "speaker": "Woman", "text": "Wait." },
+        { "start": 16.4, "speaker": "Man", "text": "What?" },
+        { "start": 17.3, "speaker": "Woman", "text": "Did you hear that?" },
+        { "start": 19.8, "speaker": "Woman", "text": "What... is that?" },
+        {
+            "start": 24.05,
+            "speaker": "Woman",
+            "text": "Ah!",
+            "caption": "[Wings erupt from the trees. The woman cries out.]"
+        },
+        { "start": 25.8, "speaker": "Man", "text": "They're just bats!" },
+        { "start": 28.5, "speaker": "Woman", "text": "Just bats?" },
+        { "start": 30.5, "speaker": "Man", "text": "Come on. Let's get out of here." }
+    ]
+}

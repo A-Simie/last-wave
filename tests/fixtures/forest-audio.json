@@ -5,25 +5,25 @@
     "cues": [
         {
             "start": 4,
-            "end": 5.557,
+            "end": 5.556,
             "speaker": "Woman",
             "text": "Woman: Are you sure this is the right way?"
         },
         {
             "start": 7.2,
-            "end": 8.488,
+            "end": 8.484,
             "speaker": "Man",
             "text": "Man: That's what the map said."
         },
         {
             "start": 9.4,
-            "end": 11.519,
+            "end": 11.521,
             "speaker": "Woman",
             "text": "Woman: You've been saying that for the past twenty minutes."
         },
         {
             "start": 13,
-            "end": 14.809,
+            "end": 14.807,
             "speaker": "Man",
             "text": "Man: Unless you've got a better idea."
         },
@@ -35,19 +35,19 @@
         },
         {
             "start": 16.4,
-            "end": 16.93,
+            "end": 16.931,
             "speaker": "Man",
             "text": "Man: What?"
         },
         {
             "start": 17.3,
-            "end": 18.115,
+            "end": 18.12,
             "speaker": "Woman",
             "text": "Woman: Did you hear that?"
         },
         {
             "start": 19.8,
-            "end": 21.21,
+            "end": 21.209,
             "speaker": "Woman",
             "text": "Woman: What... is that?"
         },
@@ -59,9 +59,9 @@
         },
         {
             "start": 25.8,
-            "end": 27.333,
+            "end": 26.934,
             "speaker": "Man",
-            "text": "Man: Jesus! They're just bats!"
+            "text": "Man: They're just bats!"
         },
         {
             "start": 28.5,
@@ -71,7 +71,7 @@
         },
         {
             "start": 30.5,
-            "end": 32.332,
+            "end": 32.331,
             "speaker": "Man",
             "text": "Man: Come on. Let's get out of here."
         }
@@ -100,6 +100,6 @@
         "description": "Original layered impact, metallic transient, descending sting and spatial wing burst"
     },
     "bytes": 705558,
-    "sha256": "89de8aa1dde7f65fa2e7ba7c48d77b3433219b4bfae729118c4233b437558f06",
+    "sha256": "397a13f327ff9c4fbbf8a1db998c99332df5ff944ce33ccbf3a6dffd538a73b4",
     "tool": "kokoro-onnx 0.6.1 / Kokoro 1.0, MIT tool and Apache-2.0 weights; models are not deployed; speech is synthetic."
 }

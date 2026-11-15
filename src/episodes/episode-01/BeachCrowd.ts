@@ -221,7 +221,7 @@ export class BeachCrowd extends Script {
             for (const person of this.people) {
                 const layer = person.character?.anim.baseLayer;
                 if (layer?.activeState === 'point' && layer.activeStateCurrentTime >= 0.85)
-                    person.character!.anim.speed = 0;
+                    person.character!.play('talk', 0.25);
             }
         }
         if (this.mode === 'watching' || this.mode === 'pointing') {

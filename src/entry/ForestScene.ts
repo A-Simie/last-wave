@@ -6,6 +6,8 @@ import { createModelInstance } from '../scenes/createModelInstance';
 import { createBoxVisual, createMaterial } from '../scenes/primitives';
 
 import type { loadForestAssets } from './ForestAssets';
+import { createForestBridge } from './ForestBridge';
+import { FOREST_PIT } from './forestBridgeLayout';
 import { createForestCamera } from './ForestCamera';
 import { createForestEffects } from './ForestEffects';
 import { textureForestGround } from './ForestGround';
@@ -65,18 +67,31 @@ export const createForestScene = (
             normalOffsetBias: 0.08
         });
         const soil = material('forest-earth', 0.09, 0.11, 0.09);
-        createBoxVisual(root, 'forest-floor', [0, -0.15, -5], [55, 0.3, 48], soil);
+        createBoxVisual(root, 'forest-floor-west', [-14.05, -0.15, -5], [26.9, 0.3, 48], soil);
+        createBoxVisual(root, 'forest-floor-east', [19.15, -0.15, -5], [16.7, 0.3, 48], soil);
+        createBoxVisual(root, 'forest-floor-back', [5.1, -0.15, -16.5], [11.4, 0.3, 25], soil);
+        createBoxVisual(root, 'forest-floor-front', [5.1, -0.15, 17.5], [11.4, 0.3, 3], soil);
         for (let i = 0; i < 12; i++) {
             const mound = new Entity('forest-earth-mound');
             root.addChild(mound);
-            mound.setLocalPosition(-14 + i * 2.5, -0.15, -4 - (i % 3) * 3);
+            mound.setLocalPosition(-14 + i * 2.5, -0.15, -9 - (i % 3) * 3);
             mound.setLocalScale(5, 0.6 + (i % 3) * 0.2, 3);
             mound.addComponent('render', { type: 'sphere', material: soil });
         }
         const path = material('forest-path-earth', 0.18, 0.16, 0.12);
         textureForestGround(root, app.graphicsDevice, soil, path);
-        createBoxVisual(root, 'forest-path', [0, -0.01, 1], [45, 0.025, 2.8], path);
+        createBoxVisual(root, 'forest-path-west', [-11.55, -0.01, 1], [21.9, 0.025, 2.8], path);
+        createBoxVisual(root, 'forest-path-east', [16.65, -0.01, 1], [11.7, 0.025, 2.8], path);
+        const bridge = createForestBridge(root, app.graphicsDevice, assets.models.bridge, assets.models.woodSigns);
         const place = (id: ForestModelId, x: number, z: number, yaw = 0, scale = 1, y = 0) => {
+            if (
+                y > -1 &&
+                x > FOREST_PIT.west - 1.5 &&
+                x < FOREST_PIT.east + 1.5 &&
+                z > FOREST_PIT.back - 1 &&
+                z < FOREST_PIT.front
+            )
+                x = FOREST_PIT.east + 2.5 + x * 0.3;
             const object = createModelInstance(assets.models[id], FOREST_MODELS[id], `forest-${id}`);
             root.addChild(object.root);
             object.root.setLocalPosition(x, y, z);
@@ -232,10 +247,17 @@ export const createForestScene = (
             flame.setLocalScale(0.035, 0.08, 0.035);
             flame.addComponent('render', { type: 'sphere', material: glow, castShadows: false });
         }
-        const signWood = material('abandoned-sign-wood', 0.23, 0.16, 0.09);
-        createBoxVisual(root, 'abandoned-sign-post', [6, 0.85, -1.8], [0.12, 1.7, 0.12], signWood);
-        const sign = createBoxVisual(root, 'abandoned-sign', [6, 1.5, -1.8], [1.5, 0.35, 0.12], signWood);
-        sign.setLocalEulerAngles(0, -12, -9);
+        for (const [x, z] of [
+            [1.3, 0],
+            [8.7, 0],
+            [2.2, 3],
+            [7.8, 3]
+        ]) {
+            place('pumpkin', x, z, x * 11, 1.5, FOREST_PIT.floor);
+            place('skull', x + 0.6, z + 0.4, 20, 1.5, FOREST_PIT.floor);
+            place('lantern', x, z + 0.4, 0, 1, FOREST_PIT.floor);
+        }
+        place('grave', 8.6, -1.4, -18, 1.3, FOREST_PIT.floor);
         const leaf = material('forest-fallen-leaves', 0.3, 0.19, 0.075);
         const driftingLeaves: Entity[] = [];
         for (let i = 0; i < 50; i++) {
@@ -278,6 +300,7 @@ export const createForestScene = (
         const update = (time: number, reduced: boolean, ambienceTime: number) => {
             const steady = reduced;
             camera.update(time, reduced);
+            bridge.update(time);
             const { x, scared } = performers.update(time);
             flashlight.light!.intensity =
                 time >= 2 && time < 38 ? 7 * Math.min(1, time - 2) * Math.min(1, 38 - time) : 0;
@@ -322,7 +345,13 @@ export const createForestScene = (
             login = createLoginDressing(root, models, mobile);
             if (login.hasBats) effects.useModelBats();
         };
-        return { root, update, addLoginModels, destroy: () => root.destroy() };
+        return {
+            root,
+            update,
+            addLoginModels,
+            projectLogin: () => bridge.project(camera.entity),
+            destroy: () => root.destroy()
+        };
     } catch (error) {
         root.destroy();
         throw error;

@@ -22,6 +22,7 @@ import {
 } from '../src/episodes/episode-01/entryLayout.ts';
 import { OPENING_CUTSCENE, OPENING_QUEST, STARTER_BAG } from '../src/episodes/episode-01/opening.ts';
 import { StreetEntryProgress } from '../src/episodes/episode-01/StreetEntryProgress.ts';
+import { stepStreetWalker } from '../src/episodes/episode-01/streetMotion.ts';
 import {
     createBeachArrivalSnapshot,
     isBeachArrivalPosition,
@@ -32,6 +33,76 @@ import { CutsceneSystem } from '../src/systems/CutsceneSystem.ts';
 import { DialogueSystem } from '../src/systems/DialogueSystem.ts';
 import { InventorySystem } from '../src/systems/InventorySystem.ts';
 import { SAVE_STORAGE_KEY, SAVE_VERSION, SaveSystem, validateSaveState } from '../src/systems/SaveSystem.ts';
+
+test('street walkers pass a stationary person instead of forming a permanent queue', () => {
+    const corridor = { minX: -10, maxX: 12, minZ: -0.45, maxZ: 1.4 };
+    const walkers = Array.from({ length: 6 }, (_, i) => ({ x: -1.5 - i * 1.5, z: 0 }));
+    for (let frame = 0; frame < 600; frame++) {
+        for (const walker of walkers) {
+            const blockers = [
+                { x: 0, z: 0, radius: 1.1 },
+                ...walkers.filter((p) => p !== walker).map((p) => ({ ...p, radius: 0.75 }))
+            ];
+            [walker.x, walker.z] = stepStreetWalker(walker, { x: 11, z: 0 }, 0.12, blockers, corridor, () => true);
+        }
+    }
+    assert.ok(
+        walkers.every((p) => p.x > 3),
+        JSON.stringify(walkers)
+    );
+});
+
+test('street steering separates head-on walkers and escapes an existing overlap', () => {
+    const corridor = { minX: -6, maxX: 6, minZ: -0.45, maxZ: 1.4 };
+    const a = { x: -3, z: 0 },
+        b = { x: 3, z: 0 };
+    for (let frame = 0; frame < 160; frame++) {
+        [a.x, a.z] = stepStreetWalker(a, { x: 5, z: 0 }, 0.1, [{ ...b, radius: 0.75 }], corridor, () => true);
+        [b.x, b.z] = stepStreetWalker(b, { x: -5, z: 0 }, 0.1, [{ ...a, radius: 0.75 }], corridor, () => true);
+    }
+    assert.ok(a.x > 3 && b.x < -3, JSON.stringify({ a, b }));
+    const escaped = stepStreetWalker(
+        { x: 0, z: 0 },
+        { x: 2, z: 0 },
+        0.1,
+        [{ x: -0.1, z: 0, radius: 0.75 }],
+        corridor,
+        () => true
+    );
+    assert.ok(escaped[0] > 0);
+});
+
+test('a walker trapped between a blocker and the pavement edge backs out and passes', () => {
+    const p = { x: -1.0246732234954834, z: 6.8497700691223145 };
+    const corridor = { minX: -46.45, maxX: 52.45, minZ: 6.8, maxZ: 8.65 };
+    for (let frame = 0; frame < 300; frame++) {
+        [p.x, p.z] = stepStreetWalker(
+            p,
+            { x: 52, z: 7.25 },
+            0.134,
+            [{ x: 0, z: 7.25, radius: 1.1 }],
+            corridor,
+            () => true
+        );
+    }
+    assert.ok(p.x > 2, JSON.stringify(p));
+});
+
+test('street detours stay within the pavement and respect solid geometry', () => {
+    const p = { x: 0, z: 0 };
+    const corridor = { minX: -2, maxX: 2, minZ: -0.4, maxZ: 0.4 };
+    for (let frame = 0; frame < 120; frame++) {
+        [p.x, p.z] = stepStreetWalker(
+            p,
+            { x: 2, z: 0 },
+            0.1,
+            [{ x: 0.7, z: 0, radius: 0.75 }],
+            corridor,
+            (x) => x < 0.5
+        );
+        assert.ok(p.x < 0.5 && p.z >= corridor.minZ && p.z <= corridor.maxZ);
+    }
+});
 
 const questAt = (definition, count) => ({
     questId: definition.id,

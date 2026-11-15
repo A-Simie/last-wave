@@ -5,6 +5,7 @@ import { CHARACTER_MODELS } from '../data/characterModels';
 import { LOCOMOTION_SPEEDS } from '../data/locomotion';
 import { createModelInstance } from '../scenes/createModelInstance';
 
+import { forestBridgeHeight } from './forestBridgeLayout';
 import { FOREST_SPEECH } from './forestDialogue';
 
 export const createForestPerformers = (
@@ -78,8 +79,8 @@ export const createForestPerformers = (
             woman.root.enabled = time >= 3.5 && time < 38;
             const flinch = scared ? Math.sin(Math.min(1, (time - 24) / 1.7) * Math.PI) * 0.25 : 0;
             const cautious = Math.max(0, Math.min(1, (time - 19.4) / 0.7)) * 0.3;
-            man.root.setLocalPosition(x, 0.04, 0.6 - cautious + flinch);
-            woman.root.setLocalPosition(x - 1.2, 0.04, 1.25 + flinch * 0.5);
+            man.root.setLocalPosition(x, forestBridgeHeight(x), 0.6 - cautious + flinch);
+            woman.root.setLocalPosition(x - 1.2, forestBridgeHeight(x - 1.2), 1.25 + flinch * 0.5);
             const turn = (from: number, to: number, start: number, end: number) => {
                 const p = Math.max(0, Math.min(1, (time - start) / (end - start))),
                     t = p * p * (3 - 2 * p);

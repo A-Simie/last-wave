@@ -123,6 +123,7 @@ export class BeachWave extends Script {
             this.beatTime = 0;
         }
         if (beat === 'crowd' || beat === 'wave') this.crowd.point();
+        if (beat === 'wave') this.crowd.evacuate();
         if (beat === 'blink') this.progress.beginBlink();
         this.motion.update(0, this.progress.state, beat, steady);
     }

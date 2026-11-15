@@ -11,10 +11,7 @@ export const FOREST_PHASES = [
     { id: 'board', start: 38, end: FOREST_DURATION }
 ] as const;
 
-const ATMOSPHERE = [
-    { start: 22.3, end: 23.5, text: '[A branch snaps overhead]' },
-    { start: 38, end: 40, text: '[A distant rumble. Chains creak.]' }
-];
+const ATMOSPHERE = [{ start: 22.3, end: 23.5, text: '[A branch snaps overhead]' }];
 
 export class ForestTimeline {
     private elapsed = 0;

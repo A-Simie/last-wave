@@ -42,7 +42,7 @@ export const createWaveCamera = (parent: Entity, app: AppBase, assets: GameAsset
     const toTarget = new Vec3();
     const roll = new Quat();
     let key = '';
-    let tween = 1;
+    let shotTime = 0;
     const update = (dt: number, state: WaveState, beat: string, steady: boolean) => {
         const warning = state.phase === 'warning';
         const falling = state.phase === 'falling';
@@ -56,28 +56,42 @@ export const createWaveCamera = (parent: Entity, app: AppBase, assets: GameAsset
         }
         const nextKey = warning ? beat || 'retreat' : state.phase;
         if (nextKey !== key) {
-            tween = !key || steady ? 1 : 0;
+            shotTime = 0;
+            if (!key) {
+                const gameplayCamera = app.root.findByName('camera');
+                if (gameplayCamera) {
+                    position.copy(gameplayCamera.getPosition());
+                    target.copy(position).add(gameplayCamera.forward.clone().mulScalar(5));
+                }
+            }
             key = nextKey;
             from.copy(position);
             fromTarget.copy(target);
         }
         let fov = 58;
+        shotTime += dt;
         if (warning) {
             const shot = WAVE_SHOTS[beat] ?? WAVE_SHOTS.retreat;
             to.set(...shot.position);
             toTarget.set(...shot.target);
+            if (!steady) {
+                to.x -= shotTime * 0.45;
+                to.z -= shotTime * 0.3;
+                toTarget.x -= shotTime * 0.15;
+            }
             fov = shot.fov;
-            tween = steady ? 1 : Math.min(1, tween + dt / 1.35);
-            const t = tween * tween * (3 - 2 * tween);
-            position.lerp(from, to, t);
-            target.lerp(fromTarget, toTarget, t);
+            const blend = steady ? 1 : 1 - Math.exp(-dt * 2.8);
+            position.lerp(position, to, blend);
+            target.lerp(target, toTarget, blend);
         } else {
             const p = player.getPosition();
             const ground = evacuationHeight(p.z);
-            const t = blinking ? 1 : steady ? 0 : Math.max(0, Math.min(1, (state.elapsed - 0.55) / 1.65));
+            const t = blinking ? 1 : steady ? 0 : Math.max(0, Math.min(1, state.elapsed / 2.4));
             const smooth = t * t * (3 - 2 * t);
-            position.set(p.x + 4.1 * (1 - smooth), ground + 2.9 * (1 - smooth) + 0.24, p.z - 3.5 + smooth * 2.7);
-            target.set(p.x + 0.2, ground + 0.7 + smooth * 2, p.z - 0.7 + smooth * 6.7);
+            to.set(p.x, ground + 0.24, p.z - 0.8);
+            toTarget.set(p.x + 0.2, ground + 2.7, p.z + 6);
+            position.lerp(from, to, smooth);
+            target.lerp(fromTarget, toTarget, smooth);
             if (blinking) {
                 const z = 29 - Math.min(3.2, state.elapsed * 0.5);
                 figure.root.setPosition(0.4, evacuationHeight(z) + 0.016, z);
@@ -91,7 +105,8 @@ export const createWaveCamera = (parent: Entity, app: AppBase, assets: GameAsset
             camera.setRotation(camera.getRotation().clone().mul(roll));
         }
         const aspect = app.graphicsDevice.width / app.graphicsDevice.height;
-        camera.camera!.fov = aspect < 1 ? Math.min(88, fov + (1 - aspect) * 40) : fov;
+        const desiredFov = aspect < 1 ? Math.min(88, fov + (1 - aspect) * 40) : fov;
+        camera.camera!.fov += (desiredFov - camera.camera!.fov) * (steady ? 1 : 1 - Math.exp(-dt * 4));
     };
     return {
         camera,

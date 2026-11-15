@@ -1,5 +1,15 @@
 # Contributor handoff
 
+## Forest bridge login reveal - 2026-11-15
+
+Removed the opening sound invitation; autoplay is attempted and blocked audio no longer stops the film. Removed the chain/rumble caption. The supplied bridge crosses a real floor opening; the figures follow its sampled deck profile. Camera descent begins slowly, accelerates and brakes at the decorated 13.2 m bottom. A physical timber board turns to reveal a perspective-projected HTML form; labels, password toggle, truthful account feedback, skip/replay, local entry and reduced motion remain. Older decorations are kept off the crossing. Raw supplied GLBs were moved into ignored asset-library; two prepared runtime assets total 993,492 bytes. Credits, license evidence and SHA-256 manifests are versioned. Creator pages returned 403; license identification comes from embedded CC BY 4.0 metadata. See FOREST_BRIDGE_HANDOFF.md and ASSET_LICENSES.md.
+
+Checks: 126/126 tests passed on Node 22.23.4. Initial production browser run passed four groups (automatic intro, accelerating drop/turn, HTML interactions, portrait/local-entry cleanup) with zero console/network issues. Final visual refinements, lint/build and reduced-motion browser rerun are pending. Preserve the earlier beach/street and forest-scare changes. No commit, push, authentication backend or new story scene. Next action: final rendered acceptance, then target-device/short-landscape performance checks.
+
+## Street circulation and beach flow repair — 2026-11-15
+
+All 18 beach shades have grounded weighted bases/support poles. Short captions and moving camera targets make the warning roughly 12 seconds; pointing blends to moving reactions, crowds run during the reveal, and the fall camera blends immediately from gameplay. `streetMotion.ts` supplies local pedestrian passing within authored pavement/crossing corridors; `StreetLife` checks scene solids and preserves curb traffic waits. See TASKS and BEACH-FLOW-FIX.md for verification and exact replacements. Final checks: 124/124 tests, lint, typecheck, build, scoped formatting and diff checks passed. Production browser verification measured all 45 sidewalk walkers circulating for five simulated minutes and checked pause; two groups passed with no console/network errors. Beach support/camera/control/ending checks passed nine groups before the street-only rerun. See verification.local/street-motion for the final report/capture; the beach-life report was overwritten by a failed intermediate street fixture and must not be cited as a fresh pass. Target-device performance remains open. Existing forest edits are preserved.
+
 Read these in order:
 
 1. `AGENTS.md` — project rules and current milestone.
@@ -102,3 +112,7 @@ The warning starts automatically three unpaused seconds after the three beach di
 Calm beach water now combines smooth swells, smaller ripples, traveling foam and a gentle three-minute cosmetic tide. Swimmers and boats share its height sampler. Strollers use continuous curved circuits with acceleration and yielding; moving visible characters retain locomotion animation. Two animated horses with riders, two wheeled quad bikes with riders and two fast boats patrol separate shore/offshore routes and leave during the warning. Horse, boat, wheels and prepared riding animation add four CC0 assets (570,880 bytes), supported in both asset policies.
 
 See `LW-S005-HANDOFF.md` for ownership, source links, reproduction, verification and remaining limits. No hospital scene, checkpoint version change or Git push is included.
+
+## LW-UI002 - Intro dialogue and red-eyed bat approach (2026-11-13)
+
+Removed the requested exclamation from the actual bundled Kokoro speech as well as captions; the line is now "They're just bats!" at 25.8 seconds, ending 26.934. `scripts/forest-dialogue.script.json` is the checked-in regeneration source, replacing the ignored-only script. Soundtrack duration remains 44 seconds and size 705,558 bytes; the fixture records the new output hash. Forest watcher eyes are red/unlit/emissive and larger; cloned red eye pairs follow every active bat's shared curved flight, including the commercial procedural fallback. All paths now approach above the two ducking figures before scattering forward. Existing skip/replay and reduced-motion behavior remain. See TASKS for checks and visual evidence.

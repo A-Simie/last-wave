@@ -125,12 +125,13 @@ test('each restaurant has a walkable doorway and dining aisle but solid walls an
     }
 });
 
-test('the wave starts by itself after the discoveries and paces every warning beat for reading', () => {
+test('the warning uses short readable captions within a continuous 14-second sequence', () => {
     assert.equal(WAVE_AUTOSTART_DELAY, 3);
     for (const beat of WAVE_WARNING.beats) {
         const seconds = warningBeatDuration(beat.text);
-        assert.ok(seconds >= 4.5 && seconds <= 10, beat.id);
+        assert.ok(seconds >= 2.4 && seconds <= 4, beat.id);
     }
+    assert.ok(WAVE_WARNING.beats.reduce((sum, beat) => sum + warningBeatDuration(beat.text), 0) <= 14);
 });
 
 test('the intro-skip preference is opt-in, clearable and never throws on blocked storage', () => {

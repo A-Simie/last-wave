@@ -1,0 +1,86 @@
+[
+    {
+        "file": "wooden-bridge.glb",
+        "source": "wooden_bridge_-_lowpoly_gameready.glb",
+        "attribution": {
+            "author": "Dokazvo (https://sketchfab.com/dokazvo)",
+            "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+            "source": "https://sketchfab.com/3d-models/wooden-bridge-lowpoly-gameready-2d45f016042c44828c6da08da52abe52",
+            "title": "Wooden bridge - lowpoly, gameready"
+        },
+        "sourceSha256": "32c852db6ac84ea389b72ea566ab73c912d5a6cc8e76523cbe9ffed1662a0769",
+        "outputSha256": "6dfec4f05d72954f516b61b2bbae89c31c5e825a37591c5e5ae4d88f88dabb18",
+        "sourceBytes": 3662804,
+        "outputBytes": 617180,
+        "bounds": {
+            "min": [-5.51807975769043, -0.9957432150840759, -1.5868046283721924],
+            "max": [6.215669631958008, 2.42683744430542, 1.593105673789978]
+        },
+        "deck": [
+            [-5.35, 0.4453],
+            [-5.0825, 0.411],
+            [-4.815, 0.411],
+            [-4.5475, 0.4014],
+            [-4.28, 0.368],
+            [-4.0125, 0.3518],
+            [-3.745, 0.3246],
+            [-3.4775, 0.3091],
+            [-3.21, 0.3091],
+            [-2.9425, 0.2853],
+            [-2.675, 0.2709],
+            [-2.4075, 0.2657],
+            [-2.14, 0.2523],
+            [-1.8725, 0.2523],
+            [-1.605, 0.2421],
+            [-1.3375, 0.2421],
+            [-1.07, 0.2361],
+            [-0.8025, 0.23],
+            [-0.535, 0.2303],
+            [-0.2675, 0.2303],
+            [0, 0.2313],
+            [0.2675, 0.2325],
+            [0.535, 0.2362],
+            [0.8025, 0.2438],
+            [1.07, 0.2438],
+            [1.3375, 0.2438],
+            [1.605, 0.2438],
+            [1.8725, 0.2461],
+            [2.14, 0.2589],
+            [2.4075, 0.2589],
+            [2.675, 0.2733],
+            [2.9425, 0.2973],
+            [3.21, 0.2973],
+            [3.4775, 0.3113],
+            [3.745, 0.3113],
+            [4.0125, 0.3411],
+            [4.28, 0.3634],
+            [4.5475, 0.3933],
+            [4.815, 0.3933],
+            [5.0825, 0.4178],
+            [5.35, 0.4527]
+        ],
+        "changes": "Flattened static hierarchy; textures capped at 1024px and encoded as WebP. Scene scales and reuses sign wood for the login board.",
+        "verification": "Creator pages returned HTTP 403; attribution/license verified from supplied GLB asset.extras. CC BY 4.0 terms checked 2026-11-15."
+    },
+    {
+        "file": "wood-signs.glb",
+        "source": "stylized_wood_signs.glb",
+        "attribution": {
+            "author": "Pasindu.Anjana (https://sketchfab.com/Pasindu.Anjana)",
+            "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+            "source": "https://sketchfab.com/3d-models/stylized-wood-signs-d529ec8478304d45a5048e15cf9cc9db",
+            "title": "Stylized wood signs"
+        },
+        "sourceSha256": "260bbdb11849c8f039f1418fc5ce33163d1195a9b7fc6510c6813c9522dd4463",
+        "outputSha256": "5e2baf9353734f2e8cbd3b749fbed1953c6793912431ac9ff09d191f1172fb94",
+        "sourceBytes": 7622916,
+        "outputBytes": 376312,
+        "bounds": {
+            "min": [-2.030321292795509, -0.025059469930414156, -0.054608835192040156],
+            "max": [2.031738958245389, 1.6910546697751248, 0.07978484813554058]
+        },
+        "deck": [],
+        "changes": "Flattened static hierarchy; textures capped at 1024px and encoded as WebP. Scene scales and reuses sign wood for the login board.",
+        "verification": "Creator pages returned HTTP 403; attribution/license verified from supplied GLB asset.extras. CC BY 4.0 terms checked 2026-11-15."
+    }
+]

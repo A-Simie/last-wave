@@ -135,7 +135,11 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
     BEACH_UMBRELLAS.forEach((_, index) => {
         const definition = BEACH_DRESSING_SOLIDS.find(({ name }) => name === `beach-umbrella-${index}`)!;
         const umbrella = createStaticBody(root, definition);
-        // The original shade posts now carry the supplied umbrella designs where available.
+        const base = new Entity('umbrella-weighted-base');
+        umbrella.addChild(base);
+        base.setLocalPosition(0, 0.24 - definition.position[1], 0);
+        base.setLocalScale(0.9, 0.5, 0.9);
+        base.addComponent('render', { type: 'cylinder', material: materials.cream });
         const design = Array.from(
             { length: SHADE_DESIGNS.length },
             (_, offset) => SHADE_DESIGNS[(index + offset) % SHADE_DESIGNS.length]
@@ -147,6 +151,14 @@ export const createBeachDressing = (parent: Entity, app: AppBase, assets: GameAs
             umbrella.addChild(model.root);
             model.root.setLocalPosition(0, -definition.position[1], 0);
             model.root.setLocalEulerAngles(0, index * 47, 0);
+            const supportHeight = model.dims[1] * 0.78;
+            box(
+                umbrella,
+                'umbrella-support-pole',
+                [0, supportHeight / 2 - definition.position[1], 0],
+                [0.12, supportHeight, 0.12],
+                materials.wood
+            );
             imported.push(model.root);
             return;
         }

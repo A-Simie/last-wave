@@ -49,7 +49,7 @@ def main():
     sys.path.insert(0, str(ROOT / 'asset-library/source-packs/forest-voice-tools'))
     from kokoro_onnx import Kokoro
     engine = Kokoro(str(args.model), str(args.voices))
-    script = json.loads((LIB / 'dialogue-script.json').read_text())
+    script = json.loads((ROOT / 'scripts/forest-dialogue.script.json').read_text())
     output = LIB / 'audio'
     output.mkdir(exist_ok=True)
     mix = np.zeros((RATE * script['duration'], 2))

@@ -12,11 +12,14 @@ import { createAnimatedCharacter } from '../../player/AnimatedCharacter';
 import type { AnimatedCharacter } from '../../player/AnimatedCharacter';
 import { applyUmbrellaCarryPose } from '../../player/UmbrellaCarry';
 import { createPreparedModel } from '../../scenes/createPreparedModel';
+import { isFoundationPosition } from '../../scenes/FoundationState';
 import { createBoxVisual as box, createMaterial } from '../../scenes/primitives';
 
 import { createStreetKiosks } from './StreetKiosks';
 import type { StreetKiosks } from './StreetKiosks';
 import { STREET_CROSSINGS } from './streetLayout';
+import { stepStreetWalker } from './streetMotion';
+import type { StreetCorridor, StreetObstacle } from './streetMotion';
 import { createModelVehicle, createStreetVehicle } from './StreetVehicle';
 import type { StreetModelVehicle } from './StreetVehicle';
 
@@ -27,6 +30,7 @@ type Walker = {
     waypoint: number;
     speed: number;
     heading: number;
+    corridor: StreetCorridor;
     /** Crossing pedestrians wait at curb waypoints until the lanes either side are clear. */
     crossing?: { x: number; road: number; curbs: Set<number>; wait: number };
 };
@@ -143,7 +147,6 @@ export class StreetLife extends Script {
     obstacles: Entity[] = [];
     private suspended = false;
     private lodTime = 0;
-    private readonly direction = new Vec3();
 
     set paused(value: boolean) {
         this.suspended = value;
@@ -197,28 +200,41 @@ export class StreetLife extends Script {
                 walker.character.move(0);
                 continue;
             }
-            this.direction.sub2(walker.route[walker.waypoint], position);
-            const distance = this.direction.length();
-            this.direction.normalize();
-            const blockedBy = (other: Vec3, radius: number) => {
-                const x = other.x - position.x;
-                const z = other.z - position.z;
-                return Math.hypot(x, z) < radius && x * this.direction.x + z * this.direction.z > -0.1;
-            };
-            const blocked =
-                (player.y < 3 && blockedBy(player, 1.1)) ||
-                this.walkers.some((other) => other !== walker && blockedBy(other.character.root.getPosition(), 0.65)) ||
-                this.obstacles.some((other) => other.enabled && blockedBy(other.getPosition(), 0.7));
-            walker.character.move(blocked ? 0 : Math.min(distance / step, walker.speed));
-            if (blocked) continue;
+            const target = walker.route[walker.waypoint];
+            const obstacles: StreetObstacle[] = [];
+            if (player.y < 3) obstacles.push({ x: player.x, z: player.z, radius: 1.1 });
+            for (const other of this.walkers) {
+                if (other === walker) continue;
+                const p = other.character.root.getPosition();
+                if (Math.hypot(p.x - position.x, p.z - position.z) < 2)
+                    obstacles.push({ x: p.x, z: p.z, radius: 0.75 });
+            }
+            for (const other of this.obstacles) {
+                if (!other.enabled) continue;
+                const p = other.getPosition();
+                obstacles.push({ x: p.x, z: p.z, radius: 0.85 });
+            }
+            const [x, z] = stepStreetWalker(
+                position,
+                target,
+                walker.speed * step,
+                obstacles,
+                walker.corridor,
+                (px, pz) => isFoundationPosition([px, 1.04, pz])
+            );
+            const dx = x - position.x;
+            const dz = z - position.z;
+            const moved = Math.hypot(dx, dz);
+            walker.character.move(moved / step);
+            if (moved < 0.00001 && Math.hypot(target.x - x, target.z - z) > 0.001) continue;
             walker.heading = math.lerpAngle(
                 walker.heading,
-                (Math.atan2(this.direction.x, this.direction.z) * 180) / Math.PI,
+                moved > 0.00001 ? (Math.atan2(dx, dz) * 180) / Math.PI : walker.heading,
                 Math.min(1, step * 8)
             );
             walker.character.root.setEulerAngles(0, walker.heading, 0);
-            if (distance <= walker.speed * step) {
-                walker.character.root.setPosition(walker.route[walker.waypoint]);
+            walker.character.root.setPosition(x, position.y, z);
+            if (Math.hypot(target.x - x, target.z - z) < 0.001) {
                 const arrived = walker.waypoint;
                 walker.waypoint = (walker.waypoint + 1) % walker.route.length;
                 const crossing = walker.crossing;
@@ -228,8 +244,6 @@ export class StreetLife extends Script {
                     crossing.wait = clear ? 0.8 + Math.random() * 2.2 : 1.2;
                     if (!clear) walker.waypoint = arrived;
                 }
-            } else {
-                walker.character.root.setPosition(this.direction.mulScalar(walker.speed * step).add(position));
             }
         }
         // Pedestrians on the carriageway stop traffic just like the player does.
@@ -422,7 +436,8 @@ export const createStreetLife = (app: AppBase, parent: Entity, assets: GameAsset
             ],
             waypoint: definition.returning ? 3 : 1,
             speed: 1.1 + (index % 3) * 0.12,
-            heading: definition.returning ? -90 : 90
+            heading: definition.returning ? -90 : 90,
+            corridor: { minX: west - 0.45, maxX: east + 0.45, minZ: near - 0.45, maxZ: far + 0.45 }
         };
         walkers.push(walker);
         if (definition.umbrella || definition.model === 'commuterSuit') carry(walker, index, !!definition.umbrella);
@@ -453,6 +468,7 @@ export const createStreetLife = (app: AppBase, parent: Entity, assets: GameAsset
                 waypoint: (start + 1) % route.length,
                 speed: 1.25,
                 heading: start ? 180 : 0,
+                corridor: { minX: a - 0.3, maxX: b + 0.3, minZ: crossing.near, maxZ: crossing.far },
                 crossing: { x: crossing.x, road: crossing.road, curbs: new Set([0, 2]), wait: 1 + crosserIndex * 0.7 }
             };
             walkers.push(walker);

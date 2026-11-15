@@ -51,10 +51,6 @@ export class ForestAudio {
     get clock() {
         return this.dialogue.currentTime;
     }
-    get waitingForSound() {
-        return this.state === 'loading' || this.state === 'blocked';
-    }
-
     private publish(state: ForestAudioState, message: string) {
         if (this.disposed) return;
         this.state = state;

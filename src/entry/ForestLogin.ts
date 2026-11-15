@@ -20,7 +20,6 @@ export class ForestLogin {
     private busy = false;
     private disposed = false;
     private audioState: ForestAudioState = 'loading';
-    private readonly invitation: HTMLElement;
     private readonly timeline: ForestTimeline;
     private readonly onEnter: () => void;
     private readonly authentication?: ForestAuthentication;
@@ -33,7 +32,6 @@ export class ForestLogin {
         timeline: ForestTimeline,
         onEnter: () => void,
         onSound: () => void,
-        onMuted: () => void,
         intro: { alwaysSkip: boolean; onChoose: (always: boolean) => void; onDialog: (open: boolean) => void },
         authentication?: ForestAuthentication
     ) {
@@ -49,20 +47,11 @@ export class ForestLogin {
                 <div><button type="button" data-forest-sound aria-pressed="false">Enable sound</button>
                 <button type="button" data-forest-skip>Skip intro <span aria-hidden="true">↗</span></button></div></header>
             <div class="forest-darkness" aria-hidden="true"></div>
-            <div class="forest-sound-invite" data-forest-audio-invite>
-                <p class="forest-eyebrow">THE FOREST IS LISTENING</p>
-                <h1>A wrong turn.<br>A light in the trees.</h1>
-                <p data-forest-audio-message>Preparing the forest sound and voices…</p>
-                <button type="button" class="forest-enter" data-forest-play-sound>PLAY WITH SOUND <span aria-hidden="true">↗</span></button>
-                <button type="button" class="forest-watch-muted" data-forest-watch-muted>Watch muted</button>
-            </div>
             <div class="forest-board" data-forest-board inert aria-hidden="true">
-                <div class="forest-chain forest-chain-left" aria-hidden="true"></div>
-                <div class="forest-chain forest-chain-right" aria-hidden="true"></div>
                 <div class="forest-wood">
                     <span class="forest-nail forest-nail-left" aria-hidden="true"></span>
                     <span class="forest-nail forest-nail-right" aria-hidden="true"></span>
-                    <p class="forest-eyebrow">A LIGHT IN THE DARK</p>
+                    <p class="forest-eyebrow">YOU FOUND THE WAY</p>
                     <img class="forest-logo" src="${import.meta.env.BASE_URL}assets/last-wave-logo.svg" width="300" height="86" alt="Last Wave" />
                     <p class="forest-tagline">Some stories should stay buried.</p>
                     <div class="forest-divider" aria-hidden="true"><span>✦</span></div>
@@ -106,7 +95,6 @@ export class ForestLogin {
         this.skip = this.root.querySelector('[data-forest-skip]')!;
         this.replay = this.root.querySelector('[data-forest-replay]')!;
         this.sound = this.root.querySelector('[data-forest-sound]')!;
-        this.invitation = this.root.querySelector('[data-forest-audio-invite]')!;
         const listen = (selector: string, action: () => void) =>
             this.root.querySelector(selector)!.addEventListener('click', action, { signal: this.events.signal });
         this.skipDialog = this.root.querySelector<HTMLDialogElement>('[data-forest-skip-dialog]')!;
@@ -144,8 +132,6 @@ export class ForestLogin {
             this.skip.focus({ preventScroll: true });
         });
         listen('[data-forest-sound]', onSound);
-        listen('[data-forest-play-sound]', onSound);
-        listen('[data-forest-watch-muted]', onMuted);
         this.root.addEventListener(
             'pointerdown',
             (event) => {
@@ -153,7 +139,7 @@ export class ForestLogin {
                 if (
                     this.audioState === 'blocked' &&
                     target instanceof HTMLElement &&
-                    !target.closest('button, a, input, label')
+                    !target.closest('[data-forest-sound]')
                 )
                     onSound();
             },
@@ -249,25 +235,22 @@ export class ForestLogin {
         this.sound.textContent = enabled ? 'Mute sound' : 'Enable sound';
         this.sound.setAttribute('aria-pressed', String(enabled));
         this.sound.title = feedback;
-        this.root.querySelector<HTMLElement>('[data-forest-audio-message]')!.textContent = feedback;
         if (state === 'failed') this.setFeedback(feedback);
-        this.invitation.hidden = this.timeline.state.ready || state === 'playing' || state === 'muted';
+    }
+
+    project(transform: string | null) {
+        this.board.style.transform = transform ?? '';
+        this.board.hidden = !transform && !this.root.classList.contains('forest-fallback');
     }
 
     render(reducedMotion = false) {
         const state = this.timeline.state;
         this.root.dataset.phase = state.phase;
         this.root.dataset.elapsed = state.time.toFixed(3);
-        this.invitation.hidden = state.ready || this.audioState === 'playing' || this.audioState === 'muted';
-        const progress = state.board;
-        const settling = progress >= 1 ? 0 : Math.sin(progress * 13) * Math.exp(-progress * 5) * 3;
-        const arrival = Math.max(0, (progress - 0.6) / 0.4);
-        const bounce = progress < 1 && !reducedMotion ? Math.sin(arrival * 9) * Math.exp(-arrival * 4) * 20 : 0;
-        this.board.style.transform = `translateY(calc(${-(1 - Math.min(1, progress * 1.65)) * 140}vh + ${bounce}px)) rotate(${reducedMotion ? 0 : settling}deg)`;
         this.root.style.setProperty('--forest-darkness', String(1 - Math.min(1, state.time / 6)));
         this.board.inert = !state.ready;
         this.board.setAttribute('aria-hidden', String(!state.ready));
-        this.board.style.opacity = progress > 0 ? '1' : '0';
+        this.board.style.opacity = state.time >= 43.2 ? '1' : '0';
         this.skip.hidden = state.ready;
         this.replay.hidden = reducedMotion;
         if (this.caption.textContent !== state.caption) this.caption.textContent = state.caption;

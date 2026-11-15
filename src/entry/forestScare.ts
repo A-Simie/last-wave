@@ -24,10 +24,11 @@ export const forestBatFlight = (index: number, time: number) => {
             : lane === 1
               ? [4 + (index % 3), 3 + (index % 4) * 0.5, 12]
               : lane === 2
-                ? [-12, 5 + (index % 3), -8]
-                : [12, 6 + (index % 2), -6];
-    const control1: Vector3Tuple = [origin[0] + (index % 2 ? 0.9 : -0.8), origin[1] + 1.5, origin[2] + 2.2];
-    const control2: Vector3Tuple = [end[0] * 0.6, end[1] + 1.7, end[2] * 0.5];
+                ? [-8, 3.5 + (index % 3) * 0.3, 9]
+                : [8, 3.5 + (index % 2) * 0.3, 10];
+    // Pass above the two ducking figures before fanning out beyond the clearing.
+    const control1: Vector3Tuple = [-1.4 + (index % 3) * 0.25, 1.9, 1.2];
+    const control2: Vector3Tuple = [-1.3 + (index % 4) * 0.4, 1.95, 1.8];
     const position = origin.map(
         (value, axis) =>
             inverse ** 3 * value +

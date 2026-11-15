@@ -39,7 +39,6 @@ export const openForestEntrance = async (
         () => {
             audio.toggle(timeline.state.time);
         },
-        () => audio.mute(),
         {
             alwaysSkip,
             onChoose: (always) => {
@@ -75,7 +74,10 @@ export const openForestEntrance = async (
             if (!destroyed) ui.setEntering(false);
         }
     };
-    audio.onStateChange = (state, feedback) => ui.setSound(state, feedback);
+    audio.onStateChange = (state, feedback) => {
+        if (state === 'playing' && audio.clock < timeline.state.time - 0.15) audio.seek(timeline.state.time);
+        ui.setSound(state, feedback);
+    };
     const update = (dt: number) => {
         if (destroyed || document.hidden || !document.hasFocus()) return;
         audio.setPaused(dt <= 0 || dialogOpen);
@@ -84,13 +86,14 @@ export const openForestEntrance = async (
         if (!timeline.state.ready) {
             if (wasReady) audio.seek(0);
             if (audio.enabled) timeline.seek(audio.clock);
-            else if (!audio.waitingForSound) timeline.update(dt);
+            else timeline.update(dt);
         }
         if (Number.isFinite(dt) && dt > 0) ambienceTime += dt;
         const state = timeline.state;
         scene?.update(state.time, motion.matches, ambienceTime);
         if (state.ready && !wasReady) audio.settle();
         audio.update(state.time);
+        ui.project(scene?.projectLogin() ?? null);
         ui.render(motion.matches);
         wasReady = state.ready;
     };

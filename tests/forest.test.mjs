@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
+import { forestBoardProjection } from '../src/entry/forestBoardProjection.ts';
 import { FOREST_SPEECH } from '../src/entry/forestDialogue.ts';
 import { FOREST_EYE_ANCHORS, FOREST_SCARE_START, forestBatFlight } from '../src/entry/forestScare.ts';
 import {
@@ -92,6 +93,43 @@ test('Media clock seeks select the matching caption without advancing disposed t
     assert.equal(timeline.state.time, 0);
 });
 
+test('the bridge descent has no chain or rumble caption', () => {
+    const timeline = new ForestTimeline();
+    for (const time of [38, 39, 40, 41, 42, 43, 44]) {
+        timeline.seek(time);
+        assert.equal(timeline.state.caption, '');
+    }
+});
+
+test('the HTML sign projects onto a perspective quad and rejects an edge-on surface', () => {
+    const points = [
+        { x: 120, y: 80 },
+        { x: 460, y: 110 },
+        { x: 440, y: 640 },
+        { x: 100, y: 600 }
+    ];
+    const transform = forestBoardProjection(points, 420, 620);
+    const m = transform.slice(9, -1).split(',').map(Number);
+    for (const [i, [x, y]] of [
+        [0, 0],
+        [420, 0],
+        [420, 620],
+        [0, 620]
+    ].entries()) {
+        const w = m[3] * x + m[7] * y + 1;
+        assert.ok(Math.abs((m[0] * x + m[4] * y + m[12]) / w - points[i].x) < 1e-5);
+        assert.ok(Math.abs((m[1] * x + m[5] * y + m[13]) / w - points[i].y) < 1e-5);
+    }
+    assert.equal(
+        forestBoardProjection(
+            Array.from({ length: 4 }, () => ({ x: 0, y: 0 })),
+            420,
+            620
+        ),
+        null
+    );
+});
+
 test('Deployed intro matches the verified soundtrack and complete authored cue timings', () => {
     const metadata = JSON.parse(readFileSync(new URL('./fixtures/forest-audio.json', import.meta.url), 'utf8'));
     const deployed = readFileSync(new URL('../public/assets/forest/forest-story.mp3', import.meta.url));
@@ -123,10 +161,11 @@ test('Every bat bursts from a physical watcher position and takes a spatially va
         exits.some((p) => p[2] > 8),
         'No close camera pass'
     );
-    assert.ok(
-        exits.some((p) => p[2] < -3),
-        'No deeper forest flight'
-    );
+    for (let i = 0; i < 20; i++) {
+        const approach = forestBatFlight(i, FOREST_SCARE_START + i * 0.035 + 0.9).position;
+        assert.ok(approach[2] > -2.5, 'Bat does not approach the figures');
+        assert.ok(approach[1] < 2.9, 'Bat flies above the figures without passing near them');
+    }
     assert.ok(Math.max(...exits.map((p) => p[0])) - Math.min(...exits.map((p) => p[0])) > 10);
 });
 

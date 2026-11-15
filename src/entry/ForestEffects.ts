@@ -23,8 +23,9 @@ export const createForestEffects = (root: Entity, device: GraphicsDevice, mobile
     batRoot.addComponent('render', { meshInstances: [new MeshInstance(mesh, batMaterial)], castShadows: false });
     const eyes = new Entity('forest-hidden-eyes');
     root.addChild(eyes);
-    const glow = createMaterial('forest-eye-glint', 0.3, 0.25, 0.07);
-    glow.emissive.set(0.55, 0.64, 0.28);
+    const glow = createMaterial('forest-eye-glint', 0.7, 0.005, 0.002);
+    glow.useLighting = false;
+    glow.emissive.set(3, 0.008, 0.003);
     glow.update();
     for (let i = 0; i < 6; i++) {
         const pair = new Entity(`forest-eyes-${i}`);
@@ -34,10 +35,17 @@ export const createForestEffects = (root: Entity, device: GraphicsDevice, mobile
             const eye = new Entity('eye-reflection');
             pair.addChild(eye);
             eye.setLocalPosition(x, 0, 0);
-            eye.setLocalScale(0.045, 0.026, 0.035);
+            eye.setLocalScale(0.075, 0.045, 0.055);
             eye.addComponent('render', { type: 'sphere', material: glow, castShadows: false });
         }
     }
+    const flyingEyes = Array.from({ length: count }, (_, i) => {
+        const pair = eyes.children[i % 6]!.clone();
+        pair.name = `forest-flying-eyes-${i}`;
+        root.addChild(pair);
+        pair.enabled = false;
+        return pair;
+    });
     const mistMaterial = createMaterial('forest-low-mist', 0.13, 0.21, 0.24);
     mistMaterial.opacity = 0.08;
     mistMaterial.blendType = BLEND_NORMAL;
@@ -108,6 +116,15 @@ export const createForestEffects = (root: Entity, device: GraphicsDevice, mobile
             batRoot.enabled = procedural && flight >= 0 && flight < 5.5 && !reduced;
             eyes.children.forEach((eye, i) => {
                 eye.enabled = time >= 18.6 && time < FOREST_SCARE_START && (time < 20.2 ? i === 0 : time > 21.1);
+            });
+            flyingEyes.forEach((pair, i) => {
+                const path = forestBatFlight(i, time);
+                pair.enabled = !reduced && path.visible && (procedural || i < (mobile ? 6 : 12));
+                if (!pair.enabled) return;
+                const [x, y, z] = path.position;
+                pair.setLocalPosition(x + Math.sin(path.yaw) * 0.12, y + 0.05, z + Math.cos(path.yaw) * 0.12);
+                pair.setLocalEulerAngles(0, (path.yaw * 180) / Math.PI, 0);
+                pair.setLocalScale(0.65, 0.65, 0.65);
             });
             fog.forEach((entity, i) =>
                 entity.setLocalPosition(
