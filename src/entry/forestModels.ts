@@ -4,6 +4,7 @@ import { FOREST_DETAILS } from './forestDetails';
 
 export const FOREST_MODELS = {
     ...FOREST_DETAILS,
+    dungeonKit: modelTuning('dungeon-kit.glb', [4, 4.8, 4.1305], [0, 2.4, 0], 0, 4.8),
     bridge: modelTuning(
         'wooden-bridge.glb',
         [11.7337, 3.4226, 3.1799],

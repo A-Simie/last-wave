@@ -1,0 +1,77 @@
+{
+    "file": "dungeon-kit.glb",
+    "attribution": {
+        "author": "Andrew Jepson (https://sketchfab.com/ajepson)",
+        "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+        "source": "https://sketchfab.com/3d-models/medieval-underground-dungeon-modular-asset-kit-4cf57713a01a443b988f5a9ef5c1eda0",
+        "title": "Medieval Underground Dungeon - Modular Asset Kit"
+    },
+    "sourceBytes": 34613008,
+    "outputBytes": 3303636,
+    "sourceSha256": "220ecf1f0337d6756b10837c7315193c87e4f602f95be2b82a7db42b39b37d84",
+    "outputSha256": "a42bfdd37c0b46868cffea268bd8b95d7658dc50f774ed1ab08e609b679899fb",
+    "calibration": [
+        {
+            "id": "dungeon-wall",
+            "original": {
+                "min": [-0.00005068778878404567, -0.00013852234620178455, -0.020842499267105012],
+                "max": [0.018960337215058406, 0.048435949196607986, 0.02084249688291929]
+            },
+            "scale": 98.81733856372792,
+            "bounds": {
+                "min": [-0.9393094471240984, 0, -2.0596001887923228],
+                "max": [0.9393094471240979, 4.8, 2.0596001887923236]
+            }
+        },
+        {
+            "id": "dungeon-arch",
+            "original": {
+                "min": [-0.021476716515197225, -0.00011368013664304899, -0.06084249360466387],
+                "max": [0.000050687788784031795, 0.048371170870114, -0.01912018256365844]
+            },
+            "scale": 98.99999485057822,
+            "bounds": {
+                "min": [-1.0656064576202298, 0, -2.06525428910688],
+                "max": [1.06560645762023, 4.8, 2.06525428910688]
+            }
+        },
+        {
+            "id": "dungeon-floor",
+            "original": {
+                "min": [-0.020017826109726133, -0.00025589827691059673, -0.020027026682488014],
+                "max": [0.020029344111025082, 0.0011324222237541024, 0.020000357180825823]
+            },
+            "scale": 99.88221334868057,
+            "bounds": {
+                "min": [-1.9999999999999998, 0, -1.9990118474125234],
+                "max": [2, 0.1386685244437385, 1.999011847412523]
+            }
+        },
+        {
+            "id": "dungeon-torch",
+            "original": {
+                "min": [-0.01807233101292267, 0.020710215220585335, -0.0025160401128456735],
+                "max": [-0.00936615605548595, 0.039053157664429884, 0.00253474882277166]
+            },
+            "scale": 49.06519238967674,
+            "bounds": {
+                "min": [-0.2135850746324094, 0, -0.12390896542285754],
+                "max": [0.21358507463240906, 0.8999999999999999, 0.12390896542285754]
+            }
+        },
+        {
+            "id": "dungeon-bars",
+            "original": {
+                "min": [-0.020395864984485534, 0.000002819895681294149, -0.04937257656367322],
+                "max": [-0.01956271127843756, 0.034969181232843205, -0.03065104892884829]
+            },
+            "scale": 100.09620292633177,
+            "bounds": {
+                "min": [-0.04169776121470159, 0, -0.9369769146131821],
+                "max": [0.04169776121470181, 3.5, 0.9369769146131821]
+            }
+        }
+    ],
+    "changes": "Extracted five reusable modules; retained authored geometry/materials, flattened hierarchy, calibrated metre-scale wrappers; textures resized to 1024px WebP.",
+    "verification": "CC Attribution on indexed primary Sketchfab page; supplied asset.extras identifies CC BY 4.0. Checked 2026-11-16."
+}

@@ -21,7 +21,7 @@ export const createForestBridge = (
     const rock = createMaterial('forest-pit-rock', 0.12, 0.15, 0.16);
     const timber = createMaterial('forest-pit-support', 0.19, 0.105, 0.045);
     const span = FOREST_PIT.east - FOREST_PIT.west;
-    createBoxVisual(root, 'forest-pit-floor', [5, FOREST_PIT.floor - 0.15, 6], [span, 0.3, 20], earth);
+    createBoxVisual(root, 'forest-pit-floor', [5, FOREST_PIT.floor - 0.6, 6], [span, 0.3, 20], earth);
     for (const x of [FOREST_PIT.west - 0.3, FOREST_PIT.east + 0.3])
         createBoxVisual(root, 'forest-pit-side', [x, -6.6, 6], [0.6, 13.2, 20], rock);
     for (const z of [FOREST_PIT.back - 0.3, FOREST_PIT.front + 0.3])
@@ -93,6 +93,7 @@ export const createForestBridge = (
     root.once('destroy', () => [earth, rock, timber, wood].forEach((m) => m.destroy()));
     const point = new Vec3();
     return {
+        sign,
         update: (time: number) => sign.setLocalEulerAngles(0, forestSignTurn(time), 0),
         project: (camera: Entity) => {
             if (sign.forward.dot(camera.getPosition().clone().sub(sign.getPosition())) > -0.1) return null;

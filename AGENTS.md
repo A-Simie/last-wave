@@ -75,3 +75,6 @@ See `LW-S005-HANDOFF.md` for ownership, source links, reproduction, verification
 ## Forest bridge login reveal (2026-11-15)
 
 The figures cross the supplied wooden bridge. After they leave, the camera accelerates down the 13.2 m pit beneath it and brakes at a Halloween-decorated bottom. A physical wooden sign turns to reveal a projected HTML login form. Core forest assets include the prepared CC BY 4.0 bridge/signs; raw originals remain ignored, and attribution/preparation hashes are versioned. Remove neither the HTML accessibility/fallback route nor pause/reduced-motion safeguards. No sound invitation or chain/rumble caption gates the intro. See docs/FOREST_BRIDGE_HANDOFF.md and TASKS for acceptance limits.
+
+
+The login landing now uses the supplied CC BY 4.0 Andrew Jepson dungeon kit: five shared calibrated modules, shaft masonry/arches, tiled floor, bars and torches. ForestDungeon owns landing dressing/lighting; ForestGoblin owns original sentries. All 126 tests and six muted production browser groups passed; physical-device and short-landscape acceptance remain open. Raw kit stays ignored; runtime GLB, manifests, credits and preparation scripts stay versioned.

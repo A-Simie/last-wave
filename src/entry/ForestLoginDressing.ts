@@ -52,9 +52,10 @@ export const createLoginDressing = (parent: Entity, models: LoginModels, mobile:
     place('skeletonB', [-2.5, -0.02, -8.2], 12, { height: 1.95 });
     place('skeletonA', [-4, 0, 3.2], 18, { height: 1.8 });
     place('skeletonB', [4.1, 0, 2.6], -24, { height: 1.85 });
-    place('skeletonA', [2.2, -13.2, 0.8], 15, { height: 2.3 });
-    place('skeletonB', [7.8, -13.2, 0.8], -20, { height: 2.4 });
-    place('cobwebs', [3, -7, 0.6], 0, { scale: 1 });
+    place('skeletonA', [0.65, -13.2, 1], 15, { height: 2 });
+    place('skeletonA', [9.35, -13.2, 1], -20, { height: 2 });
+    place('cobwebs', [0.5, -6.5, -2], 0, { scale: 0.7 });
+    place('cobwebs', [9.5, -6.5, -2], 0, { scale: 0.7 });
     for (const [x, y, z, yaw, scale] of [
         [-9.2, 2.15, -1.1, 30, 0.55],
         [7.8, 2.1, -1.4, -40, 0.55],
@@ -103,9 +104,11 @@ export const createLoginDressing = (parent: Entity, models: LoginModels, mobile:
                 const angle = ambienceTime * (0.35 + i * 0.05) + i * 1.7;
                 const radius = 6 + i * 1.6;
                 bat.root.setLocalPosition(
-                    Math.cos(angle) * radius,
-                    5.2 + i * 0.6 + Math.sin(ambienceTime * 1.3 + i) * 0.4,
-                    -6 + Math.sin(angle) * radius * 0.45
+                    time >= 38 ? 5 + Math.cos(angle) * 4 : Math.cos(angle) * radius,
+                    time >= 38
+                        ? -6.1 + Math.sin(ambienceTime * 1.3 + i) * 0.25
+                        : 5.2 + i * 0.6 + Math.sin(ambienceTime * 1.3 + i) * 0.4,
+                    time >= 38 ? -1 + Math.sin(angle) * 0.8 : -6 + Math.sin(angle) * radius * 0.45
                 );
                 // Tangent heading for counter-clockwise travel around the circle.
                 const heading = Math.atan2(-Math.sin(angle), Math.cos(angle) * 0.45);

@@ -52,11 +52,14 @@ const wait = (condition) =>
         `new Promise((resolve,reject)=>{const start=performance.now();const step=()=>{if(${condition})return resolve(true);if(performance.now()-start>55000)return reject(new Error('Condition timed out'));setTimeout(step,40);};step();})`
     );
 const click = async (selector) => {
+    await wait(
+        `(()=>{const e=document.querySelector(${JSON.stringify(selector)});return e&&e.getBoundingClientRect().width>0&&!e.closest('[inert]');})()`
+    );
     await evaluate(
         `(async()=>{const e=document.querySelector(${JSON.stringify(selector)});const dialog=e.closest('dialog');if(dialog)await Promise.all(dialog.getAnimations().map(a=>a.finished));})()`
     );
     const r = await evaluate(
-        `(()=>{const e=document.querySelector(${JSON.stringify(selector)}); e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`
+        `(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e.closest('[data-forest-board]'))e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`
     );
     await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...r, button: 'left', clickCount: 1 });
     await send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...r, button: 'left', clickCount: 1 });
@@ -82,6 +85,9 @@ try {
     await send('Page.enable');
     await send('Runtime.enable');
     await send('Network.enable');
+    await send('Emulation.setEmulatedMedia', {
+        features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }]
+    });
     await send('Emulation.setFocusEmulationEnabled', { enabled: true });
     await send('Emulation.setDeviceMetricsOverride', {
         width: 1440,
@@ -120,6 +126,7 @@ try {
     await click('[data-forest-skip]');
     await click('[data-forest-skip-once]');
     await click('[data-forest-replay]');
+    await wait(`document.querySelector('#forest-entry').dataset.phase!=='ready'`);
     await evaluate(`${app}.timeScale=0;true`);
     const samples = [];
     for (const t of [32, 35, 37.8, 38, 39, 40, 41, 42, 43, 44]) {
@@ -137,6 +144,19 @@ try {
     assert.ok(samples.at(-1).camera[1] < -9);
     assert.equal(samples.at(-1).formHidden, false);
     assert.equal(samples.at(-1).caption, '');
+    const decoration = await evaluate(
+        `(()=>{const a=${app},d=a.root.findByName('forest-dungeon');return {walls:d.findComponents('render').length,goblins:d.findByName('forest-goblin-left')&&d.findByName('forest-goblin-right')?2:0,torches:d.findComponents('light').length,head:d.findByName('goblin-head').getLocalRotation().toArray(),entities:d.findComponents('render').length};})()`
+    );
+    assert.ok(decoration.walls > 60);
+    assert.equal(decoration.goblins, 2);
+    assert.ok(decoration.torches >= 9);
+    await advance(0.7);
+    const moving = await evaluate(
+        `(()=>{const d=${app}.root.findByName('forest-dungeon');return {head:d.findByName('goblin-head').getLocalRotation().toArray(),entities:d.findComponents('render').length};})()`
+    );
+    assert.notDeepEqual(decoration.head, moving.head);
+    assert.equal(decoration.entities, moving.entities);
+    record('Calibrated dungeon modules, two animated goblins and live torch/candle dressing remain stable at the form');
     record('Camera accelerates into the pit, settles at the bottom, and the sign turns to reveal the form');
     const form = await evaluate(
         `(()=>{const f=document.querySelector('[data-forest-board]'),r=f.getBoundingClientRect();return {inert:f.inert,transform:f.style.transform,rect:[r.x,r.y,r.width,r.height],focus:document.activeElement.id};})()`

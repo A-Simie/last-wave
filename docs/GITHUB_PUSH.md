@@ -43,3 +43,6 @@ Commercial deployment remains separate from GitHub source hosting. Build with `V
 The two supplied root GLBs have been moved into ignored `asset-library/original-downloads/forest-bridge/`. Ship the two prepared runtime GLBs in `public/assets/forest/`, the preparation script/manifest, deck profile, source credits, forest source and verification scripts. Keep DESIGN.md and the updated task/architecture/handoff documents. The existing forest voice script and verification script are reproducibility sources, not temporary screenshots.
 
 `verification.local/` contains browser profiles, screenshots, temporary inspection textures and reports, and remains ignored. No raw model blanket ignore was added: prepared public assets must remain eligible. Existing beach/street and forest-scare work was preserved. No commit, push or history rewrite is part of this request.
+
+
+Dungeon continuation on 2026-11-16: preserve the raw 34.6 MB kit in the same ignored source folder; version only the 3.3 MB `public/assets/forest/dungeon-kit.glb`, its preparation script/manifest and runtime scene code. No dependency was added. Browser evidence stays under ignored `verification.local/forest-bridge/`. The user's intervening `forest entrance updated` commit was preserved; Codex did not commit or push.

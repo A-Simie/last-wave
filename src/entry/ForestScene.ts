@@ -9,6 +9,7 @@ import type { loadForestAssets } from './ForestAssets';
 import { createForestBridge } from './ForestBridge';
 import { FOREST_PIT } from './forestBridgeLayout';
 import { createForestCamera } from './ForestCamera';
+import { createForestDungeon } from './ForestDungeon';
 import { createForestEffects } from './ForestEffects';
 import { textureForestGround } from './ForestGround';
 import { createLoginDressing } from './ForestLoginDressing';
@@ -83,6 +84,7 @@ export const createForestScene = (
         createBoxVisual(root, 'forest-path-west', [-11.55, -0.01, 1], [21.9, 0.025, 2.8], path);
         createBoxVisual(root, 'forest-path-east', [16.65, -0.01, 1], [11.7, 0.025, 2.8], path);
         const bridge = createForestBridge(root, app.graphicsDevice, assets.models.bridge, assets.models.woodSigns);
+        const dungeon = createForestDungeon(root, assets.models, bridge.sign, mobile);
         const place = (id: ForestModelId, x: number, z: number, yaw = 0, scale = 1, y = 0) => {
             if (
                 y > -1 &&
@@ -247,16 +249,6 @@ export const createForestScene = (
             flame.setLocalScale(0.035, 0.08, 0.035);
             flame.addComponent('render', { type: 'sphere', material: glow, castShadows: false });
         }
-        for (const [x, z] of [
-            [1.3, 0],
-            [8.7, 0],
-            [2.2, 3],
-            [7.8, 3]
-        ]) {
-            place('pumpkin', x, z, x * 11, 1.5, FOREST_PIT.floor);
-            place('skull', x + 0.6, z + 0.4, 20, 1.5, FOREST_PIT.floor);
-            place('lantern', x, z + 0.4, 0, 1, FOREST_PIT.floor);
-        }
         place('grave', 8.6, -1.4, -18, 1.3, FOREST_PIT.floor);
         const leaf = material('forest-fallen-leaves', 0.3, 0.19, 0.075);
         const driftingLeaves: Entity[] = [];
@@ -301,6 +293,7 @@ export const createForestScene = (
             const steady = reduced;
             camera.update(time, reduced);
             bridge.update(time);
+            dungeon.update(time, reduced, ambienceTime);
             const { x, scared } = performers.update(time);
             flashlight.light!.intensity =
                 time >= 2 && time < 38 ? 7 * Math.min(1, time - 2) * Math.min(1, 38 - time) : 0;
