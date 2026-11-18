@@ -1,5 +1,9 @@
 # Contributor handoff
 
+## Bridge rim wall clipping fix - 2026-11-17
+
+The forest figures no longer walk through masonry at either bridge end. The third `dungeon-wall` course in `ForestDungeon.ts` overlaps the middle one and stops 2 cm below the ground; a flush `dungeon-stone-coping` caps both rims. Keep every dungeon mesh below the 0 m forest floor where the figures cross. Typecheck, lint, 126/126 tests, build and `verify-forest-bridge.mjs` (6/6) passed; the overlap sweep finds no dungeon contacts. Recording and evidence are in `verification.local/film-crossing/`. Open: a pumpkin cluster and lantern near x -6.4 still sit on the walking lines at about 4-7 s. See TASKS.md and FOREST_BRIDGE_HANDOFF.md for numbers and exact replacements.
+
 ## Halloween dungeon continuation - 2026-11-16
 
 The supplied Andrew Jepson dungeon kit now lines the shaft with calibrated masonry, arches, floor tiles, bars and torches. The 34.6 MB raw file is preserved under ignored asset-library; the prepared shared-module GLB is 3,303,636 bytes. Two original animated goblin sentries, grounded pedestals, orange pumpkin clusters, candle groups, steady-mode-aware flames/mist, skeletons, webs and overhead bats frame the login. Input space remains clear. Source credits and CC BY 4.0 adaptation records are versioned; no dependency was added. See FOREST_BRIDGE_HANDOFF.md for the source walkthrough and exact replacements.

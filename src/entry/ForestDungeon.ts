@@ -35,8 +35,13 @@ export const createForestDungeon = (
         mount.setLocalEulerAngles(0, yaw, 0);
         return mount;
     };
+    // Each calibrated wall is 4.8 m tall and ends in a 1.2 m vault spring that leans away from the shaft.
+    // Three courses stacked from the pit floor would raise that spring 1.2 m above the forest floor,
+    // across both bridge approaches. The top course overlaps the middle one and stops just below the ground.
+    const wallHeight = 4.8;
+    const rim = -0.02;
     for (const x of [FOREST_PIT.west - 0.6, FOREST_PIT.east + 0.6])
-        for (const y of [FOREST_PIT.floor, FOREST_PIT.floor + 4.8, FOREST_PIT.floor + 9.6])
+        for (const y of [FOREST_PIT.floor, FOREST_PIT.floor + wallHeight, rim - wallHeight])
             for (const z of [-2, 2, 6, 10, 14]) module('dungeon-wall', x, y, z, x < 5 ? 0 : 180);
     for (const y of [FOREST_PIT.floor, FOREST_PIT.floor + 4.8])
         for (const x of [1, 5, 9]) module('dungeon-arch', x, y, -3.6, 90);
@@ -57,6 +62,9 @@ export const createForestDungeon = (
                 createBoxVisual(root, 'dungeon-stone-course', [x, y, z], [1, 0.9, 4.02], stone);
         createBoxVisual(root, 'dungeon-back-cornice', [5, y, -2.65], [11.4, 0.9, 0.7], stone);
     }
+    // A coping flush with the ground covers the buried spring, leaving a level walk onto both approaches.
+    for (const x of [-0.5, 10.7])
+        createBoxVisual(root, 'dungeon-stone-coping', [x, rim - 0.45, 6], [1, 0.9, 20.02], stone);
     const pumpkinMaterials = new Map<Material, StandardMaterial>();
     root.once('destroy', () => {
         stone.destroy();

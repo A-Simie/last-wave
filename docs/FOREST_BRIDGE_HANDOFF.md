@@ -34,6 +34,51 @@ The supplied Andrew Jepson kit replaces the plain backdrop with five shared modu
 
 The final production browser run passes six groups with no console/network issues, including automatic startup, stable live decoration, sampled accelerating descent/turn, real HTML controls, reduced-motion form availability, portrait fit and local-entry cleanup. The final stone-rib material correction also passed the same six groups, and its desktop/portrait/bridge captures were inspected. Repository checks: 126/126 tests, lint, typecheck and production build passed; scoped formatting/diff and Git-ignore checks are recorded in TASKS. These are desktop/emulated-portrait checks, not physical-device acceptance.
 
+## Bridge rim wall correction (2026-11-17)
+
+The figures walked through masonry when stepping on and off the bridge. Each calibrated `dungeon-wall` is 4.8 m tall, and its top 1.2 m is a vault spring that curves away from the shaft, under the forest floor. Stacking three courses from the 13.2 m pit floor left the third course's spring 1.2 m above the ground along both rims and across both approach ramps. The figures wait at the west rim from about 15 to 32 s, so they stood inside it, then walked out through the east one.
+
+The third course now starts at `rim - wallHeight` (-4.82 m). It overlaps the middle course by 1.22 m, where the middle course's spring curves away behind the top course's face, and ends 2 cm below the ground to avoid coplanar flicker with the floor top. A `dungeon-stone-coping` box (1 x 0.9 x 20.02 m) in the existing stone material caps each rim at x -0.5 and 10.7, the same footprint as the lower stone courses. It covers the buried spring and leaves a level step onto each ramp. Bridge, ramps, performer paths and timings are unchanged. The full `ForestDungeon.ts` listing under Exact code replacements predates this correction.
+
+Current location: [src/entry/ForestDungeon.ts:37](C:/Users/HP/OneDrive/Documents/projects/last-wave/src/entry/ForestDungeon.ts:37)
+
+Before:
+
+```
+    for (const x of [FOREST_PIT.west - 0.6, FOREST_PIT.east + 0.6])
+        for (const y of [FOREST_PIT.floor, FOREST_PIT.floor + 4.8, FOREST_PIT.floor + 9.6])
+```
+
+After:
+
+```
+    // Each calibrated wall is 4.8 m tall and ends in a 1.2 m vault spring that leans away from the shaft.
+    // Three courses stacked from the pit floor would raise that spring 1.2 m above the forest floor,
+    // across both bridge approaches. The top course overlaps the middle one and stops just below the ground.
+    const wallHeight = 4.8;
+    const rim = -0.02;
+    for (const x of [FOREST_PIT.west - 0.6, FOREST_PIT.east + 0.6])
+        for (const y of [FOREST_PIT.floor, FOREST_PIT.floor + wallHeight, rim - wallHeight])
+```
+
+Current location: [src/entry/ForestDungeon.ts:65](C:/Users/HP/OneDrive/Documents/projects/last-wave/src/entry/ForestDungeon.ts:65)
+
+Before:
+
+```
+(Added)
+```
+
+After:
+
+```
+    // A coping flush with the ground covers the buried spring, leaving a level walk onto both approaches.
+    for (const x of [-0.5, 10.7])
+        createBoxVisual(root, 'dungeon-stone-coping', [x, rim - 0.45, 6], [1, 0.9, 20.02], stone);
+```
+
+Verification: an overlap sweep of both performers' bodies against scenery mesh bounds (0-44 s, 0.05 s steps, production build) found no dungeon contacts, down from two long ones at the rims. The highest dungeon mesh is now -0.02 m. Typecheck, lint, 126/126 tests, build and the six `verify-forest-bridge.mjs` groups passed. `verification.local/film-crossing/forest-crossing.mp4` records the fixed crossing; TASKS.md lists the numbers, scratch tools and remaining pre-existing contacts. Both figures still disappear at 38 s, when the woman is about 0.8 m short of the east rim at the edge of the film frame.
+
 ## Exact code replacements
 
 Before snapshots below use the captured baseline 626cf51 for the forest files that were clean at the start of the request. The user's intervening forest commit is preserved. Prior speech/scare edits are excluded. New files are shown as added. Generated GLB/JSON data is summarized by its preparation manifests rather than repeated here.
